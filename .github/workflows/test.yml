@@ -9,15 +9,18 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
-      - name: Install deps
+      - name: Install
         run: |
           python -m pip install --upgrade pip
-          # deterministic test deps only — the suite uses a mock LLM and mock embedder,
-          # so no cloud/model credentials are needed and FalkorDB tests auto-skip.
-          pip install numpy requests faiss-cpu sentence-transformers pytest pytest-cov
+          # installs the gem package + light test deps (faiss-cpu, pytest); the suite uses a
+          # mock LLM + mock embedder, so no model/credentials and no heavy ML deps are needed,
+          # and the FalkorDB tests auto-skip.
+          pip install -e ".[dev]"
       - name: Run tests
-        run: pytest tests/ --cov=gem --cov=unit0 --cov-report=term-missing
+        # `python -m pytest` puts the repo root on sys.path so the (unshipped) unit0 eval
+        # harness imports alongside the installed gem package.
+        run: python -m pytest tests/ --cov=gem --cov=unit0 --cov-report=term-missing
