@@ -24,21 +24,33 @@ consequences — and prunes what's unaffected:
 
 ```mermaid
 flowchart TD
-    T(["🆕 'severe peanut allergy'"]) --> S["dietary safety rule changed"]
-    S --> R1["⛔ 'order my usual pad thai' — now unsafe"]
-    S --> R2["⛔ saved snack recommendations — must be re-checked"]
-    S --> R3["⛔ 'suggest a post-gym protein bar' — exclude peanuts"]
-    T -.-> U1["✅ your coffee order — untouched"]
-    T -.-> U2["✅ your running route — untouched"]
+    T(["🆕 'I was diagnosed with a severe peanut allergy'"]):::trig
+    T ==>|updates| A["🧬 dietary safety profile<br/><i>the anchor fact</i>"]:::anchor
+
+    A -->|DERIVED_FROM| M["🍽️ weekly meal plan<br/>(satay, pad thai…)"]:::stale
+    A -->|DERIVED_FROM| R["🍴 go-to restaurant: Thai Palace"]:::stale
+    M -->|DERIVED_FROM| G["🛒 recurring grocery auto-order"]:::stale
+    M -->|DERIVED_FROM| L["🥡 'reorder my usual lunch'"]:::stale
+
+    A -. unrelated, pruned .-> K1["☕ coffee order — survives"]:::keep
+    A -. unrelated, pruned .-> K2["🏃 running route — survives"]:::keep
+
+    classDef trig fill:#fff3cd,stroke:#b8860b,color:#111;
+    classDef anchor fill:#e7e7ff,stroke:#5b5bd6,color:#111;
     classDef stale fill:#ffe0e0,stroke:#c0392b,color:#111;
     classDef keep fill:#e0f5e0,stroke:#27ae60,color:#111;
-    class R1,R2,R3 stale
-    class U1,U2 keep
 ```
 
-**Update what changed, leave the rest alone.** That selective ripple is the difference between an
-assistant that feels intelligent and one that confidently does something *harmful* — like
-re-suggesting the peanut dish it recommended last week.
+The cascade flows **down the `DERIVED_FROM` edges** (solid) and **stops** at the unrelated branches
+(dotted) — update what changed, leave the rest alone.
+
+**Why this is hard — and why GEM wins:**
+- The **2-hop grocery auto-order** doesn't mention peanuts *at all* — it's unsafe only *because* the
+  meal plan it was built from is. **Similarity search never connects "grocery order" to "peanut
+  allergy"** → flat memory leaves it stale.
+- **GEM reaches it by walking the edge** (allergy → meal plan → grocery order) — and stops cleanly
+  at coffee and running. That **transitive reach + clean pruning** is the whole mechanism, and the
+  difference between an assistant that's safe to act on and one that re-orders the satay next week.
 
 ## The breakthrough
 
