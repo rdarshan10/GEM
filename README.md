@@ -18,34 +18,37 @@ A personal or home AI accumulates thousands of interlinked facts about you. *Rem
 easy. Keeping them **consistent when your life changes** is the unsolved part — because one change
 *ripples*.
 
-**Example — home intelligence.** You tell your home AI: *"I've switched to night shifts."* A normal
-assistant just stores it. GEM cascades the consequences, and prunes what's unaffected:
+**Example — when stale memory becomes *dangerous*.** You tell your assistant: *"I was just
+diagnosed with a severe peanut allergy."* A normal assistant just stores it. GEM cascades the
+consequences — and prunes what's unaffected:
 
 ```mermaid
 flowchart TD
-    T(["🆕 'I switched to night shifts'"]) --> S["sleep schedule changed"]
-    S --> R1["⛔ wake-up at 7am — now stale"]
-    S --> R2["⛔ open the blinds at 7am — now stale"]
-    S --> R3["⛔ run the dishwasher at 9am — now stale"]
-    T -.-> U1["✅ vegetarian diet — untouched"]
-    T -.-> U2["✅ the kids' school run — untouched"]
+    T(["🆕 'severe peanut allergy'"]) --> S["dietary safety rule changed"]
+    S --> R1["⛔ 'order my usual pad thai' — now unsafe"]
+    S --> R2["⛔ saved snack recommendations — must be re-checked"]
+    S --> R3["⛔ 'suggest a post-gym protein bar' — exclude peanuts"]
+    T -.-> U1["✅ your coffee order — untouched"]
+    T -.-> U2["✅ your running route — untouched"]
     classDef stale fill:#ffe0e0,stroke:#c0392b,color:#111;
     classDef keep fill:#e0f5e0,stroke:#27ae60,color:#111;
     class R1,R2,R3 stale
     class U1,U2 keep
 ```
 
-**Update what changed, leave the rest alone.** That selective ripple is what makes a memory
-*trustworthy enough to act on* — the line between an assistant that feels intelligent and one that
-confidently does the wrong thing (throwing the blinds open while you're trying to sleep).
+**Update what changed, leave the rest alone.** That selective ripple is the difference between an
+assistant that feels intelligent and one that confidently does something *harmful* — like
+re-suggesting the peanut dish it recommended last week.
 
 ## The breakthrough
 
-Flat / vector memory — what every assistant uses today (Mem0, ChatGPT memory, plain RAG) — only
-re-checks facts that are **textually similar** to a change. *"I switched to night shifts"* isn't
-similar to *"open the blinds at 7am,"* so flat memory never connects them and serves the stale
-routine. **GEM links them with an explicit `DERIVED_FROM` dependency edge and walks it** — catching
-consequences that similarity search is *structurally blind* to.
+- **Flat / vector memory** (Mem0, ChatGPT memory, plain RAG) only re-checks facts that are
+  **textually similar** to a change. *"peanut allergy"* isn't similar to *"order my usual pad thai"* —
+  so it never connects them, and serves the unsafe suggestion anyway.
+- **GEM links them with an explicit `DERIVED_FROM` dependency edge and walks it** — catching
+  consequences that similarity search is *structurally blind* to.
+- Multi-hop: the ripple flows **down a chain**, not just one step — and stops at the boundary of
+  what truly depends on the change.
 
 ```text
 Facts handled correctly on derived-fact chains      (measured, pre-registered protocol)
@@ -108,11 +111,12 @@ the linked docs and [runs/](runs/):
 
 ## How it works
 
-When a fact changes, the facts **derived from it** go stale automatically — down a typed
-dependency chain, multi-hop — while unrelated facts survive. A flat/vector memory (Mem0, ChatGPT
-memory, plain RAG) re-examines only what *similarity search* surfaces, so a dependent that isn't
-textually similar to the change is served **stale and confidently**. GEM re-examines it via the
-dependency edge instead.
+- A fact changes → facts **derived from it** go stale automatically, **multi-hop** down a typed
+  `DERIVED_FROM` chain; unrelated facts survive.
+- Flat/vector memory only re-examines what *similarity search* surfaces → it serves dissimilar
+  dependents **stale and confidently**. GEM re-examines them via the dependency edge instead.
+- Two distinct passes at write: **conflict detection** (did this change anything?) and
+  **provenance** (`derive_links`: what depends on it?) — kept separate on purpose.
 
 ```bash
 pip install -e .                 # core (numpy + an LLM client)
@@ -146,12 +150,14 @@ m.search("how do tests authenticate?")                  # ACTIVE facts only — 
 > pytest          # 47 tests exercise the full cascade (multi-hop, semantic stop, cycle guard, …)
 > ```
 
-**See it separate from flat memory** (`python -m gem.quickstart`, saved in
-[runs/quickstart_demo.txt](runs/quickstart_demo.txt)): a billing service is reassigned from the
-Payments team to a new Revenue team. Flat memory corrects the facts textually close to the
-change but leaves *"deploy approval requires a **Payments** team reviewer"* stale — so the agent
-routes the approval to a team that no longer owns the service. GEM cascades the ownership change
-and corrects all three downstream process facts.
+**See it separate from flat memory** — `python -m gem.quickstart`
+([output](runs/quickstart_demo.txt)). A billing service is reassigned from the Payments team to a
+new Revenue team:
+
+- **Flat memory** corrects only the facts textually close to the change → leaves *"deploy approval
+  requires a **Payments** team reviewer"* stale → the agent routes approval to a team that no
+  longer owns the service.
+- **GEM** cascades the ownership change and corrects **all three** downstream process facts.
 
 ### Use it when… / skip it when… (the honest scope — measured, not asserted)
 
@@ -161,21 +167,25 @@ and corrects all three downstream process facts.
 | **reads ≫ writes** (pay the cascade once at write, not staleness every read) | **write-heavy / rarely-read** memory |
 | a silent stale fact is **expensive** (ops, compliance, agent tool-calls) | a wrong-but-cheap answer is tolerable |
 
-Measured trade (`runs/gap_experiment.txt`): on derived-chain scenarios GEM scores **37/37 vs
-flat's 25–27/37** (+27pts), at **+57% LLM calls** (~1.8 calls per recovered stale fact) — and
-the cost is **scoped to the affected dependency subgraph, not memory size** (zero extra calls on
-unrelated writes). GEM converts a permanent per-query **correctness** liability into a bounded
-one-time per-write **compute** cost. By default it **auto-corrects** derived facts; pass
-`Memory(conservative=True)` to instead flag them `STALE + needs_review` for human reconfirmation
-(recommended when a weaker model drives the cascade). Where the table's right column applies,
-flat memory wins outright — this is a targeted tool, not a general memory replacement.
+**Measured trade** (`runs/gap_experiment.txt`):
 
-**Explicit vs inferred dependencies.** `add(fact, derived_from=[ids])` pins the dependency edges
-exactly. Omit `derived_from` and GEM infers them — convenient, and **validated across 12 domains
-at ~85–88% recall / ~75–84% precision** (`runs/diag_derive_diverse.txt`), but best-effort: a
-minority of cascades may be missed or spurious. **Pin the dependencies you can't afford to get
-wrong; let the rest infer.** (`python -m gem.diag derive [N]` reproduces the recall number;
-`python -m gem.diag edges` proves hard-negative restraint isn't just an empty graph.)
+- **Accuracy** — 37/37 vs flat's 25–27/37 on derived-chain scenarios (**+27 pts**).
+- **Cost** — +57% LLM calls (~1.8 per recovered stale fact), but **scoped to the affected
+  dependency subgraph, not memory size** (zero extra calls on unrelated writes).
+- **The shift** — turns a permanent per-*query* correctness liability into a bounded one-time
+  per-*write* compute cost.
+- **Safety dial** — auto-corrects derived facts by default; `Memory(conservative=True)` instead
+  flags them `STALE + needs_review` (recommended with weaker models).
+- **Honest scope** — where the table's right column applies, flat memory wins; GEM is a targeted
+  tool, not a general memory replacement.
+
+**Explicit vs inferred dependencies.**
+
+- `add(fact, derived_from=[ids])` — **pins** the edges exactly.
+- Omit `derived_from` — GEM **infers** them; validated across 12 domains at **~85–88% recall /
+  ~75–84% precision** (`runs/diag_derive_diverse.txt`), but best-effort (a minority missed or spurious).
+- **Rule of thumb:** pin what you can't afford to get wrong; let the rest infer.
+- Reproduce: `python -m gem.diag derive [N]` (recall) · `python -m gem.diag edges` (hard-negative restraint).
 
 ---
 
