@@ -216,38 +216,38 @@ Nothing in this unit depends on KuzuDB, FAISS, or the graph store.
 | **SubEM, single-hop (sh_6k, 100 Q)** | **97.0%** (97/100) | >60% | `runs/gate_gptoss120b_sh6k.json` |
 | **SubEM, multi-hop (mh_6k, 100 Q)** | **77.0%** (77/100) | >7% | `runs/factconsolidation_mh6k.json` |
 
-Model: `gpt-oss:120b-cloud` (Ollama Cloud, free tier). **Honest caveat on the multi-hop 77%:**
-it's high because this setup feeds the *full resolved fact-state* to a capable model, turning
-"multi-hop" into in-context compositional reasoning rather than the retrieval-bottlenecked task
-the ~7% baselines faced. So it shows **competence** (the system keeps a correct resolved state
-via conflict resolution, and a strong model chains over it) — **it does not demonstrate the
-cascade**, which is orthogonal to this benchmark. The cascade's proof is the propagation eval
-([below](#the-headline-multi-hop-cascade-mvp-)), not FactConsolidation.
+Model: `gpt-oss:120b-cloud` (Ollama Cloud, free tier).
+
+**Honest caveat on the multi-hop 77%:**
+- It's high because this setup feeds the *full resolved fact-state* to a capable model — turning
+  "multi-hop" into in-context compositional reasoning, not the retrieval-bottlenecked task the
+  ~7% baselines faced.
+- So it shows **competence** (correct resolved state + a strong model chaining over it) — it does
+  **not** demonstrate the cascade, which is orthogonal to this benchmark.
+- The cascade's proof is the propagation eval ([below](#the-headline-multi-hop-cascade-mvp-)), not
+  FactConsolidation.
 
 **Closed-book ablation — the 77% is leak-free** (`python -m unit0.closedbook --multi-hop`,
-`runs/closedbook_mh6k.txt`): asked the same 100 questions with **no facts supplied**, the same
-model (`gpt-oss:120b-cloud`) scores **0% (0/100)**. The FactConsolidation golds are MQuAKE
-*counterfactual* edits (`Blair Walsh plays rugby`, citizenship `Belgium`), so from pretraining
-the model confidently returns the *real-world* values (`American football`, `United Kingdom`) —
-all wrong. **Precise claim: the 77% is entirely attributable to stored/maintained facts rather
-than pretrained priors — there is no leakage.** (It is the memory pathway: retrieval + state
-maintenance + the model reasoning over the retrieved edited facts. It is *not* the cascade —
-that lives on the propagation-eval axis below. Two separate lanes: the closed-book ablation
-proves the FactConsolidation number is leak-free; the propagation eval proves the cascade.)
+`runs/closedbook_mh6k.txt`):
+- Same 100 questions, **no facts supplied** → the same model scores **0% (0/100)**.
+- The golds are MQuAKE *counterfactual* edits (`Blair Walsh plays rugby`, citizenship `Belgium`),
+  so from pretraining the model returns the *real-world* values — all wrong.
+- **Precise claim:** the 77% is entirely attributable to stored/maintained facts, not pretrained
+  priors — **no leakage.** (The closed-book ablation proves *this number* is leak-free; the
+  propagation eval — separate axis — proves the *cascade*.)
 
-The state probe confirms the mechanism, not just the score: **every conflicting fact
-resolved to its latest/edited value under a single key** (`Hines Ward | position:
-cornerback`, `Chanel | founder: Andy Warhol`, `Germany | continent: Africa`), while
-unrelated attributes of the same entity survived untouched (`Germany | capital: Berlin`).
-The 3 misses are all an attribute-drift edge case (a fact and its edit extracted under
-slightly different attribute names, so keep-latest doesn't merge them) — a known,
-minor, second-order issue, not a mechanism failure.
+**State probe — the mechanism, not just the score:**
+- Every conflicting fact resolved to its latest/edited value under one key (`Hines Ward → position:
+  cornerback`, `Chanel → founder: Andy Warhol`, `Germany → continent: Africa`).
+- Unrelated attributes of the same entity survived untouched (`Germany | capital: Berlin`).
+- The 3 misses are an attribute-drift edge case (fact + edit extracted under slightly different
+  attribute names) — known, minor, not a mechanism failure.
 
-**Model bake-off (the real Unit 0 finding — extraction reliability is the load-bearing
-assumption):** local `qwen3.5:0.8b` and `:2b` mangle triples (empty values, inverted
-entity/value, inconsistent keys) which silently breaks conflict resolution; local
-`qwen3.5:9b` extracts cleanly but is CPU-bound and slow; `gpt-oss:120b-cloud` extracts
-cleanest *and* runs on Ollama's GPUs. Capable model in, the chain works.
+**Model bake-off (the real Unit 0 finding — extraction reliability is load-bearing):**
+- `qwen3.5:0.8b` / `:2b` — mangle triples (empty values, inverted entity/value) → silently break
+  conflict resolution.
+- `qwen3.5:9b` — extracts cleanly, but CPU-bound and slow.
+- `gpt-oss:120b-cloud` — extracts cleanest *and* runs on Ollama's GPUs. **Capable model in, the chain works.**
 
 ---
 
@@ -298,14 +298,14 @@ ingest "I now live in Mumbai":
 | unknown-value | raise-unknown-amount | ✅ STALE, no invented value |
 | robustness | belief-cycle (guard), pet-detail (EXTENDS non-propagation) | ✅ |
 
-**Propagation eval vs flat baseline** (`python -m gem.eval`) — the quantified value of the
-cascade. The generator produces **139 scenarios from 19 documented templates** (`gem/eval.py`)
-spanning clean N-hop chains, hard negatives, divergent parents, extremes (deep 6-hop, wide
-fan-out, tax-boundary near-miss, multi-parent) and **chaos** (no-op observations, colloquial
-phrasing, noise-amid-signal, off-domain, multi-change). Reported on a **stratified slice of all
-19 templates** (2/template, 37 scenarios) — deliberate integrity-over-raw-N so the whole run
-completes inside the cloud rate-limit window; runs are discarded unless the degraded-call
-integrity counter is **0**. Result (`runs/propagation_eval_strat_clean.txt`):
+**Propagation eval vs flat baseline** (`python -m gem.eval`) — the quantified value of the cascade:
+
+- **Generator:** 139 scenarios from 19 documented templates (`gem/eval.py`) — clean N-hop chains,
+  hard negatives, divergent parents, extremes (deep 6-hop, wide fan-out, tax near-miss, multi-parent),
+  and **chaos** (no-op observations, colloquial phrasing, noise-amid-signal, off-domain, multi-change).
+- **Reported on** a stratified slice of all 19 templates (2/template, 37 scenarios) — integrity-over-
+  raw-N so the run finishes inside the cloud rate-limit window; discarded unless the degraded-call
+  counter is **0**. Result (`runs/propagation_eval_strat_clean.txt`):
 
 All numbers below use **`gpt-oss:120b-cloud`** as the boundary model (same model as the
 single-hop gate and the multi-hop run). The `qwen3.5:2b` figures elsewhere are explicitly the
@@ -317,31 +317,31 @@ small-model ablation, never the headline.
 | flat baseline (generous: semantic conflict-scan, no propagation) | 22/37 | 91/117 (78%) |
 | **cascade lift** | **+15 scenarios** | **+22 points** | (integrity: clean, 0 degraded) |
 
-Run-to-run determinism (`gpt-oss:120b-cloud`, 5 clean passes, `runs/determinism_120b.txt`):
-node accuracy **min 95.1 / mean 99.0 / max 100%**. The point isn't the sub-100 — it's *where*
-the variance lives: only 2/19 scenarios ever flip, and **both are the hardest positive cascades
-(the 6-hop chain and the oblique-trigger case); none on the negatives or boundary pruning.** The
-instability is confined to exactly where the cascade does the most work (long chains = more
-boundary decisions to get right), not scattered across easy cases — so a measured-and-localized
-95–100%, which is the honest-and-strong read, not a flaky one.
+**Run-to-run determinism** (5 clean passes, `runs/determinism_120b.txt`): node accuracy
+**min 95.1 / mean 99.0 / max 100%**.
+- The point isn't the sub-100 — it's *where* the variance lives: only 2/19 scenarios ever flip,
+  and **both are the hardest positive cascades** (the 6-hop chain, the oblique-trigger case) —
+  none on negatives or boundary pruning.
+- So the instability is localized to where the cascade does the most work, not scattered across
+  easy cases — a measured-and-localized 95–100%, not a flaky one.
 
-**The honest reading is per-category, not the headline.** The lift concentrates exactly where
-dependents are *transitively deep* or don't restate the trigger's terms — `deep-6hop` +58pt,
-`nhop-positive` +32pt, `off-domain` +40pt, `messy-phrasing` +33pt, `wide-fanout` +25pt. Where
-the correct answer is non-propagation (timezone, language, tax-within-state, divergent-survives,
-no-op, EXTENDS) GEM **ties** the baseline — both correctly do nothing, proving GEM isn't merely
-over-invalidating. And where a 2-hop dependent textually restates its parent's value
-(`raise-unknown`, `multi-parent`), even a flat conflict-scan catches it, so no lift — an honest
-limit, not a bug (GEM passes those too, so the edges exist). So the defensible claim is precise:
-**the cascade beats even a generous semantic-conflict baseline specifically on transitive depth.**
-This is the proof for **target 1**; the generator + ground-truth derivation are fully transparent
-in `gem/eval.py`.
+**The honest reading is per-category, not the headline:**
+- **Lift concentrates** where dependents are *transitively deep* or don't restate the trigger's
+  terms — `deep-6hop` +58pt, `off-domain` +40pt, `messy-phrasing` +33pt, `nhop-positive` +32pt,
+  `wide-fanout` +25pt.
+- **Ties** the baseline where the correct answer is *non-propagation* (timezone, language,
+  tax-within-state, no-op, EXTENDS) — both correctly do nothing, so GEM isn't just over-invalidating.
+- **No lift** where a 2-hop dependent textually restates its parent (`raise-unknown`, `multi-parent`)
+  — a flat conflict-scan catches those too (GEM passes them as well; the edges exist). An honest
+  limit, not a bug.
+- So the precise claim: **the cascade beats even a generous semantic-conflict baseline specifically
+  on transitive depth.** This is the proof for **target 1**; generator + ground truth are transparent
+  in `gem/eval.py`.
 
-The cascade walks `DERIVED_FROM` edges only; `ASSOCIATED` edges are never followed for
-invalidation — the typed-edge distinction is what makes correct pruning possible. Two
-prompt-level lessons are documented in `gem/engine.py`: the dependent re-check must be
-told the dependency exists (or surface semantics prune genuine dependents), and a
-`PARTIALLY_UPDATES` change must signal value-uncertainty downstream or the chain breaks.
+**Why typed edges matter:** the cascade walks `DERIVED_FROM` only — `ASSOCIATED` edges are never
+followed for invalidation; that typed distinction is what makes correct pruning possible. (Two
+prompt lessons in `gem/engine.py`: the dependent re-check must be *told* the dependency exists, and
+a `PARTIALLY_UPDATES` change must signal value-uncertainty downstream or the chain breaks.)
 
 This is the proof for the project's **target 1** (the cascade works). FactConsolidation
 (Unit 0) is **target 2** (external competence). See the plan for the full Unit 5.5
@@ -462,6 +462,11 @@ Governed Evolving Memory: a memory system whose novel contribution is
 **dependency-aware invalidation** — change one fact and dependent facts go stale down
 a typed `DERIVED_FROM` chain, while unrelated branches survive. Unit 0 is only the
 gate; the cascade is built later, once the gate proves the foundation holds.
+
+It's worth being precise about what GEM *is*: the typed graph is the **substrate**, not the point —
+GEM is closer to a **truth-maintenance layer** (dependency-directed belief revision) over that
+graph than to a static knowledge graph. The contribution is the *governed evolution* — the
+LLM-driven cascade that re-examines and invalidates dependents as facts change — not the storage.
 
 ---
 
