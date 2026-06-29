@@ -1,0 +1,62 @@
+﻿37 scenarios from 19 templates (stratified 2/template)
+
+[  1/37] PASS 4/4  relocation-4hop[Berlin->Munich]   | baseline 3/4
+[  2/37] PASS 4/4  relocation-4hop[Seattle->Portland]   | baseline 2/4
+[  3/37] PASS 2/2  timezone-survives[Bangalore->Mumbai]   | baseline 2/2
+[  4/37] PASS 2/2  timezone-survives[Chennai->Delhi]   | baseline 2/2
+[  5/37] PASS 3/3  divergent-survives[Berlin->Munich|a Tesla]   | baseline 3/3
+[  6/37] PASS 3/3  divergent-survives[Seattle->Portland|a PlayStation 5]   | baseline 3/3
+[  7/37] PASS 2/2  sensor-baseline[21->18C]   | baseline 2/2
+[  8/37] PASS 2/2  sensor-baseline[20->24C]   | baseline 2/2
+[  9/37] PASS 3/3  region-sla[us-east-1->ap-south-1]   | baseline 2/3
+[ 10/37] PASS 3/3  region-sla[eu-west-1->us-west-2]   | baseline 2/3
+[ 11/37] PASS 2/2  raise-unknown[80k]   | baseline 2/2
+[ 12/37] PASS 2/2  raise-unknown[120k]   | baseline 2/2
+[ 13/37] PASS 2/2  extends[Rex]   | baseline 2/2
+[ 14/37] PASS 2/2  extends[Milo]   | baseline 2/2
+[ 15/37] PASS 3/3  org-reporting[Alice->Bob]   | baseline 1/3
+[ 16/37] PASS 3/3  org-reporting[Priya->Sam]   | baseline 1/3
+[ 17/37] PASS 2/2  language-survives[Munich->Hamburg]   | baseline 2/2
+[ 18/37] PASS 2/2  language-survives[Lyon->Nantes]   | baseline 2/2
+[ 19/37] PASS 2/2  subscription[Netflix:Premium->Standard]   | baseline 2/2
+[ 20/37] PASS 2/2  subscription[Spotify:Family->Individual]   | baseline 2/2
+[ 21/37] PASS 6/6  deep-6hop[Berlin->Munich]   | baseline 3/6
+[ 22/37] PASS 6/6  deep-6hop[Seattle->Portland]   | baseline 2/6
+[ 23/37] PASS 6/6  wide-fanout[Bangalore->Mumbai]   | baseline 5/6
+[ 24/37] PASS 6/6  wide-fanout[Chennai->Delhi]   | baseline 4/6
+[ 25/37] PASS 2/2  tax-within-state[San Francisco->San Diego]   | baseline 2/2
+[ 26/37] PASS 2/2  tax-within-state[Buffalo->Albany]   | baseline 2/2
+[ 27/37] PASS 4/4  multi-parent-matters   | baseline 4/4
+[ 28/37] PASS 4/4  multi-parent-irrelevant   | baseline 4/4
+[ 29/37] PASS 3/3  noop[0]   | baseline 3/3
+[ 30/37] PASS 2/2  noop[1]   | baseline 2/2
+[ 31/37] PASS 3/3  messy-phrasing[Berlin]   | baseline 1/3
+[ 32/37] PASS 3/3  messy-phrasing[Seattle]   | baseline 3/3
+[ 33/37] PASS 5/5  noise-amid-signal[Lyon->Paris]   | baseline 4/5
+[ 34/37] PASS 5/5  noise-amid-signal[Munich->Berlin]   | baseline 4/5
+[ 35/37] PASS 2/2  medical-dose   | baseline 2/2
+[ 36/37] PASS 3/3  flight-itinerary   | baseline 1/3
+[ 37/37] PASS 5/5  dual-change-job-and-city   | baseline 4/5
+
+================================================================
+GEM (cascade):   37/37 scenarios, 117/117 nodes (100%)
+flat baseline:   22/37 scenarios, 91/117 nodes (78%)
+cascade lift:    +22 node-accuracy points
+integrity:       clean (0 degraded calls)
+================================================================
+
+by category (GEM vs baseline):
+  chaos / messy-phrasing         GEM 100%  base  67%  (+33pt)
+  chaos / multi-change           GEM 100%  base  80%  (+20pt)
+  chaos / no-op                  GEM 100%  base 100%  (+0pt)  <- TIE: no lift (check: no depth, or derive_links missed edges?)
+  chaos / noise                  GEM 100%  base  80%  (+20pt)
+  chaos / off-domain             GEM 100%  base  60%  (+40pt)
+  extreme / deep-chain           GEM 100%  base  42%  (+58pt)
+  extreme / divergent-parents    GEM 100%  base 100%  (+0pt)  <- TIE: no lift (check: no depth, or derive_links missed edges?)
+  extreme / near-miss-negative   GEM 100%  base 100%  (+0pt)  <- TIE: no lift (check: no depth, or derive_links missed edges?)
+  extreme / wide-fanout          GEM 100%  base  75%  (+25pt)
+  generated / divergent-parents  GEM 100%  base 100%  (+0pt)  <- TIE: no lift (check: no depth, or derive_links missed edges?)
+  generated / extends-negative   GEM 100%  base 100%  (+0pt)  <- TIE: no lift (check: no depth, or derive_links missed edges?)
+  generated / hard-negative      GEM 100%  base 100%  (+0pt)  <- TIE: no lift (check: no depth, or derive_links missed edges?)
+  generated / nhop-positive      GEM 100%  base  68%  (+32pt)
+  generated / unknown-value      GEM 100%  base 100%  (+0pt)  <- TIE: no lift (check: no depth, or derive_links missed edges?)

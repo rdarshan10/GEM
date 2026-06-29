@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.hf_cache/
+data_cache/
+*.log
+# build / tooling artifacts
+.coverage
+.pytest_cache/
+*.egg-info/
+build/
+dist/

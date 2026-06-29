@@ -1,0 +1,26 @@
+﻿==========================================================================
+BEFORE the move — both agents answer the same way
+==========================================================================
+Q: What time is my daily briefing, and is it still accurate?
+
+  GEM agent : Your daily briefing is set for 6:45 AM. Since there’s no indication it’s been changed, that time remains accurate (though you mentioned you wake at 7 AM, so you might want to verify it still works for you).
+
+  flat agent: Your daily briefing is set for 6:45 am. According to your stored information, that time is still current.
+
+==========================================================================
+EVENT: user says "I now live in Mumbai"
+==========================================================================
+  GEM  marked stale: ['My commute to work is 45 minutes', 'My daily briefing is scheduled for 6:45am']
+  flat marked stale: ['I wake at 7am to beat the Bangalore traffic']
+
+==========================================================================
+AFTER the move — same question, watch the answers diverge
+==========================================================================
+Q: What time is my daily briefing, and is it still accurate?
+
+  GEM agent : Your memory notes a daily briefing at 6:45 am, but that entry is marked **[STALE]**, so its accuracy can’t be confirmed. You’ll need to verify the current briefing time to see if it’s still 6:45 am.
+
+  flat agent: Your daily briefing is set for 6:45 am. Since that detail isn’t marked as stale, it remains current and accurate.
+
+(The flat agent still answers from the stale Bangalore-based schedule; the GEM
+ agent knows those facts went stale when the city changed — that's the cascade.)

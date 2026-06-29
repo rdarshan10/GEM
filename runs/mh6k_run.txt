@@ -1,0 +1,23 @@
+﻿Loading FactConsolidation multi-hop size=6k ...
+record factconsolidation_mh_6k: 11 chunks, 100 questions
+ingesting chunks + answering queries (this is the gate) ...
+  ingest chunk 1/11: +44 facts -> 41 keys (27s)
+  ingest chunk 2/11: +43 facts -> 80 keys (37s)
+  ingest chunk 3/11: +42 facts -> 118 keys (27s)
+  ingest chunk 4/11: +43 facts -> 151 keys (50s)
+  ingest chunk 5/11: +45 facts -> 188 keys (58s)
+  ingest chunk 6/11: +44 facts -> 217 keys (73s)
+  ingest chunk 7/11: +43 facts -> 247 keys (55s)
+  ingest chunk 8/11: +42 facts -> 270 keys (77s)
+  ingest chunk 9/11: +42 facts -> 292 keys (75s)
+  ingest chunk 10/11: +42 facts -> 310 keys (80s)
+  ingest chunk 11/11: +25 facts -> 320 keys (46s)
+  resolved state: 320 (entity,attribute) keys; answering 100 questions ...
+
+============================================================
+model:   gpt-oss:120b-cloud
+record:  factconsolidation_mh_6k
+SubEM:   77.0%  (77/100)
+time:    914s
+============================================================
+saved -> runs/factconsolidation_mh6k.json

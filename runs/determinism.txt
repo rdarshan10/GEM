@@ -1,0 +1,33 @@
+﻿37 scenarios from 19 templates (stratified 2/template)
+
+run 1/5: 36/37 scen, 115/117 nodes (98.3%)
+run 2/5: 37/37 scen, 117/117 nodes (100.0%)
+run 3/5: 36/37 scen, 116/117 nodes (99.1%)
+run 4/5: 4/37 scen, 38/117 nodes (32.5%)
+run 5/5: 4/37 scen, 35/117 nodes (29.9%)
+
+================================================================
+determinism over 5 runs:
+  node accuracy: min 29.9%  mean 72.0%  max 100.0%
+  scenarios that flipped pass/fail at least once: 33/37
+    ~ deep-6hop[Berlin->Munich]
+    ~ deep-6hop[Seattle->Portland]
+    ~ divergent-survives[Berlin->Munich|a Tesla]
+    ~ divergent-survives[Seattle->Portland|a PlayStation 5]
+    ~ dual-change-job-and-city
+    ~ flight-itinerary
+    ~ language-survives[Lyon->Nantes]
+    ~ language-survives[Munich->Hamburg]
+    ~ medical-dose
+    ~ messy-phrasing[Berlin]
+    ~ messy-phrasing[Seattle]
+    ~ multi-parent-irrelevant
+    ~ multi-parent-matters
+    ~ noise-amid-signal[Lyon->Paris]
+    ~ noise-amid-signal[Munich->Berlin]
+================================================================
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+RUN INVALID — 232 degraded LLM calls (classify=232, derive_links=0).
+DISCARD this run and re-run; do NOT report the number. A degraded classify
+corrupts a cascade decision; a degraded derive_links drops a DERIVED_FROM edge.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

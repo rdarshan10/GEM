@@ -1,0 +1,23 @@
+﻿
+[FAIL] tax-country-survives-city-move (hard negative)  (personal / hard-negative)  1/2
+       trigger: I have moved to Paris
+   [ok] expect invalid got invalid | ACTIVE     I live in Paris
+   [XX] expect survive got invalid | ACTIVE     I file my income taxes in Paris
+       cascade trace:
+         ingest conflict: new 'I have moved to Paris' UPDATES n1 'I live in Lyon, France'
+         revise n1: UPDATES 'I live in Lyon, France' -> 'I live in Paris'
+           semantic stop: n2 UNRELATED to change
+         ingest conflict: new 'I have moved to Paris' UPDATES n2 'I file my income taxes in France'
+         revise n2: UPDATES 'I file my income taxes in France' -> 'I file my income taxes in Paris'
+       cascade trace (traversal + decisions):
+         ingest conflict: new 'I have moved to Paris' UPDATES n1 'I live in Lyon, France'
+         revise n1: UPDATES 'I live in Lyon, France' -> 'I live in Paris'
+           semantic stop: n2 UNRELATED to change
+         ingest conflict: new 'I have moved to Paris' UPDATES n2 'I file my income taxes in France'
+         revise n2: UPDATES 'I file my income taxes in France' -> 'I file my income taxes in Paris'
+
+============================================================
+scenarios passed:  0/1
+node-level correct: 1/2 (50%)
+integrity: 0 degraded calls (clean)
+============================================================

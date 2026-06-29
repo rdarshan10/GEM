@@ -1,0 +1,75 @@
+﻿
+[PASS] rent-follows-city (2-hop)  (personal / positive)  2/2
+       trigger: I have moved to Munich
+   [ok] expect invalid got invalid | ACTIVE     "I live in Munich"
+   [ok] expect invalid got invalid | STALE      My monthly rent is 1200 euros
+
+[PASS] mumbai-commute (4-hop)  (personal / positive)  4/4
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I now live in Mumbai
+   [ok] expect invalid got invalid | STALE      "My commute to work is 45 minutes"
+   [ok] expect invalid got invalid | STALE      I wake at 7am to beat the traffic
+   [ok] expect invalid got invalid | ACTIVE     "My daily briefing is scheduled for 6:45am" (value unknown; must reconfirm wake-up time)
+
+[PASS] timezone-survives-same-zone (hard negative)  (personal / hard-negative)  2/2
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I now live in Mumbai
+   [ok] expect survive got survive | ACTIVE     My timezone is IST
+
+[FAIL] tax-country-survives-city-move (hard negative)  (personal / hard-negative)  1/2
+       trigger: I have moved to Paris
+   [ok] expect invalid got invalid | SUPERSEDED I live in Lyon, France
+   [XX] expect survive got invalid | ACTIVE     "I file my income taxes in Paris"
+       cascade trace:
+         ingest conflict: new 'I have moved to Paris' CONTRADICTS n1 'I live in Lyon, France'
+         revise n1: CONTRADICTS 'I live in Lyon, France' -> 'I live in Lyon, France' [SUPERSEDED]
+           revise n2: PARTIALLY_UPDATES 'I file my income taxes in France' -> 'I file my income taxes in France'
+         ingest conflict: new 'I have moved to Paris' UPDATES n2 'I file my income taxes in France'
+         revise n2: UPDATES 'I file my income taxes in France' -> '"I file my income taxes in Paris"'
+
+[PASS] commute-plan-divergent-parents (positive branch)  (personal / divergent-parents)  3/3
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I now live in Mumbai
+   [ok] expect survive got survive | ACTIVE     I work 9 to 5
+   [ok] expect invalid got invalid | STALE      I plan a 7am commute to beat the Bangalore traffic
+
+[FAIL] charger-survives-move (divergent hard negative)  (home / divergent-parents)  2/3
+       trigger: I have moved to Portland
+   [ok] expect invalid got invalid | ACTIVE     "I have moved to Portland"
+   [ok] expect survive got survive | ACTIVE     I own a Tesla
+   [XX] expect survive got invalid | STALE      My garage charger is a Tesla Wall Connector
+       cascade trace:
+         ingest conflict: new 'I have moved to Portland' UPDATES n1 'I live in Seattle'
+         revise n1: UPDATES 'I live in Seattle' -> '"I have moved to Portland"'
+           revise n3: UPDATES 'My garage charger is a Tesla Wall Connector' -> 'My garage charger is a Tesla Wall Connector' [STALE]
+
+[PASS] raise-unknown-amount (unknown-value)  (personal / unknown-value)  2/2
+       trigger: I just got a raise
+   [ok] expect invalid got invalid | ACTIVE     "My salary has been raised to 80k dollars"
+   [ok] expect invalid got invalid | ACTIVE     "I have been raised to an income of $80k dollars. My rent budget is likely now covered or exceeded by my salary, so I do not need a separate monthly rent allocation."
+
+[PASS] thermostat-baseline (home, 2-hop positive)  (home / positive)  2/2
+       trigger: I changed the living room baseline temperature to 18C
+   [ok] expect invalid got invalid | ACTIVE     "The living room baseline temperature is 18C"
+   [ok] expect invalid got invalid | STALE      "The evening thermostat is set to 23C" -> "I changed the living room baseline temperature to 18C"
+
+[PASS] api-region-sla (work, 3-hop positive)  (work / positive)  3/3
+       trigger: We migrated the API to AWS ap-south-1
+   [ok] expect invalid got invalid | STALE      Our API is hosted on AWS us-east-1
+   [ok] expect invalid got invalid | STALE      Our latency budget assumes us-east-1 at about 20ms
+   [ok] expect invalid got invalid | STALE      Our SLA promises p99 under 50ms based on that latency budget
+
+[PASS] pet-detail-extends (EXTENDS non-propagation)  (personal / extends)  2/2
+       trigger: Rex loves to swim in the lake
+   [ok] expect survive got survive | ACTIVE     I have a dog named Rex
+   [ok] expect survive got survive | ACTIVE     Rex is a golden retriever
+
+[PASS] belief-cycle (cycle guard)  (robustness / cycle)  2/2
+       trigger: The project ship date has slipped to Q4
+   [ok] expect invalid got invalid | STALE      Assumption A: the project ships in Q3
+   [ok] expect invalid got invalid | STALE      Plan B: hiring is paced to a Q3 ship (depends on A)
+
+============================================================
+scenarios passed:  9/11
+node-level correct: 25/27 (93%)
+============================================================

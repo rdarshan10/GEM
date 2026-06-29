@@ -1,0 +1,10 @@
+derive_links PRECISION lever — confirmation pass OFF vs ON (diverse scenarios)
+
+mode               recall           precision          spurious edges
+baseline (off)     22/24 (92%)      22/64 (34%)        42            
+confirm pass (on)  8/24 (33%)       8/19 (42%)         11            
+
+integrity: 0 degraded calls (clean)
+
+confirm pass: precision 34% -> 42% (+8%), recall 92% -> 33% (-58%), spurious edges 42 -> 11
+Verdict: worth it iff precision gain (less over-cascade) outweighs the recall cost.

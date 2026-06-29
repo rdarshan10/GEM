@@ -1,0 +1,39 @@
+  relocation-4hop[Berlin->Munich]          recall 2/3  (inferred 3)  <- MISSED edges
+  relocation-4hop[Seattle->Portland]       recall 2/3  (inferred 3)  <- MISSED edges
+  relocation-4hop[Austin->Denver]          recall 2/3  (inferred 3)  <- MISSED edges
+  relocation-4hop[Boston->Chicago]         recall 2/3  (inferred 3)  <- MISSED edges
+  relocation-4hop[Madrid->Valencia]        recall 2/3  (inferred 3)  <- MISSED edges
+  relocation-4hop[Toronto->Calgary]        recall 3/3  (inferred 3)
+  relocation-4hop[London->Bristol]         recall 3/3  (inferred 3)
+  relocation-4hop[Sydney->Melbourne]       recall 1/3  (inferred 2)  <- MISSED edges
+  relocation-4hop[Dublin->Cork]            recall 3/3  (inferred 3)
+  relocation-4hop[Lisbon->Porto]           recall 3/3  (inferred 4)
+  relocation-4hop[Warsaw->Krakow]          recall 1/3  (inferred 2)  <- MISSED edges
+  relocation-4hop[Oslo->Bergen]            recall 3/3  (inferred 4)
+  relocation-4hop[Denver->Phoenix]         recall 2/3  (inferred 3)  <- MISSED edges
+  relocation-4hop[Miami->Atlanta]          recall 2/3  (inferred 3)  <- MISSED edges
+  relocation-4hop[Nashville->Memphis]      recall 2/3  (inferred 3)  <- MISSED edges
+  relocation-4hop[Vancouver->Ottawa]       recall 3/3  (inferred 3)
+  timezone-survives[Bangalore->Mumbai]     recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Chennai->Delhi]        recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Pune->Hyderabad]       recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Lyon->Paris]           recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Munich->Berlin]        recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Osaka->Tokyo]          recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Kolkata->Jaipur]       recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Nice->Bordeaux]        recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Hamburg->Cologne]      recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Nagoya->Kyoto]         recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Ahmedabad->Surat]      recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Marseille->Toulouse]   recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Frankfurt->Stuttgart]  recall 0/1  (inferred 0)  <- MISSED edges
+  timezone-survives[Fukuoka->Sapporo]      recall 0/1  (inferred 0)  <- MISSED edges
+
+================================================================
+derive_links recall:    36/62 ground-truth edges (58%)
+derive_links precision: 36/48 inferred edges (75%)
+integrity: 0 degraded calls (clean)
+================================================================
+
+A recall gap here would surface on harder positive cases in real ingest, where
+edges are inferred, not pinned. This is the provenance risk the cascade eval can't see.

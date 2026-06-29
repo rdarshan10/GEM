@@ -1,0 +1,1181 @@
+{
+  "model": "qwen3.5:0.8b",
+  "record_id": "factconsolidation_sh_6k",
+  "subem": 0.0,
+  "correct": 0,
+  "total": 3,
+  "elapsed_sec": 143.10410261154175,
+  "predictions": [
+    "ice hockey",
+    "Rurouni Kenshin",
+    "Canada"
+  ],
+  "golds": [
+    [
+      "pesäpallo"
+    ],
+    [
+      "The Fairly OddParents"
+    ],
+    [
+      "India"
+    ]
+  ],
+  "hits": [
+    false,
+    false,
+    false
+  ],
+  "state": [
+    {
+      "entity": "Thomas Kyd",
+      "attribute": "born",
+      "value": "in London"
+    },
+    {
+      "entity": "Fatah chairperson",
+      "attribute": "is",
+      "value": "Mahmoud Abbas"
+    },
+    {
+      "entity": "Amy Winehouse's death location",
+      "attribute": "died in",
+      "value": "Camden Town"
+    },
+    {
+      "entity": "Hines Ward's position",
+      "attribute": "plays the position of",
+      "value": "wide receiver"
+    },
+    {
+      "entity": "Bengaluru's continent",
+      "attribute": "is located in",
+      "value": "Asia"
+    },
+    {
+      "entity": "Pedro Pierluisi's workplace",
+      "attribute": "worked in",
+      "value": "Washington, D.C."
+    },
+    {
+      "entity": "Rogério Ceni's position",
+      "attribute": "plays the position of",
+      "value": "goalkeeper"
+    },
+    {
+      "entity": "Tony Hall's role at BBC",
+      "attribute": "is director of",
+      "value": "British Broadcasting Corporation"
+    },
+    {
+      "entity": "Victoria Beckham's spouse",
+      "attribute": "is married to",
+      "value": "David Beckham"
+    },
+    {
+      "entity": "University of Minnesota headquarters location",
+      "attribute": "of is located in the city of",
+      "value": "Minneapolis"
+    },
+    {
+      "entity": "Ursula K. Le Guin author",
+      "attribute": "author of A Wizard of Earthsea is",
+      "value": "Ursula K. Le Guin"
+    },
+    {
+      "entity": "Ferdinand Marcos's spouse",
+      "attribute": "is married to",
+      "value": "Imelda Marcos"
+    },
+    {
+      "entity": "University of California, Berkeley headquarters location",
+      "attribute": "of is located in the city of",
+      "value": "Berkeley"
+    },
+    {
+      "entity": "Tim Cook CEO Apple Inc.",
+      "attribute": "chief executive officer of Apple Inc. is",
+      "value": "Tim Cook"
+    },
+    {
+      "entity": "Lisa Leslie's position",
+      "attribute": "plays the position of",
+      "value": "center"
+    },
+    {
+      "entity": "University where Galileo was educated location",
+      "attribute": "is located in the city of",
+      "value": "Pisa"
+    },
+    {
+      "entity": "Coco Chanel founder",
+      "attribute": "was founded by",
+      "value": "Coco Chanel"
+    },
+    {
+      "entity": "John Knox founder Church of Scotland",
+      "attribute": "was founded by",
+      "value": "John Knox"
+    },
+    {
+      "entity": "Slovakia national football team sport association",
+      "attribute": "is associated with the sport of",
+      "value": "association football"
+    },
+    {
+      "entity": "Alta IF sport association",
+      "attribute": "is associated with the sport of",
+      "value": "association football"
+    },
+    {
+      "entity": "Kūkai founder Shingon Buddhism",
+      "attribute": "was founded by",
+      "value": "Kūkai"
+    },
+    {
+      "entity": "Chang'an capital Tang Empire",
+      "attribute": "capital is Chang'an",
+      "value": ""
+    },
+    {
+      "entity": "Robert A. Heinlein US citizen",
+      "attribute": "is a citizen of United States of America",
+      "value": ""
+    },
+    {
+      "entity": "Galwegians RFC sport association rugby union",
+      "attribute": "is associated with the sport of",
+      "value": "rugby union"
+    },
+    {
+      "entity": "Ferdinand von Richthofen German citizenship",
+      "attribute": "is a citizen of Germany",
+      "value": ""
+    },
+    {
+      "entity": "David Bowie performer Aladdin Sane",
+      "attribute": "was performed by",
+      "value": "David Bowie"
+    },
+    {
+      "entity": "Berlin capital Germany",
+      "attribute": "capital is Berlin",
+      "value": ""
+    },
+    {
+      "entity": "Robert A. Heinlein author Starship Troopers",
+      "attribute": "author of The Witcher is",
+      "value": "Andrzej Sapkowski"
+    },
+    {
+      "entity": "London Great Britain capital",
+      "attribute": "is located in the city of London",
+      "value": ""
+    },
+    {
+      "entity": "Andy Warhol founder Chanel",
+      "attribute": "was founded by",
+      "value": "Andy Warhol"
+    },
+    {
+      "entity": "Steve Sax sport association baseball",
+      "attribute": "is associated with the sport of",
+      "value": "baseball"
+    },
+    {
+      "entity": "Hines Ward position cornerback",
+      "attribute": "plays the position of",
+      "value": "cornerback"
+    },
+    {
+      "entity": "Frank Zappa death location Los Angeles",
+      "attribute": "died in the city of",
+      "value": "Los Angeles"
+    },
+    {
+      "entity": "Lucasfilm employed Dave Filoni",
+      "attribute": "is employed by Lucasfilm.",
+      "value": ""
+    },
+    {
+      "entity": "Henri Grégoire French citizenship",
+      "attribute": "is a citizen of France",
+      "value": ""
+    },
+    {
+      "entity": "Christianity founded Jerusalem location",
+      "attribute": "was founded in the city of",
+      "value": "Jerusalem"
+    },
+    {
+      "entity": "Germany continent Europe",
+      "attribute": "is located in the continent of",
+      "value": "Europe"
+    },
+    {
+      "entity": "Kūkai",
+      "attribute": "speaks the language of Japanese",
+      "value": ""
+    },
+    {
+      "entity": "Friedrich Nietzsche",
+      "attribute": "is famous for Thus Spoke Zarathustra",
+      "value": ""
+    },
+    {
+      "entity": "wide receiver",
+      "attribute": "is associated with the sport of American football",
+      "value": ""
+    },
+    {
+      "entity": "Ron Dennis",
+      "attribute": "is employed by McLaren Automotive",
+      "value": ""
+    },
+    {
+      "entity": "Israel",
+      "attribute": "was founded by David Ben-Gurion",
+      "value": ""
+    },
+    {
+      "entity": "Israel",
+      "attribute": "was founded by Philippe, Duke of Orléans",
+      "value": ""
+    },
+    {
+      "entity": "quarterback",
+      "attribute": "is associated with the sport of Muay Thai",
+      "value": ""
+    },
+    {
+      "entity": "Frank Zappa",
+      "attribute": "died in the city of Berlin",
+      "value": ""
+    },
+    {
+      "entity": "Blood on the Tracks",
+      "attribute": "was performed by Bob Dylan",
+      "value": ""
+    },
+    {
+      "entity": "Ursula K. Le Guin",
+      "attribute": "died in the city of Portland",
+      "value": ""
+    },
+    {
+      "entity": "The chairperson of Congolese Party of Labour",
+      "attribute": "is Denis Sassou-Nguesso",
+      "value": ""
+    },
+    {
+      "entity": "Colin Irwin",
+      "attribute": "is a citizen of United Kingdom",
+      "value": ""
+    },
+    {
+      "entity": "Canada",
+      "attribute": "is located in the continent of North America",
+      "value": ""
+    },
+    {
+      "entity": "cricket",
+      "attribute": "was created in the country of England",
+      "value": ""
+    },
+    {
+      "entity": "Nicolae Ceaușescu",
+      "attribute": "is married to Elena Ceaușescu",
+      "value": ""
+    },
+    {
+      "entity": "pesäpallo",
+      "attribute": "was created in the country of Finland",
+      "value": ""
+    },
+    {
+      "entity": "Leo Stein",
+      "attribute": "is a citizen of United States of America",
+      "value": ""
+    },
+    {
+      "entity": "Walter Chrysler's child",
+      "attribute": "is Walter Percy Chrysler Jr.",
+      "value": ""
+    },
+    {
+      "entity": "Yves Montand",
+      "attribute": "is married to Simone Signoret",
+      "value": ""
+    },
+    {
+      "entity": "The univeristy where Joan Didion was educated",
+      "attribute": "is University of California, Berkeley",
+      "value": ""
+    },
+    {
+      "entity": "The director of American Broadcasting Company",
+      "attribute": "is Bob Iger",
+      "value": ""
+    },
+    {
+      "entity": "Born in the U.S.A.",
+      "attribute": "was performed by Bruce Springsteen",
+      "value": ""
+    },
+    {
+      "entity": "Rand al'Thor",
+      "attribute": "was created by Robert Jordan",
+      "value": ""
+    },
+    {
+      "entity": "Buddhism",
+      "attribute": "was founded by Gautama Buddha",
+      "value": ""
+    },
+    {
+      "entity": "Natalie Portman",
+      "attribute": "is affiliated with the religion of Judaism",
+      "value": ""
+    },
+    {
+      "entity": "point guard",
+      "attribute": "is associated with the sport of basketball",
+      "value": ""
+    },
+    {
+      "entity": "Kingdom of Ireland",
+      "attribute": "is affiliated with the religion of Catholic Church",
+      "value": ""
+    },
+    {
+      "entity": "Rocket Man",
+      "attribute": "was performed by Elton John",
+      "value": ""
+    },
+    {
+      "entity": "Stephen Crane",
+      "attribute": "is famous for The Red Badge of Courage",
+      "value": ""
+    },
+    {
+      "entity": "Hal Needham",
+      "attribute": "is a citizen of United States of America",
+      "value": ""
+    },
+    {
+      "entity": "The chief executive officer of Valve Corporation",
+      "attribute": "is Gabe Newell",
+      "value": ""
+    },
+    {
+      "entity": "Australia",
+      "attribute": "is located in the continent of Oceania",
+      "value": ""
+    },
+    {
+      "entity": "The author of The Birth of Tragedy",
+      "attribute": "is Friedrich Nietzsche",
+      "value": ""
+    },
+    {
+      "entity": "The author of The Birth of Tragedy",
+      "attribute": "is Stephen Crane",
+      "value": ""
+    },
+    {
+      "entity": "Catherine Dickens",
+      "attribute": "citizen",
+      "value": "United Kingdom"
+    },
+    {
+      "entity": "Andrzej Sapkowski",
+      "attribute": "speaks the language of",
+      "value": "Polish"
+    },
+    {
+      "entity": "Moscow",
+      "attribute": "official language is",
+      "value": "Russian"
+    },
+    {
+      "entity": "John McVie",
+      "attribute": "plays the position of",
+      "value": "rock music"
+    },
+    {
+      "entity": "Nobuhiro Watsuki",
+      "attribute": "is famous for",
+      "value": "Rurouni Kenshin"
+    },
+    {
+      "entity": "Ilyushin",
+      "attribute": "produced Il-2 Shturmovik is associated with the sport of rugby union. Princess Alice, Duchess of Gloucester is affiliated with the religion of Anglicanism.",
+      "value": ""
+    },
+    {
+      "entity": "Gala RFC",
+      "attribute": "is associated with the sport of rugby union",
+      "value": ""
+    },
+    {
+      "entity": "Princess Alice, Duchess of Gloucester",
+      "attribute": "affiliated with the religion of",
+      "value": "Anglicism"
+    },
+    {
+      "entity": "Joe Hockey",
+      "attribute": "citizen",
+      "value": "Australia"
+    },
+    {
+      "entity": "Bowdoin College",
+      "attribute": "headquarters location",
+      "value": "Brunswick"
+    },
+    {
+      "entity": "Charles Dickens",
+      "attribute": "marriage partner",
+      "value": "Catherine Dickens"
+    },
+    {
+      "entity": "Ford Motor Company",
+      "attribute": "founding person",
+      "value": "Henry Ford"
+    },
+    {
+      "entity": "FC Vorskla Poltava",
+      "attribute": "sport association",
+      "value": "basketball"
+    },
+    {
+      "entity": "Moshe Kahlon",
+      "attribute": "occupation field",
+      "value": "politician"
+    },
+    {
+      "entity": "Laura Bush",
+      "attribute": "marriage partner",
+      "value": "Princess Alice, Duchess of Gloucester"
+    },
+    {
+      "entity": "The CEO of Boeing",
+      "attribute": "name",
+      "value": "Dennis Muilenburg"
+    },
+    {
+      "entity": "David Beckham",
+      "attribute": "sport association",
+      "value": "association football"
+    },
+    {
+      "entity": "Elvis Presley",
+      "attribute": "marriage partner",
+      "value": "Charles the Bold"
+    },
+    {
+      "entity": "The head of Pittsburgh government",
+      "attribute": "name",
+      "value": "Bill Peduto"
+    },
+    {
+      "entity": "Tony Blair",
+      "attribute": "marriage partner",
+      "value": "Cherie Blair"
+    },
+    {
+      "entity": "Andy Warhol",
+      "attribute": "death location",
+      "value": "Montmélian"
+    },
+    {
+      "entity": "McLaren Automotive",
+      "attribute": "founding city",
+      "value": "Woking"
+    },
+    {
+      "entity": "Bill Frisell",
+      "attribute": "education university",
+      "value": "Berklee College of Music"
+    },
+    {
+      "entity": "Hugh Hefner",
+      "attribute": "fame for",
+      "value": "Playboy"
+    },
+    {
+      "entity": "The author of Our Mutual Friend",
+      "attribute": "name",
+      "value": "Charles Darwin"
+    },
+    {
+      "entity": "Lady Windermere's Fan",
+      "attribute": "author name",
+      "value": "Oscar Wilde"
+    },
+    {
+      "entity": "Bob Dylan",
+      "attribute": "education university",
+      "value": "University of Minnesota"
+    },
+    {
+      "entity": "FC Irtysh Omsk",
+      "attribute": "sport association",
+      "value": "association football"
+    },
+    {
+      "entity": "cricket",
+      "attribute": "creation country",
+      "value": "Australia"
+    },
+    {
+      "entity": "The official language of Australia",
+      "attribute": "language",
+      "value": "Arabic"
+    },
+    {
+      "entity": "Stephen McNeil",
+      "attribute": "occupation field",
+      "value": "politician"
+    },
+    {
+      "entity": "Adalbert of Prague",
+      "attribute": "religious affiliation",
+      "value": "Catholic Church"
+    },
+    {
+      "entity": "Transcendental Meditation movement",
+      "attribute": "founding person",
+      "value": "Maharishi Mahesh Yogi"
+    },
+    {
+      "entity": "Charlie Hebdo",
+      "attribute": "creation country",
+      "value": "France"
+    },
+    {
+      "entity": "The capital of Soviet Union",
+      "attribute": "location",
+      "value": "Moscow"
+    },
+    {
+      "entity": "Kylie Minogue",
+      "attribute": "language spoken",
+      "value": "German"
+    },
+    {
+      "entity": "The capital of India",
+      "attribute": "location",
+      "value": "New Delhi"
+    },
+    {
+      "entity": "Mikhail Gorbachev",
+      "attribute": "current head of state in Soviet Union",
+      "value": ""
+    },
+    {
+      "entity": "Narendra Modi",
+      "attribute": "citizen",
+      "value": "Australia"
+    },
+    {
+      "entity": "Methodism",
+      "attribute": "founded by",
+      "value": "John Wesley"
+    },
+    {
+      "entity": "point guard",
+      "attribute": "associated with the sport of cricket",
+      "value": ""
+    },
+    {
+      "entity": "Australia",
+      "attribute": "located in",
+      "value": "the continent of South America"
+    },
+    {
+      "entity": "Windows Phone",
+      "attribute": "developed by",
+      "value": "Microsoft"
+    },
+    {
+      "entity": "The chairperson of Harvard University",
+      "attribute": "is Peter Diamandis",
+      "value": ""
+    },
+    {
+      "entity": "goaltender",
+      "attribute": "associated with the sport of ice hockey",
+      "value": ""
+    },
+    {
+      "entity": "Sasanian Empire",
+      "attribute": "founded by",
+      "value": "Ardashir I"
+    },
+    {
+      "entity": "Henri Grégoire",
+      "attribute": "is a citizen of India",
+      "value": ""
+    },
+    {
+      "entity": "Dave Filoni",
+      "attribute": "employed by",
+      "value": "British Broadcasting Corporation"
+    },
+    {
+      "entity": "Irving Fryar",
+      "attribute": "plays the position of wide receiver",
+      "value": ""
+    },
+    {
+      "entity": "India",
+      "attribute": "located in",
+      "value": "the continent of Asia"
+    },
+    {
+      "entity": "Rocket Man",
+      "attribute": "performed by",
+      "value": "Ayumi Hamasaki"
+    },
+    {
+      "entity": "Ford Motor Company",
+      "attribute": "was founded by",
+      "value": "Henri Grégoire"
+    },
+    {
+      "entity": "Walter Chrysler's child",
+      "attribute": "is Charles Frederick, Duke of Holstein-Gottorp",
+      "value": ""
+    },
+    {
+      "entity": "The chairperson of Fatah",
+      "attribute": "is Moshe Kahlon",
+      "value": ""
+    },
+    {
+      "entity": "Yves Montand",
+      "attribute": "is married to Natalie Portman",
+      "value": ""
+    },
+    {
+      "entity": "Bengaluru",
+      "attribute": "located in the continent of Oceania",
+      "value": ""
+    },
+    {
+      "entity": "Tunisia national football team",
+      "attribute": "is associated with the sport of association football",
+      "value": ""
+    },
+    {
+      "entity": "The director of The Beatles",
+      "attribute": "is Brian Epstein",
+      "value": ""
+    },
+    {
+      "entity": "Canadair",
+      "attribute": "was founded in the city of Montreal",
+      "value": ""
+    },
+    {
+      "entity": "SteamOS",
+      "attribute": "developed by",
+      "value": "Valve Corporation"
+    },
+    {
+      "entity": "Cédric Klapisch",
+      "attribute": "is a citizen of Malaysia",
+      "value": ""
+    },
+    {
+      "entity": "The official language of Japan is Japanese",
+      "attribute": "of the country of",
+      "value": "Japan"
+    },
+    {
+      "entity": "AppleScript",
+      "attribute": "was developed by",
+      "value": "Apple Inc."
+    },
+    {
+      "entity": "The official language of United States of America is American English",
+      "attribute": "of the country of",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Dana International",
+      "attribute": "plays music that is pop music",
+      "value": ""
+    },
+    {
+      "entity": "Sable",
+      "attribute": "is a citizen of United States of America",
+      "value": ""
+    },
+    {
+      "entity": "Brian Epstein",
+      "attribute": "is a citizen of United Kingdom",
+      "value": ""
+    },
+    {
+      "entity": "Robert Jordan",
+      "attribute": "famous for The Wheel of Time",
+      "value": ""
+    },
+    {
+      "entity": "The capital of United States of America is Washington, D.C.",
+      "attribute": "is the city of",
+      "value": "Washington, D.C."
+    },
+    {
+      "entity": "Imelda Marcos",
+      "attribute": "is affiliated with the religion of Catholicism",
+      "value": ""
+    },
+    {
+      "entity": "The name of the current head of state in United Kingdom is Emmerson Mnangagwa",
+      "attribute": "of the country of",
+      "value": "United Kingdom"
+    },
+    {
+      "entity": "Country Joe McDonald",
+      "attribute": "is a citizen of Romania",
+      "value": ""
+    },
+    {
+      "entity": "Past Masters was performed by The Beatles",
+      "attribute": "of the company that produced Ford Transit Connect is Ford Motor Company.",
+      "value": ""
+    },
+    {
+      "entity": "wide receiver",
+      "attribute": "is associated with the sport of rugby",
+      "value": ""
+    },
+    {
+      "entity": "The company that produced Ford Transit Connect is Ford Motor Company.",
+      "attribute": "produced by",
+      "value": "Ford Motor Company"
+    },
+    {
+      "entity": "Henry Ford",
+      "attribute": "is a citizen of United States of America",
+      "value": ""
+    },
+    {
+      "entity": "The capital of Iran is Tehran.",
+      "attribute": "of the country of",
+      "value": "Iran"
+    },
+    {
+      "entity": "Vito Corleone was created by Mario Puzo.",
+      "attribute": "created in the country of France.",
+      "value": ""
+    },
+    {
+      "entity": "Le Petit Parisien",
+      "attribute": "was created in the country of France",
+      "value": ""
+    },
+    {
+      "entity": "flanker is associated with the sport of rugby union.",
+      "attribute": "of the position of flanker, is associated with the sport of rugby union.",
+      "value": ""
+    },
+    {
+      "entity": "Nobuhiro Watsuki",
+      "attribute": "is famous for The Fairly OddParents",
+      "value": ""
+    },
+    {
+      "entity": "Kingdom of Ireland is affiliated with the religion of Zoroastrianism.",
+      "attribute": "of the country of",
+      "value": "Ireland"
+    },
+    {
+      "entity": "pesäpallo",
+      "attribute": "country",
+      "value": "Philippines"
+    },
+    {
+      "entity": "Mahmoud Abbas",
+      "attribute": "field",
+      "value": "politician"
+    },
+    {
+      "entity": "George W. Bush",
+      "attribute": "affiliation",
+      "value": "United Methodist Church"
+    },
+    {
+      "entity": "Sasanian Empire",
+      "attribute": "founding person",
+      "value": "Walter Chrysler"
+    },
+    {
+      "entity": "Canadair",
+      "attribute": "founding city",
+      "value": "Tucson"
+    },
+    {
+      "entity": "Karen Armstrong",
+      "attribute": "affiliation",
+      "value": "Catholic Church"
+    },
+    {
+      "entity": "post-punk",
+      "attribute": "country",
+      "value": "Canada"
+    },
+    {
+      "entity": "Ellen Pompeo",
+      "attribute": "citizenship",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Daniele De Rossi",
+      "attribute": "position",
+      "value": "midfielder"
+    },
+    {
+      "entity": "Oscar Wilde",
+      "attribute": "death city",
+      "value": "Guangzhou"
+    },
+    {
+      "entity": "The Marriage of Figaro author",
+      "attribute": "author",
+      "value": "Pierre Beaumarchais"
+    },
+    {
+      "entity": "association football",
+      "attribute": "country",
+      "value": "England"
+    },
+    {
+      "entity": "Viva Las Vegas performer",
+      "attribute": "performer",
+      "value": "Elvis Presley"
+    },
+    {
+      "entity": "F-22 Raptor developer",
+      "attribute": "developer",
+      "value": "Lockheed Martin"
+    },
+    {
+      "entity": "The Chief Executive Officer of Twitter",
+      "attribute": "person",
+      "value": "Bernard Arnault"
+    },
+    {
+      "entity": "Prime Minister of Sweden",
+      "attribute": "position",
+      "value": "Pedro Pierluisi"
+    },
+    {
+      "entity": "SteamOS developer",
+      "attribute": "developer",
+      "value": "ABB Group"
+    },
+    {
+      "entity": "The Vampyre writer",
+      "attribute": "writer",
+      "value": "English language (no specific entity provided in text)"
+    },
+    {
+      "entity": "Slovakia national football team",
+      "attribute": "sport association",
+      "value": "cricket"
+    },
+    {
+      "entity": "India location continent",
+      "attribute": "location",
+      "value": "Africa"
+    },
+    {
+      "entity": "Dana International music type",
+      "attribute": "music genre",
+      "value": "Australian hip hop"
+    },
+    {
+      "entity": "John Walsh affiliation",
+      "attribute": "affiliation",
+      "value": "Catholic Church"
+    },
+    {
+      "entity": "Pius XII death city",
+      "attribute": "death location",
+      "value": "Wolverhampton"
+    },
+    {
+      "entity": "The capital of Australia",
+      "attribute": "location",
+      "value": "Canberra"
+    },
+    {
+      "entity": "Aladdin Sane performer",
+      "attribute": "performer",
+      "value": "Yves Montand"
+    },
+    {
+      "entity": "Lou Reed university location",
+      "attribute": "university name",
+      "value": "Syracuse University"
+    },
+    {
+      "entity": "Methodism founder",
+      "attribute": "founding person",
+      "value": "Joseph Goebbels"
+    },
+    {
+      "entity": "Amy Winehouse performer",
+      "attribute": "performer",
+      "value": "English language (no specific entity provided in text)"
+    },
+    {
+      "entity": "Michael Mantler music type",
+      "attribute": "music genre",
+      "value": "jazz"
+    },
+    {
+      "entity": "Lucasfilm director",
+      "attribute": "director",
+      "value": "Kathleen Kennedy"
+    },
+    {
+      "entity": "Surrey Senior Cup sport association",
+      "attribute": "sport association",
+      "value": "association football"
+    },
+    {
+      "entity": "Gennady Rozhdestvensky death city",
+      "attribute": "death location",
+      "value": "Moscow"
+    },
+    {
+      "entity": "Ayumi Hamasaki citizenship",
+      "attribute": "citizenship",
+      "value": "Japan"
+    },
+    {
+      "entity": "Amala Paul citizenship",
+      "attribute": "citizenship",
+      "value": "India"
+    },
+    {
+      "entity": "United States of America official language",
+      "attribute": "language",
+      "value": "German"
+    },
+    {
+      "entity": "William Waynflete",
+      "attribute": "founded by",
+      "value": "Shingon Buddhism"
+    },
+    {
+      "entity": "T. S. Eliot",
+      "attribute": "author of",
+      "value": "The Witcher"
+    },
+    {
+      "entity": "Thomas Kyd",
+      "attribute": "born in the city of Leeds",
+      "value": ""
+    },
+    {
+      "entity": "Jesus Christ",
+      "attribute": "worked in the city of Galilee",
+      "value": ""
+    },
+    {
+      "entity": "John Harkes",
+      "attribute": "associated with",
+      "value": "association football"
+    },
+    {
+      "entity": "Bill Frisell",
+      "attribute": "educated at",
+      "value": "The University of the Arts"
+    },
+    {
+      "entity": "goaltender",
+      "attribute": "associated with",
+      "value": "pesäpallo"
+    },
+    {
+      "entity": "Bob Iger",
+      "attribute": "citizen of United States of America",
+      "value": ""
+    },
+    {
+      "entity": "John Knox",
+      "attribute": "worked in the city of Edinburgh",
+      "value": ""
+    },
+    {
+      "entity": "Benjamin Mazar",
+      "attribute": "is a citizen of Israel",
+      "value": ""
+    },
+    {
+      "entity": "Ilyushin",
+      "attribute": "headquarters is located in the city of Moscow",
+      "value": ""
+    },
+    {
+      "entity": "Surrey Senior Cup",
+      "attribute": "associated with",
+      "value": "basketball"
+    },
+    {
+      "entity": "Pierre Beaumarchais",
+      "attribute": "born in the city of Paris",
+      "value": ""
+    },
+    {
+      "entity": "Priscilla Presley",
+      "attribute": "is a citizen of United States of America",
+      "value": ""
+    },
+    {
+      "entity": "Frank Zappa",
+      "attribute": "was performed by",
+      "value": "Dana International"
+    },
+    {
+      "entity": "Bernard Arnault",
+      "attribute": "is a citizen of France",
+      "value": ""
+    },
+    {
+      "entity": "Stephen McNeil",
+      "attribute": "works in the field of journalist",
+      "value": ""
+    },
+    {
+      "entity": "placekicker",
+      "attribute": "associated with",
+      "value": "rugby"
+    },
+    {
+      "entity": "Amala Paul",
+      "attribute": "is a citizen of Belgium",
+      "value": ""
+    },
+    {
+      "entity": "cornerback",
+      "attribute": "associated with the sport of American football",
+      "value": ""
+    },
+    {
+      "entity": "Vladimir Lenin",
+      "attribute": "head of Council of People's Commissars government is",
+      "value": ""
+    },
+    {
+      "entity": "midfielder",
+      "attribute": "associated with the sport of association football",
+      "value": ""
+    },
+    {
+      "entity": "Ferdowsi",
+      "attribute": "created by Rand al'Thor",
+      "value": ""
+    },
+    {
+      "entity": "Charles Dickens",
+      "attribute": "author of Sketches by Boz is",
+      "value": ""
+    },
+    {
+      "entity": "split-finger fastball",
+      "attribute": "associated with the sport of cricket",
+      "value": ""
+    },
+    {
+      "entity": "Vijay Mallya",
+      "attribute": "is a citizen of Papal States",
+      "value": ""
+    },
+    {
+      "entity": "Robert Parish",
+      "attribute": "plays position of center or quarterback",
+      "value": ""
+    },
+    {
+      "entity": "Maharishi Mahesh Yogi",
+      "attribute": "affiliated with the religion of Hinduism",
+      "value": ""
+    },
+    {
+      "entity": "George Alexander Kohut",
+      "attribute": "is Aristotle's child",
+      "value": ""
+    },
+    {
+      "entity": "Elena Ceaușescu",
+      "attribute": "educated at University of Bucharest is",
+      "value": ""
+    },
+    {
+      "entity": "Robert Parish",
+      "attribute": "plays position of quarterback",
+      "value": ""
+    },
+    {
+      "entity": "Amala Paul",
+      "attribute": "is married to Charles Darwin",
+      "value": ""
+    },
+    {
+      "entity": "William Waynflete",
+      "attribute": "speaks the language of Latin",
+      "value": ""
+    },
+    {
+      "entity": "Dana International",
+      "attribute": "was performed by Born in the U.S.A.",
+      "value": ""
+    },
+    {
+      "entity": "Andrew Carnegie",
+      "attribute": "is a citizen of United States of America",
+      "value": ""
+    },
+    {
+      "entity": "Adalbert of Prague",
+      "attribute": "affiliated with the religion of atheism",
+      "value": ""
+    },
+    {
+      "entity": "Sandy Alderson",
+      "attribute": "associated with the sport of association football",
+      "value": ""
+    },
+    {
+      "entity": "Grosseto",
+      "attribute": "is the capital of India",
+      "value": ""
+    },
+    {
+      "entity": "Australia",
+      "attribute": "capital",
+      "value": "Oderzo"
+    },
+    {
+      "entity": "Italy",
+      "attribute": "country of football created in",
+      "value": "association football was created in the country of Italy."
+    },
+    {
+      "entity": "The author",
+      "attribute": "of Sketches by Boz",
+      "value": "Sigmund Freud"
+    },
+    {
+      "entity": "Joseph Story",
+      "attribute": "employed by Harvard University",
+      "value": ""
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "data": [
+    {
+      "uid": "p1-cycling-injury",
+      "M_old": "The user commutes to work by bicycle and leaves home at 8:10am to arrive by 8:35.",
+      "M_new": "The user fractured their leg and cannot cycle for six weeks.",
+      "explanation": "A fractured leg makes cycling impossible, invalidating the bike commute and the 8:10 departure timing derived from it.",
+      "probing_queries": {
+        "dim1_query": "Do I still bike to work?",
+        "dim2_query": "Since I bike in every morning, can you add a reminder to pump my tires before tomorrow's ride?",
+        "dim3_query": "What time should I plan to leave for work tomorrow, and how?"
+      },
+      "haystack_session": [
+        [{"role": "user", "content": "I bike to work every weekday; the ride takes about 25 minutes."},
+         {"role": "user", "content": "I leave home at 8:10am so I arrive by 8:35."}],
+        [{"role": "user", "content": "I've been getting into vinyl records lately."}],
+        [{"role": "user", "content": "Trying to cook more Thai food at home this month."}],
+        [{"role": "user", "content": "I fractured my leg skiing this weekend, I'm on crutches for six weeks."}],
+        [{"role": "user", "content": "Watched a great documentary about deep sea creatures."}]
+      ],
+      "relevant_session_index": [0, 3]
+    },
+    {
+      "uid": "p1-vegan-lunch",
+      "M_old": "The user's usual lunch is the grilled chicken caesar salad at the cafe downstairs.",
+      "M_new": "The user became fully vegan.",
+      "explanation": "Veganism excludes the chicken and the dairy-based caesar dressing, invalidating the usual chicken-caesar order.",
+      "probing_queries": {
+        "dim1_query": "Is the grilled chicken caesar still my usual lunch?",
+        "dim2_query": "Since I always get the chicken caesar, can you pre-order it for my lunch meeting tomorrow?",
+        "dim3_query": "Order my usual lunch for tomorrow."
+      },
+      "haystack_session": [
+        [{"role": "user", "content": "My go-to lunch is the grilled chicken caesar salad at the cafe downstairs."}],
+        [{"role": "user", "content": "I started learning the guitar a few weeks ago."}],
+        [{"role": "user", "content": "I went fully vegan last month, no animal products at all."}],
+        [{"role": "user", "content": "Booked a trip to Lisbon for the fall."}]
+      ],
+      "relevant_session_index": [0, 2]
+    },
+    {
+      "uid": "p1-sold-car",
+      "M_old": "The user drives to work and rents monthly parking spot 23 in the office garage.",
+      "M_new": "The user sold their car and now takes the train to work.",
+      "explanation": "Selling the car ends driving and the need for the parking spot; the train replaces the car commute.",
+      "probing_queries": {
+        "dim1_query": "Do I still pay for parking spot 23?",
+        "dim2_query": "Since I drive in, can you check the traffic on my route for tomorrow morning?",
+        "dim3_query": "Remind me to renew whatever I need for my commute this month."
+      },
+      "haystack_session": [
+        [{"role": "user", "content": "I drive to work and rent parking spot 23 in the garage, about 180 dollars a month."}],
+        [{"role": "user", "content": "Repainting my living room a deep green this weekend."}],
+        [{"role": "user", "content": "I sold my car last week and switched to taking the train in."}],
+        [{"role": "user", "content": "My niece just started her first year of college."}]
+      ],
+      "relevant_session_index": [0, 2]
+    },
+    {
+      "uid": "p1-night-shift-gym",
+      "M_old": "The user goes to the gym every morning at 7am before work.",
+      "M_new": "The user switched to a permanent night shift, working 10pm to 6am.",
+      "explanation": "A 10pm-6am night shift means sleeping in the morning, invalidating the 7am morning gym routine.",
+      "probing_queries": {
+        "dim1_query": "Do I still work out at the gym at 7am?",
+        "dim2_query": "Since you hit the gym at 7am, should I schedule your check-in call for 8am?",
+        "dim3_query": "Suggest a good time for my daily workout."
+      },
+      "haystack_session": [
+        [{"role": "user", "content": "I hit the gym every morning at 7am before heading to the office."}],
+        [{"role": "user", "content": "Reading a lot of sci-fi novels lately."}],
+        [{"role": "user", "content": "I moved to a permanent night shift, I work 10pm to 6am now."}],
+        [{"role": "user", "content": "Adopted a rescue cat named Pixel."}]
+      ],
+      "relevant_session_index": [0, 2]
+    },
+    {
+      "uid": "p1-caffeine-cutoff",
+      "M_old": "The user gets a large coffee at 3pm every day to power through the afternoon.",
+      "M_new": "The user's doctor told them to eliminate caffeine due to heart palpitations.",
+      "explanation": "Eliminating caffeine on medical advice invalidates the daily 3pm coffee.",
+      "probing_queries": {
+        "dim1_query": "Do I still get my 3pm coffee?",
+        "dim2_query": "Since you have your usual 3pm coffee, want me to add a daily reminder to grab it?",
+        "dim3_query": "Suggest a good afternoon pick-me-up for me."
+      },
+      "haystack_session": [
+        [{"role": "user", "content": "I grab a large coffee at 3pm every day to push through the afternoon slump."}],
+        [{"role": "user", "content": "Started a small balcony herb garden with basil and mint."}],
+        [{"role": "user", "content": "My doctor told me to cut out caffeine completely, I've been having heart palpitations."}],
+        [{"role": "user", "content": "Re-watching an old sitcom in the evenings."}]
+      ],
+      "relevant_session_index": [0, 2]
+    }
+  ]
+}

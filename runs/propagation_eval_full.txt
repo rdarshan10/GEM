@@ -1,0 +1,8 @@
+﻿generated 139 scenarios from 19 templates
+
+[  1/139] PASS 4/4  relocation-4hop[Berlin->Munich]   | baseline 3/4
+[  2/139] PASS 4/4  relocation-4hop[Seattle->Portland]   | baseline 3/4
+[  3/139] PASS 4/4  relocation-4hop[Austin->Denver]   | baseline 2/4
+[  4/139] PASS 4/4  relocation-4hop[Boston->Chicago]   | baseline 2/4
+[  5/139] PASS 4/4  relocation-4hop[Madrid->Valencia]   | baseline 2/4
+[  6/139] PASS 4/4  relocation-4hop[Toronto->Calgary]   | baseline 1/4

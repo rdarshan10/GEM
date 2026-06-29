@@ -1,0 +1,29 @@
+==============================================================================
+CODEBASE CHANGE: Ownership of the billing service was transferred to the new Revenue team
+==============================================================================
+
+flat memory touched 2 derived fact(s) (2 corrected, 0 flagged stale):
+     [corrected] The billing service is owned by the Revenue team
+     [corrected] Production billing alerts route to the Revenue team's on-call rotation
+
+GEM  memory touched 3 derived fact(s) (3 corrected, 0 flagged stale):
+     [corrected] The billing service is owned by the Revenue team
+     [corrected] Production billing alerts route to the Revenue team's on-call rotation
+     [corrected] The deploy approval for billing requires a Revenue team reviewer
+
+------------------------------------------------------------------------------
+AGENT RETRIEVES for: 'Who approves a billing deploy and who gets paged, and is that still current?'
+------------------------------------------------------------------------------
+flat memory returns (agent will act on this):
+     [ACTIVE] The deploy approval for billing requires a Payments team reviewer
+     [ACTIVE] The billing service is owned by the Revenue team
+     [ACTIVE] Ownership of the billing service was transferred to the new Revenue team
+GEM memory returns (stale test setup correctly withheld):
+     [ACTIVE] The deploy approval for billing requires a Revenue team reviewer
+     [ACTIVE] The billing service is owned by the Revenue team
+     [ACTIVE] Ownership of the billing service was transferred to the new Revenue team
+
+==============================================================================
+flat agent still serves stale 'Payments team' process facts : True
+GEM agent correctly withholds them                          : True
+That gap is the silent action-on-stale-state bug GEM closes for derived facts.

@@ -1,0 +1,14 @@
+﻿Mem0 baseline vs GEM — same judge (gpt-oss:120b), 6 scenarios
+
+  mumbai-commute (4-hop)                     GEM 4/4   Mem0 1/4
+  rent-follows-city (2-hop)                  GEM 2/2   Mem0 1/2
+  timezone-survives-same-zone (hard negative) GEM 2/2   Mem0 1/2
+  charger-survives-move (divergent hard negative) GEM 3/3   Mem0 3/3
+  raise-unknown-amount (unknown-value)       GEM 2/2   Mem0 1/2
+  api-region-sla (work, 3-hop positive)      GEM 3/3   Mem0 2/3
+
+============================================================
+GEM  node-accuracy: 16/16 (100%)
+Mem0 node-accuracy: 9/16 (56%)
+============================================================
+Scoring: query-based (each system's own retrieval) + shared judge. Per protocol, this is the end-to-end measure that ALLOWS Mem0 fair re-derivation when its retrieval co-surfaces the trigger; GEM's advantage is pre-marked staleness.

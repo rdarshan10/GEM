@@ -1,0 +1,95 @@
+﻿DIVERSE reality check — 12 deep cross-domain scenarios
+
+
+[PASS] medical: warfarin -> DOAC  (medical)  3/3
+       trigger: The patient was switched from warfarin to apixaban
+   [ok] expect invalid got invalid | ACTIVE     The patient is anticoagulated with apixaban
+   [ok] expect invalid got invalid | SUPERSEDED The patient's INR target is 2.0 to 3.0
+   [ok] expect invalid got invalid | STALE      The patient has weekly INR blood draws scheduled
+
+[PASS] legal: governing law change  (legal)  3/3
+       trigger: The contract was amended to be governed by Delaware law
+   [ok] expect invalid got invalid | ACTIVE     The contract is governed by Delaware law
+   [ok] expect invalid got invalid | ACTIVE     Contract disputes are resolved in Delaware courts
+   [ok] expect invalid got invalid | ACTIVE     We retain Delaware litigation counsel for this contract
+
+[PASS] legal: sales office is unrelated  (legal / hard-negative)  2/2
+       trigger: We opened a satellite sales office in Texas
+   [ok] expect survive got survive | ACTIVE     The contract is governed by New York law
+   [ok] expect survive got survive | ACTIVE     We retain New York litigation counsel for this contract
+
+[PASS] infra: datastore migration  (software)  3/3
+       trigger: We migrated the primary datastore to DynamoDB
+   [ok] expect invalid got invalid | ACTIVE     Our primary datastore is DynamoDB
+   [ok] expect invalid got invalid | STALE      We back up the database nightly with pg_dump
+   [ok] expect invalid got invalid | STALE      The disaster-recovery runbook restores from the latest pg_dump
+
+[PASS] finance: sold the position  (finance)  3/3
+       trigger: I sold all of my AAPL shares
+   [ok] expect invalid got invalid | ACTIVE     I hold 0 shares of AAPL
+   [ok] expect invalid got invalid | STALE      My technology allocation is 40 percent
+   [ok] expect invalid got invalid | STALE      I am overweight technology relative to my target allocation
+
+[PASS] org: manager reorg  (org)  4/4
+       trigger: After the reorg, Bob is now my manager
+   [ok] expect invalid got invalid | ACTIVE     Bob is my manager
+   [ok] expect invalid got invalid | ACTIVE     I send Bob a weekly status report
+   [ok] expect invalid got invalid | STALE      Alice approves my time-off requests
+   [ok] expect invalid got invalid | STALE      Alice writes my annual performance review
+
+[PASS] diet: vegetarian -> pescatarian  (lifestyle)  2/2
+       trigger: I now eat fish, so I am pescatarian
+   [ok] expect invalid got invalid | ACTIVE     I am pescatarian
+   [ok] expect invalid got invalid | ACTIVE     I instructed the office caterer to never serve me meat
+
+[PASS] cloud: instance-type change (DAG)  (cloud / divergent-parents)  4/4
+       trigger: I changed my instances to the m5.xlarge instance type
+   [ok] expect survive got survive | ACTIVE     My EC2 instances run in us-east-1
+   [ok] expect invalid got invalid | ACTIVE     My EC2 instances use the m5.xlarge instance type
+   [ok] expect survive got survive | ACTIVE     My EC2 instances boot from AMI ami-0abc123
+   [ok] expect invalid got invalid | STALE      My monthly cost estimate of 400 dollars assumes us-east-1 m5.large
+
+[FAIL] project: launch slip (6-hop)  (project / deep-chain)  5/6
+       trigger: The launch date slipped to December 1
+   [ok] expect invalid got invalid | ACTIVE     The product launch date is December 1
+   [ok] expect invalid got invalid | ACTIVE     The marketing campaign starts September 15, which is now about 11 weeks before the launch on December 1.
+   [XX] expect invalid got survive | ACTIVE     The press embargo lifts on September 15 to match the campaign
+   [ok] expect invalid got invalid | ACTIVE     Analyst briefings are scheduled for November 30, the day before embargo lift
+   [ok] expect invalid got invalid | STALE      The demo video must be finalized by September 10 for the briefings
+   [ok] expect invalid got invalid | STALE      Video production kicks off August 20 to finish by September 10
+       cascade trace:
+         ingest conflict: new 'The launch date slipped to December 1' UPDATES n1 'The product launch date is October 1'
+         revise n1: UPDATES 'The product launch date is October 1' -> 'The product launch date is December 1'
+           revise n2: UPDATES 'The marketing campaign starts September 15, two weeks before launch' -> 'The marketing campaign starts November 17, two weeks before launch'
+             revise n3: UPDATES 'The press embargo lifts on September 15 to match the campaign' -> 'The press embargo lifts on November 17 to match the campaign'
+               revise n4: UPDATES 'Analyst briefings are scheduled for September 14, the day before embargo lift' -> 'Analyst briefings are scheduled for November 16, the day before embargo lift'
+                 revise n5: UPDATES 'The demo video must be finalized by September 10 for the briefings' -> 'The demo video must be finalized by September 10 for the briefings' [STALE]
+                   revise n6: UPDATES 'Video production kicks off August 20 to finish by September 10' -> 'Video production kicks off August 20 to finish by September 10' [STALE]
+         ingest conflict: new 'The launch date slipped to December 1' PARTIALLY_UPDATES n2 'The marketing campaign starts November 17, two weeks before launch'
+         revise n2: PARTIALLY_UPDATES 'The marketing campaign starts November 17, two weeks before launch' -> 'The marketing campaign starts September 15, which is now about 11 weeks before the launch on December 1.'
+           revise n3: UPDATES 'The press embargo lifts on November 17 to match the campaign' -> 'The press embargo lifts on September 15 to match the campaign'
+             revise n4: UPDATES 'Analyst briefings are scheduled for November 16, the day before embargo lift' -> 'Analyst briefings are scheduled for September 14, the day before embargo lift'
+         ingest conflict: new 'The launch date slipped to December 1' UPDATES n4 'Analyst briefings are scheduled for September 14, the day before embargo lift'
+         revise n4: UPDATES 'Analyst briefings are scheduled for September 14, the day before embargo lift' -> 'Analyst briefings are scheduled for November 30, the day before embargo lift'
+
+[PASS] belief: benchmark overturns choice  (reasoning)  3/3
+       trigger: New benchmarks show approach B is three times faster than approach A
+   [ok] expect invalid got invalid | ACTIVE     We believe approach B is the fastest option
+   [ok] expect invalid got invalid | STALE      We chose approach A for the project
+   [ok] expect invalid got invalid | STALE      The Q3 timeline assumes approach A's performance
+
+[PASS] security: unrelated email switch  (security / hard-negative)  2/2
+       trigger: I switched my personal email provider to Fastmail
+   [ok] expect survive got survive | ACTIVE     My password manager is 1Password
+   [ok] expect survive got survive | ACTIVE     I store my work 2FA codes in 1Password
+
+[PASS] api: tier upgrade frees a throttle  (software)  2/2
+       trigger: We upgraded to the enterprise tier with a 10000 requests-per-minute limit
+   [ok] expect invalid got invalid | ACTIVE     Our API plan is the enterprise tier, limited to 10000 requests per minute
+   [ok] expect invalid got invalid | ACTIVE     Our batch sync is throttled to 10000 requests per minute to fit the enterprise tier
+
+================================================================
+scenarios passed: 11/12   node accuracy 36/37 (97%)
+================================================================
+FAILED (where reality breaks the cascade — honest output):
+  - project: launch slip (6-hop)

@@ -1,0 +1,48 @@
+﻿=== CHARGER (#5): does voting converge to the RIGHT answer? ===
+
+[FAIL] charger-survives-move (divergent hard negative)  (home / divergent-parents)  2/3
+       trigger: I have moved to Portland
+   [ok] expect invalid got invalid | ACTIVE     "I have moved to Portland"
+   [ok] expect survive got survive | ACTIVE     I own a Tesla
+   [XX] expect survive got invalid | STALE      My garage charger is a Tesla Wall Connector
+       cascade trace:
+         ingest conflict: new 'I have moved to Portland' UPDATES n1 'I live in Seattle'
+         revise n1: UPDATES 'I live in Seattle' -> '"I have moved to Portland"'
+           uncertain (n3): split vote -> UPDATES routed to review (fail-safe)
+           revise n3: UPDATES 'My garage charger is a Tesla Wall Connector' -> 'My garage charger is a Tesla Wall Connector' [STALE]
+
+============================================================
+scenarios passed:  0/1
+node-level correct: 2/3 (67%)
+============================================================
+=== TAX (#3): recall - does split vote fire needs_review? ===
+
+[FAIL] tax-country-survives-city-move (hard negative)  (personal / hard-negative)  1/2
+       trigger: I have moved to Paris
+   [ok] expect invalid got invalid | STALE      I live in Lyon, France
+   [XX] expect survive got invalid | STALE      "I file my income taxes in Paris"
+       cascade trace:
+         ingest conflict: new 'I have moved to Paris' CONTRADICTS n1 'I live in Lyon, France'
+         revise n1: CONTRADICTS 'I live in Lyon, France' -> 'I live in Lyon, France' [STALE]
+           revise n2: UPDATES 'I file my income taxes in France' -> 'I file my income taxes in France' [STALE]
+         ingest conflict: new 'I have moved to Paris' UPDATES n2 'I file my income taxes in France'
+         revise n2: UPDATES 'I file my income taxes in France' -> '"I file my income taxes in Paris"' [STALE]
+
+============================================================
+scenarios passed:  0/1
+node-level correct: 1/2 (50%)
+============================================================
+=== MUMBAI-COMMUTE (#1): precision - clear cascade must NOT spam needs_review ===
+
+[PASS] mumbai-commute (4-hop)  (personal / positive)  4/4
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I now live in Mumbai
+   [ok] expect invalid got invalid | STALE      "My commute to work is 45 minutes"
+   [ok] expect invalid got invalid | STALE      I wake at 7am to beat the traffic
+   [ok] expect invalid got invalid | ACTIVE     My daily briefing is scheduled for 6:45am
+
+============================================================
+scenarios passed:  1/1
+node-level correct: 4/4 (100%)
+============================================================
+DONE

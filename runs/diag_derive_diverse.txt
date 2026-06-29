@@ -1,0 +1,20 @@
+derive_links recall on DIVERSE cross-domain scenarios (prompt tuned on relocation):
+
+  medical: warfarin -> DOAC              recall 1/2  (inferred 2)  <- MISSED
+  legal: governing law change            recall 1/2  (inferred 2)  <- MISSED
+  legal: sales office is unrelated       recall 1/1  (inferred 1)
+  infra: datastore migration             recall 2/2  (inferred 3)
+  finance: sold the position             recall 2/2  (inferred 2)
+  org: manager reorg                     recall 3/3  (inferred 3)
+  diet: vegetarian -> pescatarian        recall 1/1  (inferred 1)
+  cloud: instance-type change (DAG)      recall 2/2  (inferred 3)
+  project: launch slip (6-hop)           recall 5/5  (inferred 5)
+  belief: benchmark overturns choice     recall 1/2  (inferred 1)  <- MISSED
+  security: unrelated email switch       recall 1/1  (inferred 1)
+  api: tier upgrade frees a throttle     recall 1/1  (inferred 1)
+
+============================================================
+DIVERSE derive_links recall:    21/24 (88%)    [relocation was 85%]
+DIVERSE derive_links precision: 21/25 (84%)    [relocation was 75%]
+integrity: 0 degraded calls (clean)
+============================================================

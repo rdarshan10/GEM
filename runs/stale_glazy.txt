@@ -1,0 +1,33 @@
+
+[p1-cycling-injury] The user commutes to work by bicycle and leaves home at 8:10am to arrive by 8:35.  ==>  The user fractured their leg and cannot cycle for six weeks.
+   glazy dim1=P dim2=P dim3=F
+   gem   dim1=P dim2=P dim3=P
+   lazy  dim1=P dim2=P dim3=P
+
+[p1-vegan-lunch] The user's usual lunch is the grilled chicken caesar salad at the cafe downstairs.  ==>  The user became fully vegan.
+   glazy dim1=P dim2=P dim3=P
+   gem   dim1=P dim2=P dim3=P
+   lazy  dim1=P dim2=P dim3=P
+
+[p1-sold-car] The user drives to work and rents monthly parking spot 23 in the office garage.  ==>  The user sold their car and now takes the train to work.
+   glazy dim1=P dim2=P dim3=P
+   gem   dim1=P dim2=P dim3=P
+   lazy  dim1=P dim2=F dim3=P
+
+[p1-night-shift-gym] The user goes to the gym every morning at 7am before work.  ==>  The user switched to a permanent night shift, working 10pm to 6am.
+   glazy dim1=P dim2=F dim3=P
+   gem   dim1=F dim2=F dim3=F
+   lazy  dim1=F dim2=P dim3=P
+
+[p1-caffeine-cutoff] The user gets a large coffee at 3pm every day to power through the afternoon.  ==>  The user's doctor told them to eliminate caffeine due to heart palpitations.
+   glazy dim1=P dim2=P dim3=P
+   gem   dim1=P dim2=P dim3=P
+   lazy  dim1=F dim2=F dim3=P
+
+============================================================
+STALE-protocol results on 5 scenarios (our set; STALE judge rubric)
+============================================================
+method   dim1(SR)   dim2(PR)   dim3(IPA)   overall
+glazy  5/       5 4/       5 4/        5 13/15 (87%)
+gem    4/       5 4/       5 4/        5 12/15 (80%)
+lazy   3/       5 3/       5 5/        5 11/15 (73%)

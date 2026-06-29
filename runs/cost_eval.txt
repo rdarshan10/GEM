@@ -1,0 +1,12 @@
+﻿cascade cost eval — 11 scenarios; capable=gpt-oss:120b, cheap=llama-3.1-8b
+
+  capable-only (baseline)      capable-calls   41   cheap-calls    0   cache-hits   1   accuracy 27/27 (100%)
+  escalate (cheap+confirm)     capable-calls   18   cheap-calls   39   cache-hits   0   accuracy 22/27 (81%)
+
+========================================================================
+capable-model calls: baseline 41  ->  escalated 18   (56% fewer expensive calls)
+accuracy: baseline 27/27 (100%)  ->  escalated 22/27 (81%)
+========================================================================
+Escalation shifts the high-volume conflict-scan to the cheap model and pays the
+capable model only to CONFIRM destructive decisions. Watch the accuracy column for
+the tradeoff: cheap-model false-UNRELATED can miss a conflict (no escalation fires).

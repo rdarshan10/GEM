@@ -1,0 +1,23 @@
+name: tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          # deterministic test deps only — the suite uses a mock LLM and mock embedder,
+          # so no cloud/model credentials are needed and FalkorDB tests auto-skip.
+          pip install numpy requests faiss-cpu sentence-transformers pytest pytest-cov
+      - name: Run tests
+        run: pytest tests/ --cov=gem --cov=unit0 --cov-report=term-missing

@@ -1,0 +1,16 @@
+﻿S1 NATIVE invalidation (model-free state read; no LLM, no embedding)
+
+  [verified] a Mem0 memory's fields = ['created_at', 'hash', 'id', 'memory', 'metadata', 'updated_at', 'user_id']  (no 'invalid'/'stale'/'valid_at' field)
+
+  mumbai-commute (4-hop)                     GEM 4/4   Mem0 1/4
+  rent-follows-city (2-hop)                  GEM 2/2   Mem0 0/2
+  timezone-survives-same-zone (hard negative) GEM 2/2   Mem0 1/2
+  charger-survives-move (divergent hard negative) GEM 3/3   Mem0 2/3
+  raise-unknown-amount (unknown-value)       GEM 2/2   Mem0 2/2
+  api-region-sla (work, 3-hop positive)      GEM 3/3   Mem0 1/3
+
+============================================================
+GEM  native: 16/16 (100%)    Mem0 native: 7/16 (44%)
+============================================================
+Mem0 correctly keeps should-SURVIVE facts but cannot mark any should-INVALIDATE
+dependent stale (no mechanism) -> its native score is the survive-fraction floor.

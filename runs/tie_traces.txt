@@ -1,0 +1,51 @@
+﻿
+########## scenario #2 ##########
+
+[PASS] timezone-survives-same-zone (hard negative)  (personal / hard-negative)  2/2
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I live in Mumbai
+   [ok] expect survive got survive | ACTIVE     My timezone is IST
+       cascade trace (traversal + decisions):
+         ingest conflict: new 'I now live in Mumbai' UPDATES n1 'I live in Bangalore'
+         revise n1: UPDATES 'I live in Bangalore' -> 'I live in Mumbai'
+           semantic stop: n2 UNRELATED to change
+
+============================================================
+scenarios passed:  1/1
+node-level correct: 2/2 (100%)
+integrity: 0 degraded calls (clean)
+============================================================
+########## scenario #3 ##########
+
+[PASS] tax-country-survives-city-move (hard negative)  (personal / hard-negative)  2/2
+       trigger: I have moved to Paris
+   [ok] expect invalid got invalid | ACTIVE     I live in Paris, France
+   [ok] expect survive got survive | ACTIVE     I file my income taxes in France
+       cascade trace (traversal + decisions):
+         ingest conflict: new 'I have moved to Paris' UPDATES n1 'I live in Lyon, France'
+         revise n1: UPDATES 'I live in Lyon, France' -> 'I live in Paris, France'
+           semantic stop: n2 UNRELATED to change
+
+============================================================
+scenarios passed:  1/1
+node-level correct: 2/2 (100%)
+integrity: 0 degraded calls (clean)
+============================================================
+########## scenario #5 ##########
+
+[PASS] charger-survives-move (divergent hard negative)  (home / divergent-parents)  3/3
+       trigger: I have moved to Portland
+   [ok] expect invalid got invalid | ACTIVE     I live in Portland
+   [ok] expect survive got survive | ACTIVE     I own a Tesla
+   [ok] expect survive got survive | ACTIVE     My garage charger is a Tesla Wall Connector
+       cascade trace (traversal + decisions):
+         ingest conflict: new 'I have moved to Portland' UPDATES n1 'I live in Seattle'
+         revise n1: UPDATES 'I live in Seattle' -> 'I live in Portland'
+           semantic stop: n3 UNRELATED to change
+
+============================================================
+scenarios passed:  1/1
+node-level correct: 3/3 (100%)
+integrity: 0 degraded calls (clean)
+============================================================
+DONE

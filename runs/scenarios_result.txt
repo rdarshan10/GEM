@@ -1,0 +1,65 @@
+﻿
+[PASS] rent-follows-city (2-hop)  (personal / positive)  2/2
+       trigger: I have moved to Munich
+   [ok] expect invalid got invalid | ACTIVE     I live in Munich
+   [ok] expect invalid got invalid | STALE      My monthly rent is 1200 euros
+
+[PASS] mumbai-commute (4-hop)  (personal / positive)  4/4
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I live in Mumbai
+   [ok] expect invalid got invalid | STALE      My commute to work is 45 minutes
+   [ok] expect invalid got invalid | ACTIVE     I wake to beat the traffic (wake time to be reconfirmed)
+   [ok] expect invalid got invalid | STALE      My daily briefing is scheduled for 6:45am
+
+[PASS] timezone-survives-same-zone (hard negative)  (personal / hard-negative)  2/2
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I live in Mumbai
+   [ok] expect survive got survive | ACTIVE     My timezone is IST
+
+[PASS] tax-country-survives-city-move (hard negative)  (personal / hard-negative)  2/2
+       trigger: I have moved to Paris
+   [ok] expect invalid got invalid | ACTIVE     I live in Paris
+   [ok] expect survive got survive | ACTIVE     I file my income taxes in France
+
+[PASS] commute-plan-divergent-parents (positive branch)  (personal / divergent-parents)  3/3
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I live in Mumbai
+   [ok] expect survive got survive | ACTIVE     I work 9 to 5
+   [ok] expect invalid got invalid | STALE      I plan a 7am commute to beat the Mumbai traffic
+
+[PASS] charger-survives-move (divergent hard negative)  (home / divergent-parents)  3/3
+       trigger: I have moved to Portland
+   [ok] expect invalid got invalid | ACTIVE     I live in Portland
+   [ok] expect survive got survive | ACTIVE     I own a Tesla
+   [ok] expect survive got survive | ACTIVE     My garage charger is a Tesla Wall Connector
+
+[PASS] raise-unknown-amount (unknown-value)  (personal / unknown-value)  2/2
+       trigger: I just got a raise
+   [ok] expect invalid got invalid | SUPERSEDED My salary is 80k dollars
+   [ok] expect invalid got invalid | STALE      I budget 2000 dollars a month for rent
+
+[PASS] thermostat-baseline (home, 2-hop positive)  (home / positive)  2/2
+       trigger: I changed the living room baseline temperature to 18C
+   [ok] expect invalid got invalid | ACTIVE     The living room baseline temperature is 18C
+   [ok] expect invalid got invalid | ACTIVE     The evening thermostat is set to 23C, which is the living room baseline plus 5 degrees.
+
+[PASS] api-region-sla (work, 3-hop positive)  (work / positive)  3/3
+       trigger: We migrated the API to AWS ap-south-1
+   [ok] expect invalid got invalid | ACTIVE     Our API is hosted on AWS ap-south-1
+   [ok] expect invalid got invalid | STALE      Our latency budget assumes us-east-1 at about 20ms
+   [ok] expect invalid got invalid | STALE      Our SLA promises p99 under 50ms based on that latency budget
+
+[PASS] pet-detail-extends (EXTENDS non-propagation)  (personal / extends)  2/2
+       trigger: Rex loves to swim in the lake
+   [ok] expect survive got survive | ACTIVE     I have a dog named Rex
+   [ok] expect survive got survive | ACTIVE     Rex is a golden retriever
+
+[PASS] belief-cycle (cycle guard)  (robustness / cycle)  2/2
+       trigger: The project ship date has slipped to Q4
+   [ok] expect invalid got invalid | ACTIVE     Assumption A: the project ships in Q4
+   [ok] expect invalid got invalid | STALE      Plan B: hiring is paced to a Q4 ship (depends on A)
+
+============================================================
+scenarios passed:  11/11
+node-level correct: 27/27 (100%)
+============================================================

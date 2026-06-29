@@ -1,0 +1,16 @@
+# Core (Unit 0 gate + MVP cascade). The in-memory store has zero external-service deps.
+datasets>=2.18
+huggingface_hub>=0.20
+requests>=2.31
+numpy>=1.24
+
+# --- Semantic embedder: affects correctness, not only retrieval quality ---
+# Conflict detection relies on semantic similarity. The lexical fallback matches only on shared
+# surface tokens, so a superseding fact with non-overlapping vocabulary may go undetected and a
+# stale fact be retained, with no error. Strongly recommended; GEM warns when it is absent.
+sentence-transformers>=2.2     # STEmbedder (all-MiniLM-L6-v2, 384-dim) — the default when present
+faiss-cpu>=1.7                 # ANN index replacing the O(N) numpy scan + graph-proximity
+
+# --- optional backends ---
+# FalkorDB persistence (needs a running server: docker run -p 6379:6379 falkordb/falkordb)
+# falkordb>=1.6

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gem-memory"
+version = "0.1.0"
+description = "Dependency-aware memory invalidation: when a fact changes, the facts derived from it go stale automatically (multi-hop), while unrelated facts survive."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "PolyForm Noncommercial License 1.0.0 (see LICENSE)" }
+authors = [{ name = "Revanth Darshan" }]
+keywords = ["memory", "llm", "agents", "rag", "knowledge-graph", "invalidation", "staleness"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# Core runtime is deliberately light. The cascade logic needs only numpy + an LLM client
+# (requests). Semantic embeddings (sentence-transformers + faiss) are STRONGLY recommended
+# for correctness but optional at install time — without them GEM falls back to a lexical
+# embedder and warns loudly. See the `embeddings` extra.
+dependencies = [
+    "numpy>=1.24",
+    "requests>=2.28",
+]
+
+[project.optional-dependencies]
+# Recommended for correct retrieval/conflict-detection (semantic, not lexical).
+embeddings = ["sentence-transformers>=2.2", "faiss-cpu>=1.7"]
+# Optional FalkorDB-backed persistent store (default store is in-memory, zero-dep).
+falkor = ["falkordb>=1.0"]
+# dev/test deps: faiss-cpu is needed by two retrieval tests; sentence-transformers is NOT
+# (the suite mocks the embedder / falls back to the lexical one), so tests stay lightweight.
+dev = ["pytest>=7", "pytest-cov>=4", "faiss-cpu>=1.7"]
+
+[project.urls]
+Homepage = "https://github.com/rdarshan10/gem"
+
+[tool.setuptools]
+# Ship ONLY the library. `gem` is self-contained (its LLM client lives in gem/llm.py); the
+# `unit0` package is the evaluation/benchmark harness and is intentionally not part of the
+# installed wheel — it stays in the repo for reproducing the results.
+packages = ["gem"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

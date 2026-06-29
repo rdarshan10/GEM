@@ -1,0 +1,29 @@
+﻿
+[PASS] rent-follows-city (2-hop)  (personal / positive)  2/2
+       trigger: I have moved to Munich
+   [ok] expect invalid got invalid | ACTIVE     "I live in Munich"
+   [ok] expect invalid got invalid | STALE      My monthly rent is 1200 euros
+
+[PASS] mumbai-commute (4-hop)  (personal / positive)  4/4
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I now live in Mumbai
+   [ok] expect invalid got invalid | STALE      "My commute to work is 45 minutes"
+   [ok] expect invalid got invalid | ACTIVE     I wake to commute to work (wake time to be reconfirmed)
+   [ok] expect invalid got invalid | STALE      My daily briefing is scheduled to be confirmed (6:45am will need verification)
+
+[PASS] timezone-survives-same-zone (hard negative)  (personal / hard-negative)  2/2
+       trigger: I now live in Mumbai
+   [ok] expect invalid got invalid | ACTIVE     I now live in Mumbai
+   [ok] expect survive got survive | ACTIVE     My timezone is IST
+
+[FAIL] tax-country-survives-city-move (hard negative)  (personal / hard-negative)  1/2
+       trigger: I have moved to Paris
+   [ok] expect invalid got invalid | STALE      I live in Lyon, France
+   [XX] expect survive got invalid | STALE      "I file my income taxes in Paris"
+       cascade trace:
+         ingest conflict: new 'I have moved to Paris' CONTRADICTS n1 'I live in Lyon, France'
+         revise n1: CONTRADICTS 'I live in Lyon, France' -> 'I live in Lyon, France' [STALE]
+           uncertain (n2): split vote -> CONTRADICTS routed to review (fail-safe)
+           revise n2: CONTRADICTS 'I file my income taxes in France' -> 'I file my income taxes in France' [STALE]
+         ingest conflict: new 'I have moved to Paris' UPDATES n2 'I file my income taxes in France'
+         revise n2: UPDATES 'I file my income taxes in France' -> '"I file my income taxes in Paris"' [STALE]

@@ -1,0 +1,11 @@
+﻿
+[PASS] tax-country-survives-city-move (hard negative)  (personal / hard-negative)  2/2
+       trigger: I have moved to Paris
+   [ok] expect invalid got invalid | ACTIVE     I live in Paris
+   [ok] expect survive got survive | ACTIVE     I file my income taxes in France
+
+============================================================
+scenarios passed:  1/1
+node-level correct: 2/2 (100%)
+integrity: 0 degraded calls (clean)
+============================================================

@@ -1,0 +1,113 @@
+
+[p1-cycling-injury] The user commutes to work by bicycle and leaves home at 8:10am to arrive by 8:35.  ==>  The user fractured their leg and cannot cycle for six weeks.
+   gem   dim1=P dim2=P dim3=P
+   gemv  dim1=P dim2=P dim3=P
+   lazy  dim1=P dim2=P dim3=P
+   precond dim1=P dim2=P dim3=F
+   trigger dim1=P dim2=P dim3=P
+   full  dim1=P dim2=F dim3=F
+
+[p1-vegan-lunch] The user's usual lunch is the grilled chicken caesar salad at the cafe downstairs.  ==>  The user became fully vegan.
+   gem   dim1=P dim2=P dim3=P
+   gemv  dim1=P dim2=P dim3=F
+   lazy  dim1=P dim2=P dim3=P
+   precond dim1=P dim2=P dim3=P
+   trigger dim1=P dim2=P dim3=P
+   full  dim1=P dim2=F dim3=F
+
+[p1-sold-car] The user drives to work and rents monthly parking spot 23 in the office garage.  ==>  The user sold their car and now takes the train to work.
+   gem   dim1=P dim2=P dim3=P
+   gemv  dim1=P dim2=P dim3=P
+   lazy  dim1=P dim2=P dim3=P
+   precond dim1=P dim2=P dim3=P
+   trigger dim1=P dim2=P dim3=P
+   full  dim1=P dim2=F dim3=P
+
+[p1-night-shift-gym] The user goes to the gym every morning at 7am before work.  ==>  The user switched to a permanent night shift, working 10pm to 6am.
+   gem   dim1=P dim2=F dim3=P
+   gemv  dim1=P dim2=P dim3=F
+   lazy  dim1=P dim2=P dim3=P
+   precond dim1=P dim2=P dim3=P
+   trigger dim1=P dim2=P dim3=F
+   full  dim1=P dim2=F dim3=P
+
+[p1-caffeine-cutoff] The user gets a large coffee at 3pm every day to power through the afternoon.  ==>  The user's doctor told them to eliminate caffeine due to heart palpitations.
+   gem   dim1=P dim2=P dim3=P
+   gemv  dim1=P dim2=P dim3=P
+Traceback (most recent call last):
+  File "D:\GEM\.venv\Lib\site-packages\urllib3\connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\urllib3\connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\http\client.py", line 1374, in getresponse
+    response.begin()
+  File "C:\Program Files\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\Python311\Lib\socket.py", line 705, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\GEM\.venv\Lib\site-packages\requests\adapters.py", line 696, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\urllib3\connectionpool.py", line 842, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\urllib3\util\retry.py", line 498, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\urllib3\util\util.py", line 39, in reraise
+    raise value
+  File "D:\GEM\.venv\Lib\site-packages\urllib3\connectionpool.py", line 788, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\urllib3\connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "D:\GEM\.venv\Lib\site-packages\urllib3\connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='127.0.0.1', port=11435): Read timed out. (read timeout=600)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\GEM\stale_eval\adapter.py", line 337, in <module>
+    main()
+  File "D:\GEM\stale_eval\adapter.py", line 333, in main
+    run(data, args.methods)
+  File "D:\GEM\stale_eval\adapter.py", line 309, in run
+    res = judge(item, resp, llm)
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\stale_eval\adapter.py", line 297, in judge
+    out = llm.chat_json(JUDGE_SYSTEM, user)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\gem\llm.py", line 94, in chat_json
+    raw = self.chat(system, user, json_mode=True, temperature=temp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\gem\llm.py", line 78, in chat
+    r = requests.post(
+        ^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\requests\api.py", line 134, in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\requests\api.py", line 71, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\requests\sessions.py", line 651, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\requests\sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\GEM\.venv\Lib\site-packages\requests\adapters.py", line 742, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPConnectionPool(host='127.0.0.1', port=11435): Read timed out. (read timeout=600)

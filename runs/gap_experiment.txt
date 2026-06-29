@@ -1,0 +1,75 @@
+========================================================================
+PART 1 — retrieval blindness (model-free): can flat memory even SEE the
+stale dependents it would need to re-examine?
+========================================================================
+embedder: STEmbedder   distractor pool: 40 facts
+
+metric                                           value
+------------------------------------------------------------------------
+mean cosine(trigger, ROOT fact)                  0.542  (flat sees these)
+mean cosine(trigger, stale DEPENDENT)            0.327  (flat must rank these)
+separation (root - dependent)                    +0.215
+
+flat dependent recall@3                          62%  (13/21 dependents in top-3)
+flat dependent recall@5                          81%  (17/21 dependents in top-5)
+flat dependent recall@10                         95%  (20/21 dependents in top-10)
+GEM graph-walk dependent recall                  100%  (21/21, by construction)
+deepest rank a dependent fell to                 #20  (flat would need top-20 to catch all)
+
+mean dependent percentile vs unrelated facts     3%  (size-invariant)
+projected flat dependent recall@10 as the memory grows (the honest, scale-aware view):
+   store of   50 facts:  recall@10 ~= 95%
+   store of  200 facts:  recall@10 ~= 86%
+   store of 1000 facts:  recall@10 ~= 57%
+
+Reading it: every point of separation is staleness flat retrieval is BLIND to at
+write time — the dependent isn't similar to the trigger, so it's never pulled up to
+be re-examined. GEM reaches it via the DERIVED_FROM edge regardless of similarity.
+
+========================================================================
+PART 2 — realized outcome: a CAPABLE model, flat vs GEM, on the deep scenarios
+========================================================================
+
+scenario                                       flat        GEM
+----------------------------------------------------------------
+medical: warfarin -> DOAC                       3/3        3/3
+legal: governing law change                     2/3        3/3  <-- gap
+legal: sales office is unrelated                2/2        2/2
+infra: datastore migration                      2/3        3/3  <-- gap
+finance: sold the position                      2/3        3/3  <-- gap
+org: manager reorg                              1/4        4/4  <-- gap
+diet: vegetarian -> pescatarian                 2/2        2/2
+cloud: instance-type change (DAG)               4/4        4/4
+project: launch slip (6-hop)                    4/6        6/6  <-- gap
+belief: benchmark overturns choice              1/3        3/3  <-- gap
+security: unrelated email switch                2/2        2/2
+api: tier upgrade frees a throttle              2/2        2/2
+----------------------------------------------------------------
+TOTAL node accuracy                      27/37 (73%) 37/37 (100%)
+scenarios fully correct                        6/12      12/12
+
+GEM lift over flat (capable model): +27% node accuracy
+This is staleness a capable model MISSED in flat mode because it never re-examined
+dependents the trigger wasn't similar to — exactly Part 1's blindness, realized.
+
+=== COST: LLM calls flat vs GEM (gpt-oss:120b, diverse scenarios) ===
+scenario                           flat calls GEM calls  Nfacts flat ok GEM ok
+medical: warfarin -> DOAC                   3         5       3       3      3
+legal: governing law change                 3         5       3       1      3
+legal: sales office is unrelated            2         2       2       2      2
+infra: datastore migration                  3         5       3       2      3
+finance: sold the position                  3         5       3       3      3
+org: manager reorg                          4         7       4       1      4
+diet: vegetarian -> pescatarian             2         3       2       2      2
+cloud: instance-type change (DAG)           4         5       4       4      4
+project: launch slip (6-hop)                6        11       6       2      6
+belief: benchmark overturns choice          3         5       3       1      3
+security: unrelated email switch            2         2       2       2      2
+api: tier upgrade frees a throttle          2         3       2       2      2
+------------------------------------------------------------------------------
+TOTAL                                      37        58      37      25     37
+
+flat: 37 LLM calls -> 25/37 correct
+GEM:  58 LLM calls -> 37/37 correct
+GEM spent 21 EXTRA calls (57% more) to gain 12 nodes
+cost per extra correct node: 1.8 LLM calls

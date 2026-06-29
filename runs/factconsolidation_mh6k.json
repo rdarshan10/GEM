@@ -1,0 +1,2116 @@
+{
+  "model": "gpt-oss:120b-cloud",
+  "record_id": "factconsolidation_mh_6k",
+  "subem": 0.77,
+  "correct": 77,
+  "total": 100,
+  "elapsed_sec": 914.3535423278809,
+  "predictions": [
+    "Belgium",
+    "Kyiv",
+    "Italy",
+    "Russellville",
+    "rugby",
+    "Baldwin Wallace University",
+    "France",
+    "Oceania",
+    "North America",
+    "Berlin",
+    "atheism",
+    "Zoroastrianism",
+    "Duluth",
+    "Anglicanism",
+    "Emmerson Mnangagwa",
+    "London",
+    "Soviet Union",
+    "London",
+    "politician",
+    "Duluth",
+    "Persian",
+    "Edinburgh",
+    "George Alexander Kohut",
+    "Ukraine",
+    "Harare",
+    "Adel al-Jubeir",
+    "Peter Diamandis",
+    "Harrisville",
+    "Prague",
+    "Rajanpur",
+    "New York City",
+    "Giuseppe Conte",
+    "North America",
+    "South America",
+    "atheism",
+    "The Fairly OddParents",
+    "Japan",
+    "German",
+    "Canada",
+    "Muay Thai",
+    "Philippe, Duke of Orléans",
+    "German",
+    "Leeds",
+    "Japan, Shinzō Abe",
+    "Russellville",
+    "London",
+    "Tokyo",
+    "Asia",
+    "Grosseto",
+    "Latin",
+    "Moscow",
+    "politician",
+    "Taipei",
+    "Russian Empire",
+    "Beaumont",
+    "Karachi",
+    "Africa",
+    "Oderzo",
+    "Iran",
+    "Duluth",
+    "Berlin",
+    "field hockey",
+    "director",
+    "Montmélian",
+    "United Kingdom",
+    "Narendra Modi",
+    "German",
+    "Grosseto",
+    "Trinity College Dublin",
+    "Leipzig",
+    "Botevgrad",
+    "Connachta",
+    "Connachta",
+    "Bill Peduto",
+    "Wolverhampton",
+    "Islam",
+    "Stockholm",
+    "Harrisville",
+    "Africa",
+    "rugby",
+    "Europe",
+    "Ankara",
+    "Elizabeth II",
+    "John Winthrop",
+    "Tehran",
+    "Philippines",
+    "Grosseto",
+    "Duluth",
+    "Arabic",
+    "Australia",
+    "French",
+    "Harrisville",
+    "German",
+    "Harare",
+    "Japan",
+    "Mekere Morauta",
+    "Guangzhou",
+    "pop music",
+    "Grosseto",
+    "English"
+  ],
+  "golds": [
+    [
+      "Belgium"
+    ],
+    [
+      "Rodez"
+    ],
+    [
+      "Italy"
+    ],
+    [
+      "Russellville"
+    ],
+    [
+      "rugby"
+    ],
+    [
+      "Baldwin Wallace University"
+    ],
+    [
+      "France"
+    ],
+    [
+      "Oceania"
+    ],
+    [
+      "North America"
+    ],
+    [
+      "Berlin"
+    ],
+    [
+      "atheism"
+    ],
+    [
+      "Zoroastrianism"
+    ],
+    [
+      "Duluth"
+    ],
+    [
+      "Anglicanism"
+    ],
+    [
+      "Emmerson Mnangagwa"
+    ],
+    [
+      "Russellville"
+    ],
+    [
+      "Soviet Union"
+    ],
+    [
+      "London"
+    ],
+    [
+      "soldier"
+    ],
+    [
+      "Duluth"
+    ],
+    [
+      "Persian"
+    ],
+    [
+      "Edinburgh"
+    ],
+    [
+      "George Alexander Kohut"
+    ],
+    [
+      "Soviet Union"
+    ],
+    [
+      "Harare"
+    ],
+    [
+      "Adel al-Jubeir"
+    ],
+    [
+      "Peter Diamandis"
+    ],
+    [
+      "Harrisville"
+    ],
+    [
+      "Prague"
+    ],
+    [
+      "Rajanpur"
+    ],
+    [
+      "New York City"
+    ],
+    [
+      "Giuseppe Conte"
+    ],
+    [
+      "North America"
+    ],
+    [
+      "South America"
+    ],
+    [
+      "atheism"
+    ],
+    [
+      "The Fairly OddParents"
+    ],
+    [
+      "Japan"
+    ],
+    [
+      "German"
+    ],
+    [
+      "Canada"
+    ],
+    [
+      "Muay Thai"
+    ],
+    [
+      "Philippe, Duke of Orléans"
+    ],
+    [
+      "German"
+    ],
+    [
+      "Leeds"
+    ],
+    [
+      "Shinzō Abe"
+    ],
+    [
+      "London"
+    ],
+    [
+      "London"
+    ],
+    [
+      "Tokyo"
+    ],
+    [
+      "Asia"
+    ],
+    [
+      "Grosseto"
+    ],
+    [
+      "Latin"
+    ],
+    [
+      "Mansourah, Algeria"
+    ],
+    [
+      "journalist"
+    ],
+    [
+      "Taipei"
+    ],
+    [
+      "Russian Empire"
+    ],
+    [
+      "Beaumont"
+    ],
+    [
+      "Sweden"
+    ],
+    [
+      "Africa"
+    ],
+    [
+      "Oderzo"
+    ],
+    [
+      "Charles Frederick, Duke of Holstein-Gottorp"
+    ],
+    [
+      "Duluth"
+    ],
+    [
+      "Berlin"
+    ],
+    [
+      "field hockey"
+    ],
+    [
+      "Ernst Heinkel"
+    ],
+    [
+      "Montmélian"
+    ],
+    [
+      "United Kingdom"
+    ],
+    [
+      "Narendra Modi"
+    ],
+    [
+      "German"
+    ],
+    [
+      "New Delhi"
+    ],
+    [
+      "University of Southern California"
+    ],
+    [
+      "Leipzig"
+    ],
+    [
+      "Botevgrad"
+    ],
+    [
+      "Connachta"
+    ],
+    [
+      "Connachta"
+    ],
+    [
+      "Jonathan Rothschild"
+    ],
+    [
+      "Wolverhampton"
+    ],
+    [
+      "interdenominational organization"
+    ],
+    [
+      "Washington, D.C."
+    ],
+    [
+      "Rome"
+    ],
+    [
+      "Africa"
+    ],
+    [
+      "rugby"
+    ],
+    [
+      "Antarctica"
+    ],
+    [
+      "Ankara"
+    ],
+    [
+      "Elizabeth II"
+    ],
+    [
+      "William Penn"
+    ],
+    [
+      "Tehran"
+    ],
+    [
+      "Philippines"
+    ],
+    [
+      "New Delhi"
+    ],
+    [
+      "Duluth"
+    ],
+    [
+      "Arabic"
+    ],
+    [
+      "Australia"
+    ],
+    [
+      "French"
+    ],
+    [
+      "Duluth"
+    ],
+    [
+      "German"
+    ],
+    [
+      "Harare"
+    ],
+    [
+      "Japan"
+    ],
+    [
+      "Mekere Morauta"
+    ],
+    [
+      "Guangzhou"
+    ],
+    [
+      "Australian hip hop"
+    ],
+    [
+      "Paris"
+    ],
+    [
+      "Swedish"
+    ]
+  ],
+  "hits": [
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    false,
+    false
+  ],
+  "state": [
+    {
+      "entity": "Thomas Kyd",
+      "attribute": "place of birth",
+      "value": "Leeds"
+    },
+    {
+      "entity": "Fatah",
+      "attribute": "chairperson",
+      "value": "Moshe Kahlon"
+    },
+    {
+      "entity": "Amy Winehouse",
+      "attribute": "place of death",
+      "value": "Camden Town"
+    },
+    {
+      "entity": "Hines Ward",
+      "attribute": "position",
+      "value": "cornerback"
+    },
+    {
+      "entity": "Bengaluru",
+      "attribute": "continent",
+      "value": "Oceania"
+    },
+    {
+      "entity": "Pedro Pierluisi",
+      "attribute": "work city",
+      "value": "Washington, D.C."
+    },
+    {
+      "entity": "Rogério Ceni",
+      "attribute": "position",
+      "value": "flanker"
+    },
+    {
+      "entity": "British Broadcasting Corporation",
+      "attribute": "director",
+      "value": "Narendra Modi"
+    },
+    {
+      "entity": "Victoria Beckham",
+      "attribute": "spouse",
+      "value": "David Beckham"
+    },
+    {
+      "entity": "University of Minnesota",
+      "attribute": "headquarters city",
+      "value": "Minneapolis"
+    },
+    {
+      "entity": "A Wizard of Earthsea",
+      "attribute": "author",
+      "value": "Pius XII"
+    },
+    {
+      "entity": "Ferdinand Marcos",
+      "attribute": "spouse",
+      "value": "Imelda Marcos"
+    },
+    {
+      "entity": "University of California, Berkeley",
+      "attribute": "headquarters city",
+      "value": "Botevgrad"
+    },
+    {
+      "entity": "Apple Inc.",
+      "attribute": "CEO",
+      "value": "Tim Cook"
+    },
+    {
+      "entity": "Lisa Leslie",
+      "attribute": "position",
+      "value": "goaltender"
+    },
+    {
+      "entity": "Galileo Galilei",
+      "attribute": "alma mater",
+      "value": "University of Pisa"
+    },
+    {
+      "entity": "Chanel",
+      "attribute": "founder",
+      "value": "Andy Warhol"
+    },
+    {
+      "entity": "Church of Scotland",
+      "attribute": "founder",
+      "value": "John Knox"
+    },
+    {
+      "entity": "Slovakia national football team",
+      "attribute": "sport",
+      "value": "cricket"
+    },
+    {
+      "entity": "Alta IF",
+      "attribute": "sport",
+      "value": "baseball"
+    },
+    {
+      "entity": "Shingon Buddhism",
+      "attribute": "founder",
+      "value": "William Waynflete"
+    },
+    {
+      "entity": "Tang Empire",
+      "attribute": "capital",
+      "value": "Beaumont"
+    },
+    {
+      "entity": "Robert A. Heinlein",
+      "attribute": "citizen",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Galwegians RFC",
+      "attribute": "sport",
+      "value": "rugby union"
+    },
+    {
+      "entity": "Ferdinand von Richthofen",
+      "attribute": "citizen",
+      "value": "Germany"
+    },
+    {
+      "entity": "Aladdin Sane",
+      "attribute": "performed by",
+      "value": "David Bowie"
+    },
+    {
+      "entity": "Germany",
+      "attribute": "capital",
+      "value": "Berlin"
+    },
+    {
+      "entity": "Starship Troopers",
+      "attribute": "author",
+      "value": "Daphne du Maurier"
+    },
+    {
+      "entity": "Satya Nadella",
+      "attribute": "place of birth",
+      "value": "Hyderabad"
+    },
+    {
+      "entity": "Madame du Barry",
+      "attribute": "citizen",
+      "value": "Great Britain"
+    },
+    {
+      "entity": "Pakistan International Airlines",
+      "attribute": "founding city",
+      "value": "Karachi"
+    },
+    {
+      "entity": "quarterback",
+      "attribute": "sport",
+      "value": "Muay Thai"
+    },
+    {
+      "entity": "The Witcher",
+      "attribute": "author",
+      "value": "T. S. Eliot"
+    },
+    {
+      "entity": "Great Britain",
+      "attribute": "capital",
+      "value": "London"
+    },
+    {
+      "entity": "Steve Sax",
+      "attribute": "sport",
+      "value": "association football"
+    },
+    {
+      "entity": "Frank Zappa",
+      "attribute": "place of death",
+      "value": "Berlin"
+    },
+    {
+      "entity": "Dave Filoni",
+      "attribute": "employer",
+      "value": "British Broadcasting Corporation"
+    },
+    {
+      "entity": "Henri Grégoire",
+      "attribute": "citizen",
+      "value": "France"
+    },
+    {
+      "entity": "Christianity",
+      "attribute": "founding city",
+      "value": "Taipei"
+    },
+    {
+      "entity": "Germany",
+      "attribute": "continent",
+      "value": "Africa"
+    },
+    {
+      "entity": "Vijay Mallya",
+      "attribute": "citizen",
+      "value": "India"
+    },
+    {
+      "entity": "Kūkai",
+      "attribute": "language",
+      "value": "Japanese"
+    },
+    {
+      "entity": "Friedrich Nietzsche",
+      "attribute": "famous for",
+      "value": "Thus Spoke Zarathustra"
+    },
+    {
+      "entity": "wide receiver",
+      "attribute": "sport",
+      "value": "rugby"
+    },
+    {
+      "entity": "Ron Dennis",
+      "attribute": "employer",
+      "value": "Pakistan International Airlines"
+    },
+    {
+      "entity": "Israel",
+      "attribute": "founder",
+      "value": "Philippe, Duke of Orléans"
+    },
+    {
+      "entity": "Blood on the Tracks",
+      "attribute": "performer",
+      "value": "Lou Reed"
+    },
+    {
+      "entity": "Ursula K. Le Guin",
+      "attribute": "place of death",
+      "value": "Portland"
+    },
+    {
+      "entity": "Congolese Party of Labour",
+      "attribute": "chairperson",
+      "value": "Stephen McNeil"
+    },
+    {
+      "entity": "Colin Irwin",
+      "attribute": "citizenship",
+      "value": "Israel"
+    },
+    {
+      "entity": "Canada",
+      "attribute": "continent",
+      "value": "Asia"
+    },
+    {
+      "entity": "cricket",
+      "attribute": "country created in",
+      "value": "Australia"
+    },
+    {
+      "entity": "Nicolae Ceaușescu",
+      "attribute": "spouse",
+      "value": "Wilhelm II"
+    },
+    {
+      "entity": "pesäpallo",
+      "attribute": "country created in",
+      "value": "Philippines"
+    },
+    {
+      "entity": "Leo Stein",
+      "attribute": "citizenship",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Walter Chrysler",
+      "attribute": "child",
+      "value": "Charles Frederick, Duke of Holstein-Gottorp"
+    },
+    {
+      "entity": "Yves Montand",
+      "attribute": "spouse",
+      "value": "Natalie Portman"
+    },
+    {
+      "entity": "Joan Didion",
+      "attribute": "university",
+      "value": "University of California, Berkeley"
+    },
+    {
+      "entity": "American Broadcasting Company",
+      "attribute": "director",
+      "value": "Ernst Heinkel"
+    },
+    {
+      "entity": "Born in the U.S.A.",
+      "attribute": "performer",
+      "value": "Dana International"
+    },
+    {
+      "entity": "Rand al'Thor",
+      "attribute": "creator",
+      "value": "Ferdowsi"
+    },
+    {
+      "entity": "Buddhism",
+      "attribute": "founder",
+      "value": "Mekere Morauta"
+    },
+    {
+      "entity": "Natalie Portman",
+      "attribute": "religion",
+      "value": "interdenominational organization"
+    },
+    {
+      "entity": "point guard",
+      "attribute": "sport",
+      "value": "cricket"
+    },
+    {
+      "entity": "Kingdom of Ireland",
+      "attribute": "religion",
+      "value": "Zoroastrianism"
+    },
+    {
+      "entity": "Rocket Man",
+      "attribute": "performer",
+      "value": "Ayumi Hamasaki"
+    },
+    {
+      "entity": "Stephen Crane",
+      "attribute": "famous for",
+      "value": "Charlie Hebdo"
+    },
+    {
+      "entity": "Hal Needham",
+      "attribute": "citizenship",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Valve Corporation",
+      "attribute": "CEO",
+      "value": "Gabe Newell"
+    },
+    {
+      "entity": "Australia",
+      "attribute": "continent",
+      "value": "South America"
+    },
+    {
+      "entity": "The Birth of Tragedy",
+      "attribute": "author",
+      "value": "Stephen Crane"
+    },
+    {
+      "entity": "placekicker",
+      "attribute": "sport",
+      "value": "rugby"
+    },
+    {
+      "entity": "United Kingdom",
+      "attribute": "head of state",
+      "value": "Emmerson Mnangagwa"
+    },
+    {
+      "entity": "Harvard University",
+      "attribute": "chairperson",
+      "value": "Peter Diamandis"
+    },
+    {
+      "entity": "Carlos Gómez",
+      "attribute": "sport",
+      "value": "basketball"
+    },
+    {
+      "entity": "Sweden",
+      "attribute": "prime minister",
+      "value": "Pedro Pierluisi"
+    },
+    {
+      "entity": "Dale Evans",
+      "attribute": "music genre",
+      "value": "country music"
+    },
+    {
+      "entity": "Laura Bush",
+      "attribute": "spouse",
+      "value": "Princess Alice, Duchess of Gloucester"
+    },
+    {
+      "entity": "Microsoft",
+      "attribute": "CEO",
+      "value": "Satya Nadella"
+    },
+    {
+      "entity": "Ferdowsi",
+      "attribute": "famous for",
+      "value": "Shahnameh"
+    },
+    {
+      "entity": "Catherine Dickens",
+      "attribute": "citizen",
+      "value": "United Kingdom"
+    },
+    {
+      "entity": "Andrzej Sapkowski",
+      "attribute": "language",
+      "value": "Polish"
+    },
+    {
+      "entity": "Moscow",
+      "attribute": "official language",
+      "value": "German"
+    },
+    {
+      "entity": "John McVie",
+      "attribute": "music genre",
+      "value": "rap rock"
+    },
+    {
+      "entity": "Nobuhiro Watsuki",
+      "attribute": "famous for",
+      "value": "The Fairly OddParents"
+    },
+    {
+      "entity": "Il-2 Shturmovik",
+      "attribute": "producer",
+      "value": "Ilyushin"
+    },
+    {
+      "entity": "Gala RFC",
+      "attribute": "sport",
+      "value": "rugby union"
+    },
+    {
+      "entity": "Princess Alice, Duchess of Gloucester",
+      "attribute": "religion",
+      "value": "Anglicanism"
+    },
+    {
+      "entity": "sumo",
+      "attribute": "country created in",
+      "value": "Japan"
+    },
+    {
+      "entity": "Meredith Grey",
+      "attribute": "performer",
+      "value": "Ellen Pompeo"
+    },
+    {
+      "entity": "Samuel Beckett",
+      "attribute": "educated at",
+      "value": "Trinity College Dublin"
+    },
+    {
+      "entity": "Israel",
+      "attribute": "continent",
+      "value": "North America"
+    },
+    {
+      "entity": "England",
+      "attribute": "official language",
+      "value": "English"
+    },
+    {
+      "entity": "rugby union",
+      "attribute": "country created in",
+      "value": "India"
+    },
+    {
+      "entity": "Fordham University",
+      "attribute": "headquarters city",
+      "value": "New York City"
+    },
+    {
+      "entity": "Club Nouveau",
+      "attribute": "country created in",
+      "value": "Soviet Union"
+    },
+    {
+      "entity": "Japan",
+      "attribute": "capital",
+      "value": "Tokyo"
+    },
+    {
+      "entity": "FC Vorskla Poltava",
+      "attribute": "sport",
+      "value": "basketball"
+    },
+    {
+      "entity": "United Kingdom",
+      "attribute": "continent",
+      "value": "Europe"
+    },
+    {
+      "entity": "Leonte Răutu",
+      "attribute": "employer",
+      "value": "University of Bucharest"
+    },
+    {
+      "entity": "Our Mutual Friend",
+      "attribute": "author",
+      "value": "Charles Darwin"
+    },
+    {
+      "entity": "Boston",
+      "attribute": "founder",
+      "value": "John Winthrop"
+    },
+    {
+      "entity": "Twitter",
+      "attribute": "CEO",
+      "value": "Jack Dorsey"
+    },
+    {
+      "entity": "Mike D'Antoni",
+      "attribute": "position",
+      "value": "point guard"
+    },
+    {
+      "entity": "Westinghouse Electric",
+      "attribute": "founded city",
+      "value": "Pittsburgh"
+    },
+    {
+      "entity": "Mario Puzo",
+      "attribute": "famous for",
+      "value": "The Godfather"
+    },
+    {
+      "entity": "London",
+      "attribute": "continent",
+      "value": "Europe"
+    },
+    {
+      "entity": "United States of America",
+      "attribute": "head of state",
+      "value": "Connachta"
+    },
+    {
+      "entity": "Australia",
+      "attribute": "official language",
+      "value": "Arabic"
+    },
+    {
+      "entity": "Pius XII",
+      "attribute": "death city",
+      "value": "Castel Gandolfo"
+    },
+    {
+      "entity": "Jack Dorsey",
+      "attribute": "citizen",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Sarit Thanarat",
+      "attribute": "religion",
+      "value": "Buddhism"
+    },
+    {
+      "entity": "Elvis Presley",
+      "attribute": "spouse",
+      "value": "Charles the Bold"
+    },
+    {
+      "entity": "Andy Warhol",
+      "attribute": "death city",
+      "value": "Montmélian"
+    },
+    {
+      "entity": "Kylie Minogue",
+      "attribute": "language",
+      "value": "German"
+    },
+    {
+      "entity": "Sidereus Nuncius",
+      "attribute": "author",
+      "value": "Samuel Beckett"
+    },
+    {
+      "entity": "Olga of Kiev",
+      "attribute": "death city",
+      "value": "Kyiv"
+    },
+    {
+      "entity": "Oscar Wilde",
+      "attribute": "death city",
+      "value": "Paris"
+    },
+    {
+      "entity": "Joe Hockey",
+      "attribute": "citizen of",
+      "value": "Australia"
+    },
+    {
+      "entity": "Bowdoin College",
+      "attribute": "headquarters city",
+      "value": "Brunswick"
+    },
+    {
+      "entity": "Charles Dickens",
+      "attribute": "spouse",
+      "value": "Catherine Dickens"
+    },
+    {
+      "entity": "Ford Motor Company",
+      "attribute": "founder",
+      "value": "Henri Grégoire"
+    },
+    {
+      "entity": "Moshe Kahlon",
+      "attribute": "occupation",
+      "value": "politician"
+    },
+    {
+      "entity": "Boeing",
+      "attribute": "chief executive officer",
+      "value": "Adel al-Jubeir"
+    },
+    {
+      "entity": "David Beckham",
+      "attribute": "sport",
+      "value": "cricket"
+    },
+    {
+      "entity": "David Bowie",
+      "attribute": "spouse",
+      "value": "Iman"
+    },
+    {
+      "entity": "Pittsburgh government",
+      "attribute": "head",
+      "value": "Bill Peduto"
+    },
+    {
+      "entity": "Tony Blair",
+      "attribute": "spouse",
+      "value": "Alan Jay Lerner"
+    },
+    {
+      "entity": "McLaren Automotive",
+      "attribute": "founding city",
+      "value": "Woking"
+    },
+    {
+      "entity": "Bill Frisell",
+      "attribute": "alma mater",
+      "value": "Berklee College of Music"
+    },
+    {
+      "entity": "Hugh Hefner",
+      "attribute": "famous for",
+      "value": "The Vampyre"
+    },
+    {
+      "entity": "Lady Windermere's Fan",
+      "attribute": "author",
+      "value": "Oscar Wilde"
+    },
+    {
+      "entity": "Bob Dylan",
+      "attribute": "alma mater",
+      "value": "University of Minnesota"
+    },
+    {
+      "entity": "FC Irtysh Omsk",
+      "attribute": "sport",
+      "value": "association football"
+    },
+    {
+      "entity": "Stephen McNeil",
+      "attribute": "occupation",
+      "value": "politician"
+    },
+    {
+      "entity": "Adalbert of Prague",
+      "attribute": "religion",
+      "value": "atheism"
+    },
+    {
+      "entity": "Transcendental Meditation movement",
+      "attribute": "founder",
+      "value": "Adalbert of Prague"
+    },
+    {
+      "entity": "Charlie Hebdo",
+      "attribute": "country created in",
+      "value": "Italy"
+    },
+    {
+      "entity": "Soviet Union",
+      "attribute": "capital",
+      "value": "Russellville"
+    },
+    {
+      "entity": "India",
+      "attribute": "capital",
+      "value": "Grosseto"
+    },
+    {
+      "entity": "Soviet Union",
+      "attribute": "head of state",
+      "value": "Mikhail Gorbachev"
+    },
+    {
+      "entity": "baseball",
+      "attribute": "country created in",
+      "value": "Japan"
+    },
+    {
+      "entity": "post-punk",
+      "attribute": "country created in",
+      "value": "Canada"
+    },
+    {
+      "entity": "country music",
+      "attribute": "country created in",
+      "value": "United States of America"
+    },
+    {
+      "entity": "France",
+      "attribute": "capital",
+      "value": "Harare"
+    },
+    {
+      "entity": "Charles Darwin",
+      "attribute": "spouse",
+      "value": "Amala Paul"
+    },
+    {
+      "entity": "Country Joe McDonald",
+      "attribute": "citizen of",
+      "value": "Romania"
+    },
+    {
+      "entity": "Stefan Löfven",
+      "attribute": "work city",
+      "value": "Stockholm"
+    },
+    {
+      "entity": "Italy",
+      "attribute": "capital",
+      "value": "Duluth"
+    },
+    {
+      "entity": "center",
+      "attribute": "sport",
+      "value": "basketball"
+    },
+    {
+      "entity": "Alan Jay Lerner",
+      "attribute": "death city",
+      "value": "New York City"
+    },
+    {
+      "entity": "Bagratuni Dynasty",
+      "attribute": "religion",
+      "value": "Christianity"
+    },
+    {
+      "entity": "University of Bucharest",
+      "attribute": "headquarters city",
+      "value": "Ankara"
+    },
+    {
+      "entity": "split-finger fastball",
+      "attribute": "sport",
+      "value": "cricket"
+    },
+    {
+      "entity": "Igor of Kiev",
+      "attribute": "spouse",
+      "value": "Olga of Kiev"
+    },
+    {
+      "entity": "Narendra Modi",
+      "attribute": "citizen",
+      "value": "India"
+    },
+    {
+      "entity": "Steve Jobs",
+      "attribute": "place of birth",
+      "value": "San Francisco"
+    },
+    {
+      "entity": "Endymion",
+      "attribute": "author",
+      "value": "John Keats"
+    },
+    {
+      "entity": "Edmund Burke",
+      "attribute": "citizen",
+      "value": "Kingdom of Ireland"
+    },
+    {
+      "entity": "Daphne du Maurier",
+      "attribute": "citizen",
+      "value": "United Kingdom"
+    },
+    {
+      "entity": "United Kingdom",
+      "attribute": "official language",
+      "value": "English"
+    },
+    {
+      "entity": "Romania",
+      "attribute": "capital",
+      "value": "Rajanpur"
+    },
+    {
+      "entity": "Hyderabad",
+      "attribute": "continent",
+      "value": "Asia"
+    },
+    {
+      "entity": "Microsoft",
+      "attribute": "chief executive officer",
+      "value": "Steve Jobs"
+    },
+    {
+      "entity": "Czech Republic",
+      "attribute": "capital",
+      "value": "Prague"
+    },
+    {
+      "entity": "Aristotle",
+      "attribute": "child",
+      "value": "George Alexander Kohut"
+    },
+    {
+      "entity": "Ernst Heinkel",
+      "attribute": "citizen",
+      "value": "Tang Empire"
+    },
+    {
+      "entity": "Catholic Church",
+      "attribute": "founder",
+      "value": "Jesus Christ"
+    },
+    {
+      "entity": "Bo Ryan",
+      "attribute": "sport",
+      "value": "association football"
+    },
+    {
+      "entity": "T. S. Eliot",
+      "attribute": "language",
+      "value": "French"
+    },
+    {
+      "entity": "AP1000",
+      "attribute": "company",
+      "value": "Westinghouse Electric"
+    },
+    {
+      "entity": "Papal States",
+      "attribute": "capital",
+      "value": "Rome"
+    },
+    {
+      "entity": "The Wheel of Time",
+      "attribute": "language",
+      "value": "English"
+    },
+    {
+      "entity": "Categories",
+      "attribute": "author",
+      "value": "Aristotle"
+    },
+    {
+      "entity": "Apple Inc.",
+      "attribute": "chief executive officer",
+      "value": "Vijay Mallya"
+    },
+    {
+      "entity": "Japan government",
+      "attribute": "name",
+      "value": "Shinzō Abe"
+    },
+    {
+      "entity": "Charles Messier",
+      "attribute": "citizen",
+      "value": "France"
+    },
+    {
+      "entity": "Pakistan International Airlines",
+      "attribute": "city founded in",
+      "value": "Sweden"
+    },
+    {
+      "entity": "John Keats",
+      "attribute": "place of death",
+      "value": "Leipzig"
+    },
+    {
+      "entity": "Madonna",
+      "attribute": "director",
+      "value": "Narendra Modi"
+    },
+    {
+      "entity": "Samuel Beckett",
+      "attribute": "university",
+      "value": "University of Southern California"
+    },
+    {
+      "entity": "Cédric Klapisch",
+      "attribute": "citizen",
+      "value": "France"
+    },
+    {
+      "entity": "England",
+      "attribute": "continent",
+      "value": "Europe"
+    },
+    {
+      "entity": "jazz",
+      "attribute": "country created in",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Darryl Strawberry",
+      "attribute": "sport",
+      "value": "baseball"
+    },
+    {
+      "entity": "William Waynflete",
+      "attribute": "language",
+      "value": "Latin"
+    },
+    {
+      "entity": "Sandy Alderson",
+      "attribute": "sport",
+      "value": "association football"
+    },
+    {
+      "entity": "basketball",
+      "attribute": "country created in",
+      "value": "Soviet Union"
+    },
+    {
+      "entity": "Narendra Modi",
+      "attribute": "citizen of",
+      "value": "Australia"
+    },
+    {
+      "entity": "Methodism",
+      "attribute": "founder",
+      "value": "Joseph Goebbels"
+    },
+    {
+      "entity": "Windows Phone",
+      "attribute": "developer",
+      "value": "Microsoft"
+    },
+    {
+      "entity": "goaltender",
+      "attribute": "sport",
+      "value": "pesäpallo"
+    },
+    {
+      "entity": "Sasanian Empire",
+      "attribute": "founder",
+      "value": "Walter Chrysler"
+    },
+    {
+      "entity": "Henri Grégoire",
+      "attribute": "citizen of",
+      "value": "India"
+    },
+    {
+      "entity": "Irving Fryar",
+      "attribute": "position",
+      "value": "wide receiver"
+    },
+    {
+      "entity": "India",
+      "attribute": "continent",
+      "value": "Africa"
+    },
+    {
+      "entity": "Tunisia national football team",
+      "attribute": "sport",
+      "value": "basketball"
+    },
+    {
+      "entity": "The Beatles",
+      "attribute": "director",
+      "value": "Joe Hockey"
+    },
+    {
+      "entity": "Canadair",
+      "attribute": "founding city",
+      "value": "Tucson"
+    },
+    {
+      "entity": "SteamOS",
+      "attribute": "developer",
+      "value": "ABB Group"
+    },
+    {
+      "entity": "Cédric Klapisch",
+      "attribute": "citizen of",
+      "value": "Malaysia"
+    },
+    {
+      "entity": "Japan",
+      "attribute": "official language",
+      "value": "Swedish"
+    },
+    {
+      "entity": "AppleScript",
+      "attribute": "developer",
+      "value": "Apple Inc."
+    },
+    {
+      "entity": "United States of America",
+      "attribute": "official language",
+      "value": "German"
+    },
+    {
+      "entity": "Dana International",
+      "attribute": "music genre",
+      "value": "pop music"
+    },
+    {
+      "entity": "Sable",
+      "attribute": "citizen of",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Brian Epstein",
+      "attribute": "citizen of",
+      "value": "United Kingdom"
+    },
+    {
+      "entity": "Robert Jordan",
+      "attribute": "famous for",
+      "value": "The Wheel of Time"
+    },
+    {
+      "entity": "United States of America",
+      "attribute": "capital",
+      "value": "Harrisville"
+    },
+    {
+      "entity": "Imelda Marcos",
+      "attribute": "religion",
+      "value": "atheism"
+    },
+    {
+      "entity": "Past Masters",
+      "attribute": "performer",
+      "value": "Madonna"
+    },
+    {
+      "entity": "Ford Transit Connect",
+      "attribute": "manufacturer",
+      "value": "Ford Motor Company"
+    },
+    {
+      "entity": "Henry Ford",
+      "attribute": "citizen of",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Iran",
+      "attribute": "capital",
+      "value": "Tehran"
+    },
+    {
+      "entity": "Vito Corleone",
+      "attribute": "creator",
+      "value": "Nobuhiro Watsuki"
+    },
+    {
+      "entity": "Le Petit Parisien",
+      "attribute": "country created in",
+      "value": "Germany"
+    },
+    {
+      "entity": "flanker",
+      "attribute": "sport",
+      "value": "rugby union"
+    },
+    {
+      "entity": "Mahmoud Abbas",
+      "attribute": "field",
+      "value": "politician"
+    },
+    {
+      "entity": "George W. Bush",
+      "attribute": "religion",
+      "value": "United Methodist Church"
+    },
+    {
+      "entity": "Karen Armstrong",
+      "attribute": "religion",
+      "value": "Church of Scotland"
+    },
+    {
+      "entity": "Ellen Pompeo",
+      "attribute": "citizenship",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Daniele De Rossi",
+      "attribute": "position",
+      "value": "midfielder"
+    },
+    {
+      "entity": "Oscar Wilde",
+      "attribute": "place of death",
+      "value": "Guangzhou"
+    },
+    {
+      "entity": "The Marriage of Figaro",
+      "attribute": "author",
+      "value": "Thomas Kyd"
+    },
+    {
+      "entity": "association football",
+      "attribute": "country created in",
+      "value": "Italy"
+    },
+    {
+      "entity": "Viva Las Vegas",
+      "attribute": "performer",
+      "value": "Elvis Presley"
+    },
+    {
+      "entity": "F-22 Raptor",
+      "attribute": "developer",
+      "value": "Boeing"
+    },
+    {
+      "entity": "Twitter",
+      "attribute": "chief executive officer",
+      "value": "Bernard Arnault"
+    },
+    {
+      "entity": "The Vampyre",
+      "attribute": "language",
+      "value": "German"
+    },
+    {
+      "entity": "Dana International",
+      "attribute": "genre",
+      "value": "Australian hip hop"
+    },
+    {
+      "entity": "John Walsh",
+      "attribute": "religion",
+      "value": "Methodism"
+    },
+    {
+      "entity": "Pius XII",
+      "attribute": "place of death",
+      "value": "Wolverhampton"
+    },
+    {
+      "entity": "Australia",
+      "attribute": "capital",
+      "value": "Oderzo"
+    },
+    {
+      "entity": "Aladdin Sane",
+      "attribute": "performer",
+      "value": "Yves Montand"
+    },
+    {
+      "entity": "Lou Reed",
+      "attribute": "alma mater",
+      "value": "Syracuse University"
+    },
+    {
+      "entity": "Back to Black",
+      "attribute": "performer",
+      "value": "Frank Zappa"
+    },
+    {
+      "entity": "Michael Mantler",
+      "attribute": "genre",
+      "value": "post-punk"
+    },
+    {
+      "entity": "Lucasfilm",
+      "attribute": "director",
+      "value": "Kathleen Kennedy"
+    },
+    {
+      "entity": "Surrey Senior Cup",
+      "attribute": "sport",
+      "value": "basketball"
+    },
+    {
+      "entity": "Gennady Rozhdestvensky",
+      "attribute": "place of death",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Ayumi Hamasaki",
+      "attribute": "citizenship",
+      "value": "Japan"
+    },
+    {
+      "entity": "Amala Paul",
+      "attribute": "citizenship",
+      "value": "Belgium"
+    },
+    {
+      "entity": "New Firm",
+      "attribute": "sport",
+      "value": "baseball"
+    },
+    {
+      "entity": "Playboy",
+      "attribute": "language",
+      "value": "English"
+    },
+    {
+      "entity": "Sable",
+      "attribute": "citizenship",
+      "value": "Czech Republic"
+    },
+    {
+      "entity": "Sigmund Freud",
+      "attribute": "place of death",
+      "value": "London"
+    },
+    {
+      "entity": "Nadezhda Krupskaya",
+      "attribute": "place of death",
+      "value": "Moscow"
+    },
+    {
+      "entity": "Jesus Christ",
+      "attribute": "place of work",
+      "value": "Galilee"
+    },
+    {
+      "entity": "John Harkes",
+      "attribute": "sport",
+      "value": "association football"
+    },
+    {
+      "entity": "Bill Frisell",
+      "attribute": "university",
+      "value": "The University of the Arts"
+    },
+    {
+      "entity": "Bob Iger",
+      "attribute": "citizenship",
+      "value": "United States of America"
+    },
+    {
+      "entity": "John Knox",
+      "attribute": "place of work",
+      "value": "Edinburgh"
+    },
+    {
+      "entity": "Benjamin Mazar",
+      "attribute": "citizenship",
+      "value": "Israel"
+    },
+    {
+      "entity": "Ilyushin",
+      "attribute": "headquarters city",
+      "value": "Moscow"
+    },
+    {
+      "entity": "Pierre Beaumarchais",
+      "attribute": "place of birth",
+      "value": "Paris"
+    },
+    {
+      "entity": "Priscilla Presley",
+      "attribute": "citizenship",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Bernard Arnault",
+      "attribute": "citizenship",
+      "value": "France"
+    },
+    {
+      "entity": "Stephen McNeil",
+      "attribute": "field",
+      "value": "journalist"
+    },
+    {
+      "entity": "cornerback",
+      "attribute": "sport",
+      "value": "field hockey"
+    },
+    {
+      "entity": "Council of People's Commissars government",
+      "attribute": "head",
+      "value": "Vladimir Lenin"
+    },
+    {
+      "entity": "midfielder",
+      "attribute": "sport",
+      "value": "sumo"
+    },
+    {
+      "entity": "Sketches by Boz",
+      "attribute": "author",
+      "value": "Sigmund Freud"
+    },
+    {
+      "entity": "Vijay Mallya",
+      "attribute": "citizenship",
+      "value": "Papal States"
+    },
+    {
+      "entity": "Robert Parish",
+      "attribute": "position",
+      "value": "quarterback"
+    },
+    {
+      "entity": "Maharishi Mahesh Yogi",
+      "attribute": "religion",
+      "value": "Hinduism"
+    },
+    {
+      "entity": "Elena Ceaușescu",
+      "attribute": "university",
+      "value": "University of Bucharest"
+    },
+    {
+      "entity": "Andrew Carnegie",
+      "attribute": "citizenship",
+      "value": "United Kingdom"
+    },
+    {
+      "entity": "Thomas Arne",
+      "attribute": "place of birth",
+      "value": "Bengaluru"
+    },
+    {
+      "entity": "Charles Messier",
+      "attribute": "citizenship",
+      "value": "Iran"
+    },
+    {
+      "entity": "Thus Spoke Zarathustra",
+      "attribute": "country created in",
+      "value": "Germany"
+    },
+    {
+      "entity": "ABB Group",
+      "attribute": "chief executive officer",
+      "value": "Bernard Arnault"
+    },
+    {
+      "entity": "Wilhelm II",
+      "attribute": "university",
+      "value": "Baldwin Wallace University"
+    },
+    {
+      "entity": "Free as a Bird",
+      "attribute": "performer",
+      "value": "The Beatles"
+    },
+    {
+      "entity": "Council of People's Commissars government",
+      "attribute": "current head",
+      "value": "Tony Blair"
+    },
+    {
+      "entity": "Coco Chanel",
+      "attribute": "place of death",
+      "value": "Paris"
+    },
+    {
+      "entity": "Bruce Springsteen",
+      "attribute": "music type",
+      "value": "rock music"
+    },
+    {
+      "entity": "AP1000",
+      "attribute": "producer",
+      "value": "Canadair"
+    },
+    {
+      "entity": "Iman",
+      "attribute": "religion",
+      "value": "Islam"
+    },
+    {
+      "entity": "rap rock",
+      "attribute": "country created in",
+      "value": "Russian Empire"
+    },
+    {
+      "entity": "666 Park Avenue",
+      "attribute": "original broadcaster",
+      "value": "American Broadcasting Company"
+    },
+    {
+      "entity": "Soviet Union",
+      "attribute": "current head of state",
+      "value": "Elizabeth II"
+    },
+    {
+      "entity": "Moshe Kahlon",
+      "attribute": "field",
+      "value": "soldier"
+    },
+    {
+      "entity": "Charles the Bold",
+      "attribute": "citizenship",
+      "value": "France"
+    },
+    {
+      "entity": "Malaysia",
+      "attribute": "continent",
+      "value": "Antarctica"
+    },
+    {
+      "entity": "Italy government",
+      "attribute": "current head",
+      "value": "Giuseppe Conte"
+    },
+    {
+      "entity": "United Kingdom",
+      "attribute": "capital",
+      "value": "London"
+    },
+    {
+      "entity": "England",
+      "attribute": "capital",
+      "value": "London"
+    },
+    {
+      "entity": "Lockheed Martin",
+      "attribute": "chief executive officer",
+      "value": "Marillyn Hewson"
+    },
+    {
+      "entity": "Berklee College of Music",
+      "attribute": "headquarters city",
+      "value": "Boston"
+    },
+    {
+      "entity": "Elton John",
+      "attribute": "citizenship",
+      "value": "United Kingdom"
+    },
+    {
+      "entity": "Ferdinand von Richthofen",
+      "attribute": "citizenship",
+      "value": "Canada"
+    },
+    {
+      "entity": "The University of the Arts",
+      "attribute": "headquarters city",
+      "value": "Philadelphia"
+    },
+    {
+      "entity": "Shahnameh",
+      "attribute": "language",
+      "value": "Persian"
+    },
+    {
+      "entity": "Alan Jay Lerner",
+      "attribute": "place of death",
+      "value": "Mansourah"
+    },
+    {
+      "entity": "Joseph Goebbels",
+      "attribute": "work city",
+      "value": "Berlin"
+    },
+    {
+      "entity": "San Francisco",
+      "attribute": "continent",
+      "value": "North America"
+    },
+    {
+      "entity": "Lou Reed",
+      "attribute": "university",
+      "value": "Fordham University"
+    },
+    {
+      "entity": "Ford F-Series",
+      "attribute": "company",
+      "value": "Ford Motor Company"
+    },
+    {
+      "entity": "Emma Watson",
+      "attribute": "language",
+      "value": "English"
+    },
+    {
+      "entity": "The Brady Bunch",
+      "attribute": "original broadcaster",
+      "value": "American Broadcasting Company"
+    },
+    {
+      "entity": "Denis Sassou-Nguesso",
+      "attribute": "occupation",
+      "value": "politician"
+    },
+    {
+      "entity": "Sophia Hawthorne",
+      "attribute": "spouse",
+      "value": "Joan Didion"
+    },
+    {
+      "entity": "Ardashir I",
+      "attribute": "child",
+      "value": "Shapur I"
+    },
+    {
+      "entity": "Hermione Granger",
+      "attribute": "performer",
+      "value": "Kylie Minogue"
+    },
+    {
+      "entity": "Derek Shepherd",
+      "attribute": "spouse",
+      "value": "Meredith Grey"
+    },
+    {
+      "entity": "Blair Walsh",
+      "attribute": "position",
+      "value": "placekicker"
+    },
+    {
+      "entity": "Philadelphia",
+      "attribute": "founder",
+      "value": "William Penn"
+    },
+    {
+      "entity": "Vladimir Lenin",
+      "attribute": "spouse",
+      "value": "Nadezhda Krupskaya"
+    },
+    {
+      "entity": "Joe Hockey",
+      "attribute": "citizenship",
+      "value": "Italy"
+    },
+    {
+      "entity": "France",
+      "attribute": "continent",
+      "value": "Europe"
+    },
+    {
+      "entity": "Joseph Story",
+      "attribute": "employer",
+      "value": "Harvard University"
+    },
+    {
+      "entity": "United States of America government",
+      "attribute": "head of government",
+      "value": "Donald Trump"
+    },
+    {
+      "entity": "Gabe Newell",
+      "attribute": "citizenship",
+      "value": "United States of America"
+    },
+    {
+      "entity": "goalkeeper",
+      "attribute": "sport",
+      "value": "association football"
+    },
+    {
+      "entity": "Nathaniel Hawthorne",
+      "attribute": "university",
+      "value": "Bowdoin College"
+    },
+    {
+      "entity": "Tim Cook",
+      "attribute": "citizenship",
+      "value": "United States of America"
+    },
+    {
+      "entity": "Roy Rogers",
+      "attribute": "spouse",
+      "value": "John McVie"
+    },
+    {
+      "entity": "Charles Dickens",
+      "attribute": "place of death",
+      "value": "Gads Hill Place"
+    },
+    {
+      "entity": "Olga of Kiev",
+      "attribute": "place of death",
+      "value": "Rodez"
+    },
+    {
+      "entity": "Tucson government",
+      "attribute": "head of government",
+      "value": "Jonathan Rothschild"
+    }
+  ]
+}

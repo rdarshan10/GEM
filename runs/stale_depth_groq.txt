@@ -1,0 +1,3 @@
+6-HOP DEPTH TEST — change hits the ROOT (launch), query asks about the LEAF (production)
+
+  eager_pinned    dim1=F dim2=F dim3=F   0/3

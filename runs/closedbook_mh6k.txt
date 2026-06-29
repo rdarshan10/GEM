@@ -1,0 +1,22 @@
+﻿closed-book ablation on factconsolidation_mh_6k: 100 questions, model=gpt-oss:120b-cloud
+
+  answered 20/100
+  answered 40/100
+  answered 60/100
+  answered 80/100
+  answered 100/100
+
+========================================================
+CLOSED-BOOK SubEM: 0.0% (0/100)
+  (open-book multi-hop was 77% — the gap is what the memory state adds)
+========================================================
+
+sample closed-book answers vs edited gold:
+  gold(edit)=['Belgium']  closed-book='United Kingdom'
+  gold(edit)=['Rodez']  closed-book='Kiev'
+  gold(edit)=['Italy']  closed-book='United States'
+  gold(edit)=['Russellville']  closed-book='London'
+  gold(edit)=['rugby']  closed-book='American football'
+  gold(edit)=['Baldwin Wallace University']  closed-book='Politehnica University of Bucharest'
+  gold(edit)=['France']  closed-book='United States'
+  gold(edit)=['Oceania']  closed-book='Europe'

@@ -1,0 +1,11 @@
+﻿similarity-gated cost eval — 6 scenarios buried in 20 distractors, candidate_k=24
+
+  filter OFF (thr=0.0)       conflict-scan LLM calls  131   sim-skipped   14   accuracy 16/16 (100%)
+  filter ON  (thr=0.35)      conflict-scan LLM calls   16   sim-skipped  129   accuracy 16/16 (100%)
+
+========================================================================
+conflict-scan LLM calls: 131 -> 16   (88% fewer)   accuracy held at 16/16 (100%)
+========================================================================
+The similarity gate skips the clearly-unrelated neighbors (distractors) without an LLM
+call; the real conflict is above threshold so it's always classified. Cost down, no
+accuracy traded — the lever escalation-to-cheap couldn't provide.

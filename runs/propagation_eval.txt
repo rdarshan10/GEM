@@ -1,0 +1,36 @@
+﻿generated 28 scenarios from 7 templates
+
+[  1/28] PASS 4/4  relocation-4hop[Berlin->Munich]   | baseline 3/4
+[  2/28] PASS 4/4  relocation-4hop[Seattle->Portland]   | baseline 1/4
+[  3/28] PASS 4/4  relocation-4hop[Austin->Denver]   | baseline 2/4
+[  4/28] PASS 4/4  relocation-4hop[Boston->Chicago]   | baseline 3/4
+[  5/28] PASS 4/4  relocation-4hop[Madrid->Valencia]   | baseline 3/4
+[  6/28] PASS 4/4  relocation-4hop[Toronto->Calgary]   | baseline 2/4
+[  7/28] PASS 2/2  timezone-survives[Bangalore->Mumbai]   | baseline 2/2
+[  8/28] PASS 2/2  timezone-survives[Chennai->Delhi]   | baseline 2/2
+[  9/28] PASS 2/2  timezone-survives[Pune->Hyderabad]   | baseline 2/2
+[ 10/28] PASS 2/2  timezone-survives[Lyon->Paris]   | baseline 2/2
+[ 11/28] PASS 2/2  timezone-survives[Munich->Berlin]   | baseline 2/2
+[ 12/28] PASS 2/2  timezone-survives[Osaka->Tokyo]   | baseline 2/2
+[ 13/28] PASS 3/3  divergent-survives[Berlin->Munich|a Tesla]   | baseline 3/3
+[ 14/28] PASS 3/3  divergent-survives[Seattle->Portland|a PlayStation 5]   | baseline 3/3
+[ 15/28] PASS 3/3  divergent-survives[Austin->Denver|an espresso machine]   | baseline 3/3
+[ 16/28] PASS 2/2  sensor-baseline[21->18C]   | baseline 1/2
+[ 17/28] PASS 2/2  sensor-baseline[20->24C]   | baseline 2/2
+[ 18/28] PASS 2/2  sensor-baseline[19->22C]   | baseline 2/2
+[ 19/28] PASS 2/2  sensor-baseline[23->17C]   | baseline 2/2
+[ 20/28] PASS 3/3  region-sla[us-east-1->ap-south-1]   | baseline 2/3
+[ 21/28] PASS 3/3  region-sla[eu-west-1->us-west-2]   | baseline 2/3
+[ 22/28] PASS 3/3  region-sla[ap-northeast-1->sa-east-1]   | baseline 2/3
+[ 23/28] PASS 2/2  raise-unknown[80k]   | baseline 2/2
+[ 24/28] PASS 2/2  raise-unknown[120k]   | baseline 2/2
+[ 25/28] PASS 2/2  raise-unknown[95k]   | baseline 1/2
+[ 26/28] PASS 2/2  extends[Rex]   | baseline 2/2
+[ 27/28] PASS 2/2  extends[Milo]   | baseline 2/2
+[ 28/28] PASS 2/2  extends[Bruno]   | baseline 2/2
+
+================================================================
+GEM (cascade):   28/28 scenarios, 74/74 nodes (100%)
+flat baseline:   17/28 scenarios, 59/74 nodes (80%)
+cascade lift:    +20 node-accuracy points
+================================================================
