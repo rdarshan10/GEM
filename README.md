@@ -18,24 +18,22 @@ A personal or home AI accumulates thousands of interlinked facts about you. *Rem
 easy. Keeping them **consistent when your life changes** is the unsolved part — because one change
 *ripples*.
 
-**Example — when stale memory becomes *dangerous*.** You tell your assistant: *"I was just
-diagnosed with a severe peanut allergy."* A normal assistant just stores it. GEM cascades the
-consequences — and prunes what's unaffected:
+**Example — one life change ripples through everything.** You tell your assistant: *"I moved from
+Boston to Denver."* A normal assistant just stores it. GEM cascades the consequences and prunes
+what's unaffected:
 
 ```mermaid
 flowchart TD
-    T(["🆕 'I was diagnosed with a severe peanut allergy'"]):::trig
-    T ==>|updates| A["🧬 dietary safety profile<br/><i>the anchor fact</i>"]:::anchor
+    T(["🆕 'I moved from Boston to Denver'"]):::trig
+    T ==>|updates| A["🏠 home location<br/><i>the anchor fact</i>"]:::anchor
 
-    A -->|"DERIVED_FROM (hop 1)"| M["🍽️ weekly meal plan<br/>(satay, pad thai…)"]:::stale
-    M -->|"hop 2"| G["🛒 recurring grocery auto-order"]:::stale
-    G -->|"hop 3"| P["📋 Sunday meal-prep checklist"]:::stale
-    P -->|"hop 4"| C["⏰ calendar: 'Sat 9pm — thaw the satay chicken'"]:::stale
+    A -->|"DERIVED_FROM (hop 1)"| M["🚆 commute: Red Line downtown"]:::stale
+    M -->|"hop 2"| D["🕖 leave home at 7:40am"]:::stale
+    D -->|"hop 3"| AL["⏰ morning alarm at 6:50am"]:::stale
+    AL -->|"hop 4"| CM["☕ coffee maker auto-brews at 6:45am"]:::stale
 
-    A -->|DERIVED_FROM| R["🍴 go-to restaurant: Thai Palace"]:::stale
-
-    A -. unrelated, pruned .-> K1["☕ coffee order — survives"]:::keep
-    A -. unrelated, pruned .-> K2["🏃 running route — survives"]:::keep
+    A -. unrelated, pruned .-> K1["🥗 vegetarian — survives"]:::keep
+    A -. unrelated, pruned .-> K2["🎂 sister's birthday in May — survives"]:::keep
 
     classDef trig fill:#fff3cd,stroke:#b8860b,color:#111;
     classDef anchor fill:#e7e7ff,stroke:#5b5bd6,color:#111;
@@ -44,16 +42,16 @@ flowchart TD
 ```
 
 The cascade flows **down the `DERIVED_FROM` edges** (solid), **multi-hop**, and **stops** at the
-unrelated branches (dotted) — update what changed, leave the rest alone.
+unrelated branches (dotted): update what changed, leave the rest alone.
 
-**Why this is hard — and why GEM wins:**
-- The deepest node — a **Saturday-night calendar reminder to thaw the chicken** — is **four hops**
-  from the allergy and mentions *nothing* about peanuts. No similarity search can connect *"thaw the
-  chicken"* to *"peanut allergy"* → flat/vector memory leaves the whole chain stale.
-- **GEM reaches it by walking the chain** (allergy → meal plan → groceries → meal-prep → reminder) —
-  and **stops cleanly** at coffee and running. That **transitive depth + correct pruning** is the
-  mechanism, and the difference between an assistant that's safe to act on and one that has you
-  thawing satay chicken next Saturday.
+**Why this is hard, and why GEM wins:**
+- The deepest node, a **coffee maker that auto-brews at 6:45am**, is **four hops** from the move and
+  mentions nothing about Boston or Denver. No similarity search connects *"coffee maker at 6:45"* to
+  *"moved to Denver"*, so flat/vector memory leaves the whole chain stale.
+- **GEM reaches it by walking the chain** (location → commute → departure time → alarm → coffee
+  maker), and **stops cleanly** at the vegetarian and birthday facts. That **transitive depth plus
+  correct pruning** is the mechanism, and the difference between an assistant that's safe to act on
+  and one that's still brewing your coffee for a train you no longer take.
 
 ## The breakthrough
 
