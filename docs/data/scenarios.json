@@ -1,0 +1,1534 @@
+{
+ "generated": "2026-10-05",
+ "llm": "openai/gpt-oss-120b",
+ "decider": "jev",
+ "scenarios": [
+  {
+   "key": "relocation",
+   "title": "Moving cities",
+   "domain": "Personal assistant",
+   "blurb": "Four facts hang off where you live, one of them four steps away. Two others only look related.",
+   "trigger": "I moved to Mumbai",
+   "nodes": [
+    {
+     "id": "n1",
+     "text": "I live in Bangalore",
+     "parents": []
+    },
+    {
+     "id": "n2",
+     "text": "My commute to the office is 45 minutes",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n3",
+     "text": "My alarm is set for 6:30 am to beat the traffic",
+     "parents": [
+      "n2"
+     ]
+    },
+    {
+     "id": "n4",
+     "text": "The coffee maker is scheduled to start at 6:45 am",
+     "parents": [
+      "n3"
+     ]
+    },
+    {
+     "id": "n5",
+     "text": "My timezone is IST",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n6",
+     "text": "My rent is 30,000 rupees a month",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n7",
+     "text": "I visited Bangalore Palace in 2019",
+     "parents": []
+    },
+    {
+     "id": "n8",
+     "text": "I prefer aisle seats on flights",
+     "parents": []
+    }
+   ],
+   "assoc": [
+    [
+     "n7",
+     "n1"
+    ]
+   ],
+   "steps": [
+    {
+     "kind": "scan",
+     "checked": [
+      {
+       "id": "n1",
+       "route": "llm",
+       "top": "UPDATES",
+       "p_top": 0.65,
+       "p_no_conflict": 0.01,
+       "p_covered": 0.6
+      },
+      {
+       "id": "n7",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.83,
+       "p_no_conflict": 1.0,
+       "p_covered": 0.05
+      },
+      {
+       "id": "n6",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.78,
+       "p_no_conflict": 0.86,
+       "p_covered": 0.03
+      },
+      {
+       "id": "n5",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.8,
+       "p_no_conflict": 0.98,
+       "p_covered": 0.05
+      },
+      {
+       "id": "n2",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.36,
+       "p_no_conflict": 0.38,
+       "p_covered": 0.03
+      },
+      {
+       "id": "n3",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.46,
+       "p_no_conflict": 0.49,
+       "p_covered": 0.03
+      }
+     ]
+    },
+    {
+     "kind": "revise",
+     "id": "n1",
+     "depth": 0,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "llm",
+      "top": "UPDATES",
+      "p_top": 0.65,
+      "p_no_conflict": 0.01,
+      "p_covered": 0.6
+     },
+     "content": "I live in Mumbai"
+    },
+    {
+     "kind": "revise",
+     "id": "n2",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.01,
+      "p_affected": 0.99,
+      "p_known": 0.1
+     },
+     "content": "My commute to the office is 45 minutes"
+    },
+    {
+     "kind": "revise",
+     "id": "n3",
+     "depth": 2,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.02,
+      "p_affected": 0.98,
+      "p_known": 0.1
+     },
+     "content": "My alarm is set for 6:30 am to beat the traffic"
+    },
+    {
+     "kind": "revise",
+     "id": "n4",
+     "depth": 3,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.08,
+      "p_affected": 0.92,
+      "p_known": 0.1
+     },
+     "content": "The coffee maker is scheduled to start at 6:45 am"
+    },
+    {
+     "kind": "stop",
+     "id": "n5",
+     "depth": 1,
+     "via": "jev",
+     "jev": {
+      "route": "stop",
+      "p_unaffected": 0.97,
+      "p_affected": 0.03,
+      "p_known": 0.22
+     }
+    },
+    {
+     "kind": "revise",
+     "id": "n6",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.07,
+      "p_affected": 0.93,
+      "p_known": 0.11
+     },
+     "content": "My rent is 30,000 rupees a month"
+    },
+    {
+     "kind": "already",
+     "id": "n6"
+    },
+    {
+     "kind": "already",
+     "id": "n2"
+    },
+    {
+     "kind": "already",
+     "id": "n3"
+    }
+   ],
+   "gem": [
+    {
+     "status": "ACTIVE",
+     "content": "I live in Mumbai",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "STALE",
+     "content": "My commute to the office is 45 minutes",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "STALE",
+     "content": "My alarm is set for 6:30 am to beat the traffic",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "STALE",
+     "content": "The coffee maker is scheduled to start at 6:45 am",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "ACTIVE",
+     "content": "My timezone is IST",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "STALE",
+     "content": "My rent is 30,000 rupees a month",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "ACTIVE",
+     "content": "I visited Bangalore Palace in 2019",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "I prefer aisle seats on flights",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "flat": [
+    {
+     "status": "ACTIVE",
+     "content": "I live in Mumbai",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "My commute to the office is 45 minutes",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "My alarm is set for 6:30 am to beat the traffic",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The coffee maker is scheduled to start at 6:45 am",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "My timezone is IST",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "My rent is 30,000 rupees a month",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "I visited Bangalore Palace in 2019",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "I prefer aisle seats on flights",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "calls": {
+    "llm": 1,
+    "jev": 4
+   },
+   "trace": [
+    "ingest conflict: new 'I moved to Mumbai' UPDATES n1 'I live in Bangalore'",
+    "revise n1: UPDATES 'I live in Bangalore' -> 'I live in Mumbai'",
+    "  jev: n2 affected, value unknown -> stale",
+    "  revise n2: UPDATES 'My commute to the office is 45 minutes' -> 'My commute to the office is 45 minutes' [STALE]",
+    "    jev: n3 affected, value unknown -> stale",
+    "    revise n3: UPDATES 'My alarm is set for 6:30 am to beat the traffic' -> 'My alarm is set for 6:30 am to beat the traffic' [STALE]",
+    "      jev: n4 affected, value unknown -> stale",
+    "      revise n4: UPDATES 'The coffee maker is scheduled to start at 6:45 am' -> 'The coffee maker is scheduled to start at 6:45 am' [STALE]",
+    "  semantic stop (jev): n5 unaffected by change",
+    "  jev: n6 affected, value unknown -> stale",
+    "  revise n6: UPDATES 'My rent is 30,000 rupees a month' -> 'My rent is 30,000 rupees a month' [STALE]",
+    "ingest conflict: n6 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n2 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n3 already revised by an upstream cascade this ingest; skip re-revision"
+   ]
+  },
+  {
+   "key": "runtime",
+   "title": "Runtime migration",
+   "domain": "Coding agent project memory",
+   "blurb": "A platform decision changes. The limits and workarounds built on it never name the platform, so text matching can't find them.",
+   "trigger": "We moved the orders service from AWS Lambda to long-running containers on ECS",
+   "nodes": [
+    {
+     "id": "n1",
+     "text": "The orders service runs on AWS Lambda",
+     "parents": []
+    },
+    {
+     "id": "n2",
+     "text": "Cold starts add about 800 ms to the first request after idle",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n3",
+     "text": "The checkout latency budget is 1.2 seconds to absorb that first-request delay",
+     "parents": [
+      "n2"
+     ]
+    },
+    {
+     "id": "n4",
+     "text": "Each handler must finish within 15 minutes",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n5",
+     "text": "The nightly export is split into 10-minute chunks",
+     "parents": [
+      "n4"
+     ]
+    },
+    {
+     "id": "n6",
+     "text": "The orders service is written in Go",
+     "parents": []
+    }
+   ],
+   "assoc": [],
+   "steps": [
+    {
+     "kind": "scan",
+     "checked": [
+      {
+       "id": "n1",
+       "route": "llm",
+       "top": "UPDATES",
+       "p_top": 0.71,
+       "p_no_conflict": 0.0,
+       "p_covered": 0.8
+      },
+      {
+       "id": "n6",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.98,
+       "p_no_conflict": 1.0,
+       "p_covered": 0.04
+      },
+      {
+       "id": "n5",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.99,
+       "p_no_conflict": 1.0,
+       "p_covered": 0.03
+      },
+      {
+       "id": "n3",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.6,
+       "p_no_conflict": 0.67,
+       "p_covered": 0.02
+      },
+      {
+       "id": "n4",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.73,
+       "p_no_conflict": 0.8,
+       "p_covered": 0.04
+      },
+      {
+       "id": "n2",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.39,
+       "p_no_conflict": 0.42,
+       "p_covered": 0.04
+      }
+     ]
+    },
+    {
+     "kind": "revise",
+     "id": "n1",
+     "depth": 0,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "llm",
+      "top": "UPDATES",
+      "p_top": 0.71,
+      "p_no_conflict": 0.0,
+      "p_covered": 0.8
+     },
+     "content": "The orders service runs on long-running containers on ECS"
+    },
+    {
+     "kind": "revise",
+     "id": "n2",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.01,
+      "p_affected": 0.99,
+      "p_known": 0.23
+     },
+     "content": "Cold starts add about 800 ms to the first request after idle"
+    },
+    {
+     "kind": "revise",
+     "id": "n3",
+     "depth": 2,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.0,
+      "p_affected": 1.0,
+      "p_known": 0.1
+     },
+     "content": "The checkout latency budget is 1.2 seconds to absorb that first-request delay"
+    },
+    {
+     "kind": "revise",
+     "id": "n4",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.03,
+      "p_affected": 0.97,
+      "p_known": 0.25
+     },
+     "content": "Each handler must finish within 15 minutes"
+    },
+    {
+     "kind": "revise",
+     "id": "n5",
+     "depth": 2,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.08,
+      "p_affected": 0.92,
+      "p_known": 0.1
+     },
+     "content": "The nightly export is split into 10-minute chunks"
+    },
+    {
+     "kind": "already",
+     "id": "n4"
+    },
+    {
+     "kind": "already",
+     "id": "n2"
+    },
+    {
+     "kind": "already",
+     "id": "n3"
+    }
+   ],
+   "gem": [
+    {
+     "status": "ACTIVE",
+     "content": "The orders service runs on long-running containers on ECS",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "STALE",
+     "content": "Cold starts add about 800 ms to the first request after idle",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "STALE",
+     "content": "The checkout latency budget is 1.2 seconds to absorb that first-request delay",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "STALE",
+     "content": "Each handler must finish within 15 minutes",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "STALE",
+     "content": "The nightly export is split into 10-minute chunks",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The orders service is written in Go",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "flat": [
+    {
+     "status": "ACTIVE",
+     "content": "The orders service runs on long-running containers on ECS",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Cold starts add about 800 ms to the first request after idle",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The checkout latency budget is 1.2 seconds to absorb that first-request delay",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "SUPERSEDED",
+     "content": "Each handler must finish within 15 minutes",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The nightly export is split into 10-minute chunks",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The orders service is written in Go",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "calls": {
+    "llm": 1,
+    "jev": 4
+   },
+   "trace": [
+    "ingest conflict: new 'We moved the orders service from AWS Lambda to long-running containers on ECS' UPDATES n1 'The orders service runs on AWS Lambda'",
+    "revise n1: UPDATES 'The orders service runs on AWS Lambda' -> 'The orders service runs on long-running containers on ECS'",
+    "  jev: n2 affected, value unknown -> stale",
+    "  revise n2: UPDATES 'Cold starts add about 800 ms to the first request after idle' -> 'Cold starts add about 800 ms to the first request after idle' [STALE]",
+    "    jev: n3 affected, value unknown -> stale",
+    "    revise n3: UPDATES 'The checkout latency budget is 1.2 seconds to absorb that first-request delay' -> 'The checkout latency budget is 1.2 seconds to absorb that first-request delay' [STALE]",
+    "  jev: n4 affected, value unknown -> stale",
+    "  revise n4: UPDATES 'Each handler must finish within 15 minutes' -> 'Each handler must finish within 15 minutes' [STALE]",
+    "    jev: n5 affected, value unknown -> stale",
+    "    revise n5: UPDATES 'The nightly export is split into 10-minute chunks' -> 'The nightly export is split into 10-minute chunks' [STALE]",
+    "ingest conflict: n4 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n2 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n3 already revised by an upstream cascade this ingest; skip re-revision"
+   ]
+  },
+  {
+   "key": "launch",
+   "title": "Launch slip",
+   "domain": "Project planning",
+   "blurb": "Every date in the plan is relative to the one before it. The launch moves; the change has to travel six steps.",
+   "trigger": "The launch date slipped to December 1",
+   "nodes": [
+    {
+     "id": "n1",
+     "text": "The product launch date is October 1",
+     "parents": []
+    },
+    {
+     "id": "n2",
+     "text": "The marketing campaign starts September 15, two weeks before launch",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n3",
+     "text": "The press embargo lifts on September 15 to match the campaign",
+     "parents": [
+      "n2"
+     ]
+    },
+    {
+     "id": "n4",
+     "text": "Analyst briefings are scheduled for September 14, the day before embargo lift",
+     "parents": [
+      "n3"
+     ]
+    },
+    {
+     "id": "n5",
+     "text": "The demo video must be finalized by September 10 for the briefings",
+     "parents": [
+      "n4"
+     ]
+    },
+    {
+     "id": "n6",
+     "text": "Video production kicks off August 20 to finish by September 10",
+     "parents": [
+      "n5"
+     ]
+    }
+   ],
+   "assoc": [],
+   "steps": [
+    {
+     "kind": "scan",
+     "checked": [
+      {
+       "id": "n1",
+       "route": "llm",
+       "top": "UPDATES",
+       "p_top": 0.97,
+       "p_no_conflict": 0.0,
+       "p_covered": 0.75
+      },
+      {
+       "id": "n2",
+       "route": "llm",
+       "top": "UPDATES",
+       "p_top": 0.43,
+       "p_no_conflict": 0.19,
+       "p_covered": 0.03
+      },
+      {
+       "id": "n4",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.77,
+       "p_no_conflict": 0.82,
+       "p_covered": 0.02
+      },
+      {
+       "id": "n6",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.87,
+       "p_no_conflict": 0.98,
+       "p_covered": 0.02
+      },
+      {
+       "id": "n3",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.64,
+       "p_no_conflict": 0.68,
+       "p_covered": 0.02
+      },
+      {
+       "id": "n5",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.68,
+       "p_no_conflict": 0.8,
+       "p_covered": 0.02
+      }
+     ]
+    },
+    {
+     "kind": "revise",
+     "id": "n1",
+     "depth": 0,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "llm",
+      "top": "UPDATES",
+      "p_top": 0.97,
+      "p_no_conflict": 0.0,
+      "p_covered": 0.75
+     },
+     "content": "The product launch date is December 1"
+    },
+    {
+     "kind": "revise",
+     "id": "n2",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "rewrite",
+      "p_unaffected": 0.01,
+      "p_affected": 0.99,
+      "p_known": 0.81
+     },
+     "content": "The marketing campaign starts November 17, two weeks before launch"
+    },
+    {
+     "kind": "revise",
+     "id": "n3",
+     "depth": 2,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "rewrite",
+      "p_unaffected": 0.0,
+      "p_affected": 1.0,
+      "p_known": 0.75
+     },
+     "content": "The press embargo lifts on November 17 to match the campaign"
+    },
+    {
+     "kind": "revise",
+     "id": "n4",
+     "depth": 3,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "rewrite",
+      "p_unaffected": 0.0,
+      "p_affected": 1.0,
+      "p_known": 0.52
+     },
+     "content": "Analyst briefings are scheduled for November 16, the day before embargo lift"
+    },
+    {
+     "kind": "revise",
+     "id": "n5",
+     "depth": 4,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.0,
+      "p_affected": 1.0,
+      "p_known": 0.25
+     },
+     "content": "The demo video must be finalized by September 10 for the briefings"
+    },
+    {
+     "kind": "revise",
+     "id": "n6",
+     "depth": 5,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.0,
+      "p_affected": 1.0,
+      "p_known": 0.14
+     },
+     "content": "Video production kicks off August 20 to finish by September 10"
+    },
+    {
+     "kind": "already",
+     "id": "n2"
+    },
+    {
+     "kind": "already",
+     "id": "n3"
+    },
+    {
+     "kind": "already",
+     "id": "n4"
+    },
+    {
+     "kind": "already",
+     "id": "n5"
+    }
+   ],
+   "gem": [
+    {
+     "status": "ACTIVE",
+     "content": "The product launch date is December 1",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The marketing campaign starts November 17, two weeks before launch",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The press embargo lifts on November 17 to match the campaign",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Analyst briefings are scheduled for November 16, the day before embargo lift",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "STALE",
+     "content": "The demo video must be finalized by September 10 for the briefings",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "STALE",
+     "content": "Video production kicks off August 20 to finish by September 10",
+     "review": true,
+     "confidence": 0.5
+    }
+   ],
+   "flat": [
+    {
+     "status": "ACTIVE",
+     "content": "The product launch date is December 1",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The marketing campaign starts September 15, and the launch is now on December 1",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The press embargo lifts on September 15 to match the campaign",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Analyst briefings are scheduled for September 14, the day before embargo lift",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The demo video must be finalized by September 10 for the briefings",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Video production kicks off August 20 to finish by September 10",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "calls": {
+    "llm": 4,
+    "jev": 6
+   },
+   "trace": [
+    "ingest conflict: new 'The launch date slipped to December 1' UPDATES n1 'The product launch date is October 1'",
+    "revise n1: UPDATES 'The product launch date is October 1' -> 'The product launch date is December 1'",
+    "  revise n2: UPDATES 'The marketing campaign starts September 15, two weeks before launch' -> 'The marketing campaign starts November 17, two weeks before launch'",
+    "    revise n3: UPDATES 'The press embargo lifts on September 15 to match the campaign' -> 'The press embargo lifts on November 17 to match the campaign'",
+    "      revise n4: UPDATES 'Analyst briefings are scheduled for September 14, the day before embargo lift' -> 'Analyst briefings are scheduled for November 16, the day before embargo lift'",
+    "        jev: n5 affected, value unknown -> stale",
+    "        revise n5: UPDATES 'The demo video must be finalized by September 10 for the briefings' -> 'The demo video must be finalized by September 10 for the briefings' [STALE]",
+    "          jev: n6 affected, value unknown -> stale",
+    "          revise n6: UPDATES 'Video production kicks off August 20 to finish by September 10' -> 'Video production kicks off August 20 to finish by September 10' [STALE]",
+    "ingest conflict: n2 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n3 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n4 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n5 already revised by an upstream cascade this ingest; skip re-revision"
+   ]
+  },
+  {
+   "key": "cloud",
+   "title": "Instance change",
+   "domain": "Infrastructure",
+   "blurb": "The budget depends on two facts at once, and finance signed off on the budget. One parent changes; its sibling facts must stay put.",
+   "trigger": "We switched our servers to the m5.xlarge instance type",
+   "nodes": [
+    {
+     "id": "n1",
+     "text": "Our servers run in the us-east-1 region",
+     "parents": []
+    },
+    {
+     "id": "n2",
+     "text": "Our servers use the m5.large instance type",
+     "parents": []
+    },
+    {
+     "id": "n3",
+     "text": "Our servers boot from image ami-0abc123",
+     "parents": []
+    },
+    {
+     "id": "n4",
+     "text": "The monthly hosting budget is 400 dollars",
+     "parents": [
+      "n1",
+      "n2"
+     ]
+    },
+    {
+     "id": "n5",
+     "text": "Finance approved the hosting line in this quarter's plan",
+     "parents": [
+      "n4"
+     ]
+    }
+   ],
+   "assoc": [],
+   "steps": [
+    {
+     "kind": "scan",
+     "checked": [
+      {
+       "id": "n2",
+       "route": "covered",
+       "top": "UPDATES",
+       "p_top": 0.96,
+       "p_no_conflict": 0.0,
+       "p_covered": 0.9
+      },
+      {
+       "id": "n1",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.99,
+       "p_no_conflict": 1.0,
+       "p_covered": 0.03
+      },
+      {
+       "id": "n3",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.97,
+       "p_no_conflict": 0.99,
+       "p_covered": 0.05
+      },
+      {
+       "id": "n4",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.98,
+       "p_no_conflict": 0.99,
+       "p_covered": 0.03
+      },
+      {
+       "id": "n5",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.99,
+       "p_no_conflict": 1.0,
+       "p_covered": 0.02
+      }
+     ]
+    },
+    {
+     "kind": "revise",
+     "id": "n2",
+     "depth": 0,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "jev",
+     "jev": {
+      "route": "covered",
+      "top": "UPDATES",
+      "p_top": 0.96,
+      "p_no_conflict": 0.0,
+      "p_covered": 0.9
+     },
+     "content": "We switched our servers to the m5.xlarge instance type"
+    },
+    {
+     "kind": "revise",
+     "id": "n4",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.03,
+      "p_affected": 0.97,
+      "p_known": 0.11
+     },
+     "content": "The monthly hosting budget is 400 dollars"
+    },
+    {
+     "kind": "revise",
+     "id": "n5",
+     "depth": 2,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.07,
+      "p_affected": 0.93,
+      "p_known": 0.09
+     },
+     "content": "Finance approved the hosting line in this quarter's plan"
+    }
+   ],
+   "gem": [
+    {
+     "status": "ACTIVE",
+     "content": "Our servers run in the us-east-1 region",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "We switched our servers to the m5.xlarge instance type",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Our servers boot from image ami-0abc123",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "STALE",
+     "content": "The monthly hosting budget is 400 dollars",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "STALE",
+     "content": "Finance approved the hosting line in this quarter's plan",
+     "review": true,
+     "confidence": 0.5
+    }
+   ],
+   "flat": [
+    {
+     "status": "ACTIVE",
+     "content": "Our servers run in the us-east-1 region",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Our servers use the m5.xlarge instance type",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Our servers boot from image ami-0abc123",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "The monthly hosting budget is 400 dollars",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Finance approved the hosting line in this quarter's plan",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "calls": {
+    "llm": 0,
+    "jev": 3
+   },
+   "trace": [
+    "ingest conflict: new 'We switched our servers to the m5.xlarge instance type' UPDATES n2 'Our servers use the m5.large instance type'",
+    "revise n2: UPDATES 'Our servers use the m5.large instance type' -> 'We switched our servers to the m5.xlarge instance type'",
+    "  jev: n4 affected, value unknown -> stale",
+    "  revise n4: UPDATES 'The monthly hosting budget is 400 dollars' -> 'The monthly hosting budget is 400 dollars' [STALE]",
+    "    jev: n5 affected, value unknown -> stale",
+    "    revise n5: UPDATES 'Finance approved the hosting line in this quarter's plan' -> 'Finance approved the hosting line in this quarter's plan' [STALE]"
+   ]
+  },
+  {
+   "key": "reorg",
+   "title": "Manager reorg",
+   "domain": "Workplace assistant",
+   "blurb": "Three routines fan out from who your manager is. Each one needs its own answer.",
+   "trigger": "After the reorg, Bob is now my manager",
+   "nodes": [
+    {
+     "id": "n1",
+     "text": "Alice is my manager",
+     "parents": []
+    },
+    {
+     "id": "n2",
+     "text": "I send Alice a weekly status report",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n3",
+     "text": "Alice approves my time-off requests",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n4",
+     "text": "Alice writes my annual performance review",
+     "parents": [
+      "n1"
+     ]
+    }
+   ],
+   "assoc": [],
+   "steps": [
+    {
+     "kind": "scan",
+     "checked": [
+      {
+       "id": "n1",
+       "route": "llm",
+       "top": "UPDATES",
+       "p_top": 0.5,
+       "p_no_conflict": 0.11,
+       "p_covered": 0.55
+      },
+      {
+       "id": "n4",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.64,
+       "p_no_conflict": 0.69,
+       "p_covered": 0.07
+      },
+      {
+       "id": "n2",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.66,
+       "p_no_conflict": 0.7,
+       "p_covered": 0.08
+      },
+      {
+       "id": "n3",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.45,
+       "p_no_conflict": 0.47,
+       "p_covered": 0.07
+      }
+     ]
+    },
+    {
+     "kind": "revise",
+     "id": "n1",
+     "depth": 0,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "llm",
+      "top": "UPDATES",
+      "p_top": 0.5,
+      "p_no_conflict": 0.11,
+      "p_covered": 0.55
+     },
+     "content": "Bob is my manager"
+    },
+    {
+     "kind": "revise",
+     "id": "n2",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "rewrite",
+      "p_unaffected": 0.0,
+      "p_affected": 1.0,
+      "p_known": 0.63
+     },
+     "content": "I send Bob a weekly status report"
+    },
+    {
+     "kind": "revise",
+     "id": "n3",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "rewrite",
+      "p_unaffected": 0.0,
+      "p_affected": 1.0,
+      "p_known": 0.67
+     },
+     "content": "Bob approves my time-off requests"
+    },
+    {
+     "kind": "revise",
+     "id": "n4",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "rewrite",
+      "p_unaffected": 0.0,
+      "p_affected": 1.0,
+      "p_known": 0.7
+     },
+     "content": "Bob writes my annual performance review"
+    },
+    {
+     "kind": "already",
+     "id": "n4"
+    },
+    {
+     "kind": "already",
+     "id": "n2"
+    },
+    {
+     "kind": "already",
+     "id": "n3"
+    }
+   ],
+   "gem": [
+    {
+     "status": "ACTIVE",
+     "content": "Bob is my manager",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "I send Bob a weekly status report",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Bob approves my time-off requests",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Bob writes my annual performance review",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "flat": [
+    {
+     "status": "ACTIVE",
+     "content": "Bob is my manager",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "I send Alice a weekly status report",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Alice approves my time-off requests",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "Alice writes my annual performance review",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "calls": {
+    "llm": 4,
+    "jev": 2
+   },
+   "trace": [
+    "ingest conflict: new 'After the reorg, Bob is now my manager' UPDATES n1 'Alice is my manager'",
+    "revise n1: UPDATES 'Alice is my manager' -> 'Bob is my manager'",
+    "  revise n2: UPDATES 'I send Alice a weekly status report' -> 'I send Bob a weekly status report'",
+    "  revise n3: UPDATES 'Alice approves my time-off requests' -> 'Bob approves my time-off requests'",
+    "  revise n4: UPDATES 'Alice writes my annual performance review' -> 'Bob writes my annual performance review'",
+    "ingest conflict: n4 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n2 already revised by an upstream cascade this ingest; skip re-revision",
+    "ingest conflict: n3 already revised by an upstream cascade this ingest; skip re-revision"
+   ]
+  },
+  {
+   "key": "email",
+   "title": "Email switch",
+   "domain": "Precision check",
+   "blurb": "Two small dependency trees sit side by side. The change touches one; the other must come through untouched.",
+   "trigger": "I switched my personal email provider to Fastmail",
+   "nodes": [
+    {
+     "id": "n1",
+     "text": "My personal email provider is Gmail",
+     "parents": []
+    },
+    {
+     "id": "n2",
+     "text": "Gmail filters forward my receipts to my expense tracker",
+     "parents": [
+      "n1"
+     ]
+    },
+    {
+     "id": "n3",
+     "text": "My password manager is 1Password",
+     "parents": []
+    },
+    {
+     "id": "n4",
+     "text": "I store my work 2FA codes in 1Password",
+     "parents": [
+      "n3"
+     ]
+    }
+   ],
+   "assoc": [],
+   "steps": [
+    {
+     "kind": "scan",
+     "checked": [
+      {
+       "id": "n1",
+       "route": "llm",
+       "top": "UPDATES",
+       "p_top": 0.85,
+       "p_no_conflict": 0.0,
+       "p_covered": 0.58
+      },
+      {
+       "id": "n3",
+       "route": "llm",
+       "top": "UNRELATED",
+       "p_top": 0.87,
+       "p_no_conflict": 0.88,
+       "p_covered": 0.26
+      },
+      {
+       "id": "n2",
+       "route": "llm",
+       "top": "REPLACES",
+       "p_top": 0.31,
+       "p_no_conflict": 0.1,
+       "p_covered": 0.06
+      },
+      {
+       "id": "n4",
+       "route": "skip",
+       "top": "UNRELATED",
+       "p_top": 0.97,
+       "p_no_conflict": 1.0,
+       "p_covered": 0.03
+      }
+     ]
+    },
+    {
+     "kind": "revise",
+     "id": "n1",
+     "depth": 0,
+     "label": "UPDATES",
+     "status": "ACTIVE",
+     "via": "llm",
+     "jev": {
+      "route": "llm",
+      "top": "UPDATES",
+      "p_top": 0.85,
+      "p_no_conflict": 0.0,
+      "p_covered": 0.58
+     },
+     "content": "My personal email provider is Fastmail"
+    },
+    {
+     "kind": "revise",
+     "id": "n2",
+     "depth": 1,
+     "label": "UPDATES",
+     "status": "STALE",
+     "via": "jev",
+     "jev": {
+      "route": "stale",
+      "p_unaffected": 0.01,
+      "p_affected": 0.99,
+      "p_known": 0.2
+     },
+     "content": "Gmail filters forward my receipts to my expense tracker"
+    },
+    {
+     "kind": "already",
+     "id": "n2"
+    }
+   ],
+   "gem": [
+    {
+     "status": "ACTIVE",
+     "content": "My personal email provider is Fastmail",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "STALE",
+     "content": "Gmail filters forward my receipts to my expense tracker",
+     "review": true,
+     "confidence": 0.5
+    },
+    {
+     "status": "ACTIVE",
+     "content": "My password manager is 1Password",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "I store my work 2FA codes in 1Password",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "flat": [
+    {
+     "status": "ACTIVE",
+     "content": "My personal email provider is Fastmail",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "STALE",
+     "content": "Gmail filters forward my receipts to my expense tracker",
+     "review": false,
+     "confidence": 0.5
+    },
+    {
+     "status": "ACTIVE",
+     "content": "My password manager is 1Password",
+     "review": false,
+     "confidence": 1.0
+    },
+    {
+     "status": "ACTIVE",
+     "content": "I store my work 2FA codes in 1Password",
+     "review": false,
+     "confidence": 1.0
+    }
+   ],
+   "calls": {
+    "llm": 2,
+    "jev": 2
+   },
+   "trace": [
+    "ingest conflict: new 'I switched my personal email provider to Fastmail' UPDATES n1 'My personal email provider is Gmail'",
+    "revise n1: UPDATES 'My personal email provider is Gmail' -> 'My personal email provider is Fastmail'",
+    "  jev: n2 affected, value unknown -> stale",
+    "  revise n2: UPDATES 'Gmail filters forward my receipts to my expense tracker' -> 'Gmail filters forward my receipts to my expense tracker' [STALE]",
+    "ingest conflict: n2 already revised by an upstream cascade this ingest; skip re-revision"
+   ]
+  }
+ ]
+}

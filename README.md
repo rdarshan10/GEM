@@ -1,5 +1,7 @@
 # GEM — Governed Evolving Memory
 
+**[Interactive explainer →](https://rdarshan10.github.io/GEM/)** step through real cascades, see what flat memory leaves behind.
+
 **The long-term goal: Personal & Home Intelligence** — an AI that genuinely *knows you* and stays
 *right* as your life changes. GEM is a **building block toward that goal**: the memory layer that
 keeps a personal/home AI's facts consistent when one of them changes.
