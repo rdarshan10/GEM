@@ -39,6 +39,7 @@ class Fact:
     status: str                       # "ACTIVE" | "STALE" | "SUPERSEDED"
     needs_review: bool = False
     confidence: float = 1.0
+    score: float | None = None        # similarity to the query (search results only)
 
 
 @dataclass
@@ -96,11 +97,27 @@ class Memory:
         across domains (small N; see runs/diag_derive_*.txt), so a minority of cascades may be
         missed or spurious. Rule of thumb: pin what you can't afford to get wrong, infer the rest.
         """
-        before = {n.id: (n.status, n.content) for n in self._g.store.all_nodes()}
+        before = self._snapshot()
         node = self._g.ingest(content, parents=derived_from)
+        return self._changes(node.id, before, skip=node.id)
+
+    def forget(self, fact_id: str) -> AddResult:
+        """Retract a fact and cascade: everything derived from it is re-checked and goes stale
+        if it depended on it. Returns the forgotten fact's id and what the cascade changed."""
+        node = self._g.store.get(fact_id)
+        if node is None:
+            raise KeyError(fact_id)
+        before = self._snapshot()
+        self._g.retract(node)
+        return self._changes(fact_id, before, skip=fact_id)
+
+    def _snapshot(self) -> dict:
+        return {n.id: (n.status, n.content) for n in self._g.store.all_nodes()}
+
+    def _changes(self, fact_id: str, before: dict, *, skip: str) -> AddResult:
         invalidated, revised = [], []
         for n in self._g.store.all_nodes():
-            if n.id == node.id:
+            if n.id == skip:
                 continue
             prev = before.get(n.id)
             if not prev or (prev[0] == n.status and prev[1] == n.content):
@@ -110,13 +127,20 @@ class Memory:
                 invalidated.append(f)         # no longer trustworthy
             else:
                 revised.append(f)             # corrected in place, still usable
-        return AddResult(id=node.id, invalidated=invalidated, revised=revised)
+        self._save()
+        return AddResult(id=fact_id, invalidated=invalidated, revised=revised)
+
+    def _save(self) -> None:
+        save = getattr(self._g.store, "save", None)   # persistent stores (JsonStore) flush here
+        if save:
+            save()
 
     def load(self, content: str, derived_from: list[str] | None = None) -> str:
         """Bulk-load a fact you already trust (skips the conflict scan). For seeding a known,
         non-conflicting initial memory fast — not for new observations."""
-        return self._g.ingest(content, parents=(derived_from or []),
-                              check_conflicts=False).id
+        fid = self._g.ingest(content, parents=(derived_from or []), check_conflicts=False).id
+        self._save()
+        return fid
 
     # --- read --------------------------------------------------------------- #
     def search(self, query: str, k: int = 5, include_stale: bool = False) -> list[Fact]:
@@ -125,7 +149,12 @@ class Memory:
                   if n.embedding is not None
                   and (include_stale or n.status == Status.ACTIVE)]
         scored.sort(key=lambda t: t[1], reverse=True)
-        return [_to_fact(n) for n, _ in scored[:k]]
+        out = []
+        for n, sim in scored[:k]:
+            f = _to_fact(n)
+            f.score = float(sim)
+            out.append(f)
+        return out
 
     def get(self, fact_id: str) -> Fact | None:
         n = self._g.store.get(fact_id)

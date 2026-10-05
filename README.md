@@ -180,6 +180,37 @@ new Revenue team:
   longer owns the service.
 - **GEM** cascades the ownership change and corrects **all three** downstream process facts.
 
+### Use it as a tool (MCP server or agent tools)
+
+GEM exposes the same tool surface as [Supermemory](https://supermemory.ai/docs/supermemory-mcp/introduction)
+(`add_memory` with `save`/`forget`, `search_memory`, `list_memories`, spaces via `container_tag`) —
+plus what flat memory can't do: every save or forget reports the **derived facts it invalidated**,
+`search_memory` returns out-of-date matches in a separate `stale` list, and `get_stale` / `why`
+explain them.
+
+```bash
+pip install -e ".[mcp,embeddings,jev]"
+claude mcp add gem -- python -m gem.mcp_server          # Claude Code
+```
+
+```json
+{"mcpServers": {"gem": {"command": "python", "args": ["-m", "gem.mcp_server"],
+  "env": {"GEM_LLM": "groq", "GROQ_MODEL": "openai/gpt-oss-120b", "GEM_DECIDER": "jev"}}}}
+```
+
+| Tool | What it does |
+|---|---|
+| `add_memory` | `save` a fact (optionally `derived_from` ids) or `forget` one; returns `revised` and `invalidated` facts |
+| `search_memory` | still-valid matches in `results`, out-of-date matches in `stale` |
+| `list_memories` | everything in a space, with status |
+| `get_stale` | facts to reconfirm because something they depended on changed |
+| `why` | the facts a fact was derived from |
+
+Memory persists per space: JSON files under `~/.gem` by default (`GEM_HOME`), or FalkorDB with
+`GEM_STORE=falkor`. For your own agent loop, `gem.tools` has the same tools as JSON definitions
+(`TOOLS` for Claude, `openai_tools()` for OpenAI/Groq) and a dispatcher:
+`GemTools().call(name, input)`.
+
 ### Use it when… / skip it when… (the honest scope — measured, not asserted)
 
 | Use GEM when | Skip GEM when |

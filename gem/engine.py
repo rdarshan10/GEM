@@ -261,8 +261,14 @@ class GEM:
         self._propagate(node, label, revised_content, trigger, depth=0,
                         visited=set() if visited is None else visited)
 
+    def retract(self, node: Node) -> None:
+        """Forget a fact: supersede it (STALE + needs_review in conservative mode) and cascade
+        to everything derived from it, exactly as if a new fact had contradicted it."""
+        self._log(f"retract {node.id} '{node.content}'")
+        self._propagate(node, C.Label.CONTRADICTS, None, trigger=None, depth=0, visited=set())
+
     def _propagate(self, node: Node, label: C.Label, revised_content: str | None,
-                   trigger: Node, depth: int, visited: set, certain: bool = True):
+                   trigger: Node | None, depth: int, visited: set, certain: bool = True):
         if node.id in visited:                      # cycle guard
             self._log(f"cycle guard: skip {node.id}")
             return
@@ -273,7 +279,8 @@ class GEM:
 
         old_content = node.content
         self._apply(node, label, revised_content, certain=certain)
-        self.store.add_edge(trigger.id, node.id, EdgeType.CONTRADICTS)
+        if trigger is not None:                     # None = an explicit retract (forget)
+            self.store.add_edge(trigger.id, node.id, EdgeType.CONTRADICTS)
         self.store.update_node(node)
         self._log(f"{'  ' * depth}revise {node.id}: {label.value} "
                   f"'{old_content}' -> '{node.content}'"
