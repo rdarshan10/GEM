@@ -72,6 +72,8 @@
       return n;
     }
     note(x, y, text) { const n = { x, y, text, a: 0, aT: 0 }; this.notes.push(n); return n; }
+    // a framed panel in world space with a title and a status line, drawn behind the graph
+    card(x0, y0, x1, y1, title) { const c = { card: true, x0, y0, x1, y1, title, status: "", active: 0, activeT: 0, a: 0, aT: 0 }; this.notes.push(c); return c; }
     showNotes(on) { this.notes.forEach((n) => { n.aT = on ? 1 : 0; }); }
     clear() { this.notes = []; this.nodes.clear(); this.edges = []; this.fx = []; this.timers.forEach((t) => t.r()); this.timers = []; }
     addEdge(a, b, type = "derived") { this.edges.push({ a, b, type, alpha: 1 }); }
@@ -211,7 +213,10 @@
         if (n.drop < 1) n.drop = Math.min(1, n.drop + dt / 0.9);
         if (n.dial && n.dial.t < 1) n.dial.t = Math.min(1, n.dial.t + dt / 0.8);
       });
-      for (const n of this.notes) n.a = lerp(n.a, n.aT, 1 - Math.exp(-dt * 3));
+      for (const n of this.notes) {
+        n.a = lerp(n.a, n.aT, 1 - Math.exp(-dt * 3));
+        if (n.card) n.active = lerp(n.active, n.activeT, 1 - Math.exp(-dt * 5));
+      }
       for (const f of this.fx) f.t += (dt * 1000) / f.dur;
       this.fx = this.fx.filter((f) => {
         if (f.t < 1) return true;
@@ -268,9 +273,40 @@
         }
       }
 
-      // notes (e.g. cluster titles)
+      // cards and notes (e.g. memory-group panels), behind everything else
       for (const nt of this.notes) {
         if (nt.a < 0.02) continue;
+        if (nt.card) {
+          const [x0, y0] = this.toScreen(nt.x0, nt.y0), [x1, y1] = this.toScreen(nt.x1, nt.y1);
+          ctx.globalAlpha = nt.a;
+          ctx.beginPath();
+          ctx.roundRect(x0, y0, x1 - x0, y1 - y0, 12);
+          ctx.fillStyle = th.cardFill || "rgba(255,255,255,.03)";
+          ctx.fill();
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = th.cardLine || "rgba(255,255,255,.1)";
+          ctx.stroke();
+          if (nt.active > 0.02) {
+            ctx.globalAlpha = nt.a * nt.active;
+            ctx.strokeStyle = th.cardActive || th.pulse;
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+          }
+          ctx.globalAlpha = nt.a;
+          ctx.font = th.cardTitleFont || "500 12px monospace";
+          ctx.fillStyle = th.text;
+          ctx.fillText(nt.title, x0 + 16, y0 + 26);
+          if (nt.status) {
+            ctx.font = th.cardStatusFont || "400 11.5px monospace";
+            ctx.fillStyle = nt.active > 0.5 ? (th.cardActive || th.pulse) : (th.noteColor || th.text);
+            let st = nt.status;
+            const room = x1 - x0 - 32;
+            while (st.length > 4 && ctx.measureText(st).width > room) st = st.slice(0, -2).trimEnd() + "…";
+            ctx.fillText(st, x0 + 16, y1 - 16);
+          }
+          ctx.globalAlpha = 1;
+          continue;
+        }
         const [x, y] = this.toScreen(nt.x, nt.y);
         ctx.globalAlpha = nt.a;
         ctx.font = th.noteFont || "500 11px monospace";
@@ -511,7 +547,7 @@
 
     // conflict scan (flat memory runs its scan on the LLM; only GEM's scan goes to Jev)
     const scan = sc.steps.find((s) => s.kind === "scan");
-    g.sonar(P("new"), { radius: 420, dur: 1300 / sp });
+    g.sonar(P("new"), { radius: opts.sonarRadius || 420, dur: 1300 / sp });
     if (opts.mode === "flat") log("flat", "conflict scan · similar facts checked by the LLM");
     else if (scan) {
       jev += 1; count();

@@ -43,6 +43,8 @@
     labelHalo: "rgba(10,11,13,.9)", fontSize: 14, fontFamily: "'Geist', sans-serif", badgeFont: "500 10px 'Geist Mono', monospace",
     lineHeight: 17, breath: 3.2, glow: 18, dim: 0.16, camSpeed: 2.2,
     noteFont: "500 12px 'Geist Mono', monospace", noteColor: "#8a8880",
+    cardFill: "rgba(255,255,255,.025)", cardLine: "rgba(255,255,255,.09)", cardActive: "#86a8ff",
+    cardTitleFont: "500 12.5px 'Geist Mono', monospace", cardStatusFont: "400 12px 'Geist Mono', monospace",
     drawNode(ctx, n, x, y, r) {
       ctx.save();
       if (n.state !== "active") { ctx.shadowColor = `rgba(${n.col.join(",")},.65)`; ctx.shadowBlur = 16; }
@@ -63,12 +65,18 @@
   const relDecided = rel.steps.filter((s) => s.kind === "revise" || s.kind === "stop");
   $("#m-cheap").textContent = `${relDecided.filter((s) => s.via === "jev").length} of ${relDecided.length}`;
   $("#m-llm").textContent = rel.calls.llm;
-  // step 08 numbers, from the recorded launch run
-  const la = S.launch, laScan = la.steps.find((s) => s.kind === "scan");
-  $("#s-checked").textContent = laScan ? laScan.checked.length : 0;
-  $("#s-links").textContent = la.steps.filter((s) => (s.kind === "revise" || s.kind === "stop") && s.depth > 0).length;
-  $("#s-llm").textContent = la.calls.llm;
+  // step 08 numbers: shown for whichever recorded change is running
   $("#s-total").textContent = data.scenarios.reduce((a, s) => a + s.nodes.length, 0);
+  const scanCount = (sc) => { const scan = sc.steps.find((s) => s.kind === "scan"); return scan ? scan.checked.length : 0; };
+  const linkCount = (sc) => sc.steps.filter((s) => (s.kind === "revise" || s.kind === "stop") && s.depth > 0).length;
+  const writeStats = (sc) => `${linkCount(sc)} followed · ${sc.calls.llm} LLM`;
+  function showWrite(sc) {
+    $("#s-checked").textContent = scanCount(sc);
+    $("#s-links").textContent = linkCount(sc);
+    $("#s-llm").textContent = sc.calls.llm;
+    $("#s-now").textContent = `now: “${sc.trigger}”`;
+  }
+  showWrite(S.launch);
 
   // ------------------------------------------------------------------ story
   const g = new GemGraph($("#stage"), theme, {
@@ -81,7 +89,7 @@
   // step 08's map: the six memories as compact graphs in a 3x2 grid, titled, so the whole
   // memory is readable at once. Nodes glide between this and the story layout.
   const MAP = [["launch", 0, 0], ["relocation", 1, 0], ["runtime", 2, 0], ["reorg", 0, 1], ["email", 1, 1], ["cloud", 2, 1]];
-  const CELL_W = 560, CELL_H = 520;
+  const CELL_W = 540, CELL_H = 600, CARD_W = 500, CARD_TOP = 150, CARD_H = 560;
   MAP.forEach(([k, col, row]) => {
     const L = GemGraph.layout(S[k], col * CELL_W, row * CELL_H, 110, 64);
     const c = C[k];
@@ -89,7 +97,12 @@
     c.storyHome = c.home;
     c.map = Object.fromEntries(S[k].nodes.map((n) => [k + ":" + n.id, L[n.id]]));
     c.mapHome = L.__trigger;
-    g.note(col * CELL_W, row * CELL_H - 135, S[k].title.toUpperCase());
+    c.card = g.card(col * CELL_W - CARD_W / 2, row * CELL_H - CARD_TOP, col * CELL_W + CARD_W / 2, row * CELL_H - CARD_TOP + CARD_H, S[k].title.toUpperCase());
+    // centre each graph vertically in its card
+    const ys = Object.values(c.map).map((p) => p[1]).concat(c.mapHome[1]);
+    const dy = (row * CELL_H - CARD_TOP + CARD_H / 2) - (Math.min(...ys) + Math.max(...ys)) / 2 + 6;
+    Object.values(c.map).forEach((p) => { p[1] += dy; });
+    c.mapHome = [c.mapHome[0], c.mapHome[1] + dy];
   });
   const placeAll = (which) => Object.values(C).forEach((c) => {
     Object.entries(c[which]).forEach(([id, [x, y]]) => { const n = g.nodes.get(id); n.hx = x; n.hy = y; });
@@ -109,6 +122,8 @@
     const c = C[key];
     placeAll("story");
     g.opts.compact = compact;
+    g.opts.labels = true;
+    MAP.forEach(([k]) => { C[k].card.activeT = 0; });
     g.showNotes(false);
     g.setFocus(c.ids.concat(key + ":new"), 0);
     g.frame(c.ids, 40, 1.15, 0.18, [c.home], ZOOM_OX, hero ? HERO_OY : undefined);
@@ -134,11 +149,11 @@
   };
   const overview = () => {
     placeAll("map");
-    g.opts.compact = true;            // in the map only the fact being decided is labelled
+    g.opts.labels = false;            // the map shows shape and state; titles say what's running
     g.setFocus(all, 1);
     g.showNotes(true);
     const xs = MAP.map(([, c]) => c * CELL_W), ys = MAP.map(([, , r]) => r * CELL_H);
-    g.frame(all, 50, 0.95, 0.18, [[Math.min(...xs) - 160, Math.min(...ys) - 150], [Math.max(...xs) + 40, Math.max(...ys) + 330]], WIDE_OX, 0);
+    g.frame(all, 40, 0.95, 0.18, [[Math.min(...xs) - CARD_W / 2, Math.min(...ys) - CARD_TOP], [Math.max(...xs) + CARD_W / 2 - g.opts.labelWidth * 0, Math.max(...ys) - CARD_TOP + CARD_H]], WIDE_OX, 0);
   };
   const play = (key, t, o = {}) => t.cancelled ? Promise.resolve() :
     GemGraph.play(g, S[key], key + ":", C[key].home, Object.assign({ token: t, dials: false, who: false }, o, { speed: (o.speed || 1) * speed }));
@@ -197,11 +212,29 @@
         if (s.jev && s.depth > 0) g.dial("relocation:" + s.id, s.kind === "stop" ? s.jev.p_unaffected : s.jev.p_affected, "", s.kind === "stop" ? "kept" : "stale");
       });
     },
-    async scale() { // the whole memory at once; one write lights up only what it touches
+    async scale() { // six changes in turn; each lights up only its own group
       const t = fresh(); resetAll(); overview();
-      await g.wait(RM ? 0 : 1300); if (t.cancelled) return;
-      g.setFocus(C.launch.ids.concat("launch:new"), 0.32);
-      await play("launch", t, { badges: false });
+      MAP.forEach(([k]) => { C[k].card.activeT = 0; C[k].card.status = `${S[k].nodes.length} facts`; });
+      await g.wait(RM ? 0 : 1100); if (t.cancelled) return;
+      for (const [k] of MAP) {
+        if (t.cancelled) return;
+        const sc = S[k], c = C[k];
+        showWrite(sc);
+        c.card.activeT = 1;
+        c.card.status = "updating…";
+        g.setFocus(c.ids.concat(k + ":new"), 0.3);
+        await play(k, t, { badges: false, speed: 1.5, sonarRadius: 170 });
+        if (t.cancelled) return;
+        c.card.activeT = 0;
+        c.card.status = writeStats(sc);
+        await g.wait(RM ? 0 : 600);
+      }
+      if (t.cancelled) return;
+      g.setFocus(all, 1);
+      $("#s-checked").textContent = data.scenarios.reduce((a, s) => a + scanCount(s), 0);
+      $("#s-links").textContent = data.scenarios.reduce((a, s) => a + linkCount(s), 0);
+      $("#s-llm").textContent = data.scenarios.reduce((a, s) => a + s.calls.llm, 0);
+      $("#s-now").textContent = "totals for all six changes · each touched only its own group";
     },
   };
 
