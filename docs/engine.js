@@ -28,6 +28,7 @@
       this.nodes = new Map();
       this.edges = [];
       this.fx = [];
+      this.notes = [];
       this.cam = { x: 0, y: 0, s: 0.6, ox: this.opts.offsetX };
       this.camT = { x: 0, y: 0, s: 0.6, ox: this.opts.offsetX };
       this.time = 0;
@@ -66,7 +67,9 @@
       this.nodes.set(id, n);
       return n;
     }
-    clear() { this.nodes.clear(); this.edges = []; this.fx = []; this.timers.forEach((t) => t.r()); this.timers = []; }
+    note(x, y, text) { const n = { x, y, text, a: 0, aT: 0 }; this.notes.push(n); return n; }
+    showNotes(on) { this.notes.forEach((n) => { n.aT = on ? 1 : 0; }); }
+    clear() { this.notes = []; this.nodes.clear(); this.edges = []; this.fx = []; this.timers.forEach((t) => t.r()); this.timers = []; }
     addEdge(a, b, type = "derived") { this.edges.push({ a, b, type, alpha: 1 }); }
     removeNode(id) {
       this.nodes.delete(id);
@@ -198,6 +201,7 @@
         if (n.drop < 1) n.drop = Math.min(1, n.drop + dt / 0.9);
         if (n.dial && n.dial.t < 1) n.dial.t = Math.min(1, n.dial.t + dt / 0.8);
       });
+      for (const n of this.notes) n.a = lerp(n.a, n.aT, 1 - Math.exp(-dt * 3));
       for (const f of this.fx) f.t += (dt * 1000) / f.dur;
       this.fx = this.fx.filter((f) => {
         if (f.t < 1) return true;
@@ -252,6 +256,19 @@
           ctx.lineTo(px - Math.cos(ang + 0.6) * s, py - Math.sin(ang + 0.6) * s);
           ctx.stroke();
         }
+      }
+
+      // notes (e.g. cluster titles)
+      for (const nt of this.notes) {
+        if (nt.a < 0.02) continue;
+        const [x, y] = this.toScreen(nt.x, nt.y);
+        ctx.globalAlpha = nt.a;
+        ctx.font = th.noteFont || "500 11px monospace";
+        ctx.fillStyle = th.noteColor || th.text;
+        ctx.textAlign = "center";
+        ctx.fillText(nt.text, x, y);
+        ctx.textAlign = "start";
+        ctx.globalAlpha = 1;
       }
 
       // effects under nodes

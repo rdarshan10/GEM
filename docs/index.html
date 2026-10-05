@@ -258,6 +258,7 @@ m.add("I moved to Mumbai").invalidated   <span class="c"># [commute]</span></pre
     edge: "#8d8f98", edgeAlpha: 0.42, pulse: "#a9c2ff", text: "#ece8df", triggerText: "#ffffff",
     labelHalo: "rgba(10,11,13,.9)", fontSize: 14, fontFamily: "'Geist', sans-serif", badgeFont: "500 10px 'Geist Mono', monospace",
     lineHeight: 17, breath: 3.2, glow: 18, dim: 0.16, camSpeed: 2.2,
+    noteFont: "500 12px 'Geist Mono', monospace", noteColor: "#8a8880",
     drawNode(ctx, n, x, y, r) {
       ctx.save();
       if (n.state !== "active") { ctx.shadowColor = `rgba(${n.col.join(",")},.65)`; ctx.shadowBlur = 16; }
@@ -280,14 +281,13 @@ m.add("I moved to Mumbai").invalidated   <span class="c"># [commute]</span></pre
   Object.entries(spots).forEach(([k, [x, y]]) => { C[k] = GemGraph.build(g, S[k], k + ":", x, y, lay); });
   const all = [].concat(...Object.values(C).map((c) => c.ids));
   const reloc = C.relocation;
+  // a title above each memory group, shown only in the zoomed-out view
+  Object.entries(C).forEach(([k, c]) => {
+    const ys = c.ids.map((id) => g.nodes.get(id).hy), xs = c.ids.map((id) => g.nodes.get(id).hx);
+    g.note((Math.min(...xs) + Math.max(...xs)) / 2, Math.max(...ys) + 70, S[k].title.toUpperCase());
+  });
   const WIDE_OX = wide ? window.innerWidth * 0.24 : 0, ZOOM_OX = wide ? window.innerWidth * 0.21 : 0;
   let current = -1;
-  const derived = g.edges.filter((e) => e.type === "derived");
-  setInterval(() => {
-    if (current !== 0 || document.hidden) return;
-    const e = derived[Math.floor(Math.random() * derived.length)];
-    g.pulse(e.a, e.b, { dur: 1500, color: "#7f93c9" });
-  }, 650);
 
   const rail = document.querySelector(".rail");
   const steps = [...document.querySelectorAll(".step")];
@@ -295,11 +295,23 @@ m.add("I moved to Mumbai").invalidated   <span class="c"># [commute]</span></pre
   let token = { cancelled: true };
   const fresh = () => { token.cancelled = true; token = { cancelled: false }; g.clearDials(); return token; };
   const resetAll = () => Object.keys(C).forEach((k) => GemGraph.reset(g, S[k], k + ":"));
-  const zoom = () => { g.setFocus(reloc.ids.concat("relocation:new")); g.frame(reloc.ids, 40, 1.15, 0.18, [reloc.home], ZOOM_OX); };
-  const overview = () => { g.setFocus(all, 1); all.forEach((id) => (g.nodes.get(id).labelAT = 0)); g.frame(all, 50, 0.5, 0.18, [], WIDE_OX); };
+  // story steps stay on the relocation memory; the other groups are hidden until the zoom-out
+  const zoom = () => { g.showNotes(false); g.setFocus(reloc.ids.concat("relocation:new"), 0); g.frame(reloc.ids, 40, 1.15, 0.18, [reloc.home], ZOOM_OX); };
+  const overview = () => { g.setFocus(all, 1); all.forEach((id) => (g.nodes.get(id).labelAT = 0)); g.showNotes(true); g.frame(all, 60, 0.5, 0.18, Object.values(C).map((c) => [c.home[0], c.home[1] - 40]), WIDE_OX); };
 
   const beats = {
-    0() { fresh(); resetAll(); overview(); },
+    // hero: the relocation write plays on a loop, so the first screen shows what GEM does
+    async 0() {
+      const t = fresh(); resetAll(); zoom();
+      await g.wait(700);
+      while (!t.cancelled) {
+        await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, dials: false });
+        if (t.cancelled) return;
+        await g.wait(3200); if (t.cancelled) return;
+        GemGraph.reset(g, S.relocation, "relocation:"); g.spotlight = null;
+        await g.wait(900);
+      }
+    },
     1() { fresh(); resetAll(); zoom(); },
     async 2() { const t = fresh(); resetAll(); zoom(); await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, until: "conflict", dials: false }); },
     async 3() { const t = fresh(); resetAll(); zoom(); await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, mode: "flat", speed: 1.4 }); },
@@ -315,7 +327,7 @@ m.add("I moved to Mumbai").invalidated   <span class="c"># [commute]</span></pre
     async 6() {
       const t = fresh(); resetAll(); overview();
       await g.wait(900); if (t.cancelled) return;
-      g.setFocus(C.launch.ids.concat("launch:new"), 0.3); C.launch.ids.forEach((id) => (g.nodes.get(id).labelAT = 0));
+      g.setFocus(C.launch.ids.concat("launch:new"), 0.3); all.forEach((id) => (g.nodes.get(id).labelAT = 0));
       await GemGraph.play(g, S.launch, "launch:", C.launch.home, { token: t, speed: 1.3, badges: false, dials: false });
     },
   };
