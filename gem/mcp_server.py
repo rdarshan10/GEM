@@ -28,7 +28,9 @@ INSTRUCTIONS = (
     "project with add_memory; when you store a fact you worked out from others, pass their ids in "
     "derived_from. When a save or forget returns 'invalidated' facts, those are no longer reliable: "
     "do not act on them, and mention the ones that matter. search_memory puts out-of-date matches "
-    "in a separate 'stale' list: confirm those with the user instead of using them."
+    "in a separate 'stale' list: ask the user instead of using them. Save the answer with "
+    "add_memory(answer, resolves=[stale id]); if the user says the old fact still holds, call "
+    "add_memory(action='confirm', fact_id=stale id). Then ask about anything in 'reconfirm'."
 )
 
 server = MCPServer("gem", instructions=INSTRUCTIONS, log_level="WARNING")
@@ -42,13 +44,15 @@ def _run(name: str, **args) -> str:
     return json.dumps(result, ensure_ascii=False)
 
 
-@server.tool(description="Save a fact to memory (action='save') or retract one (action='forget'). "
-                         "Returns facts the change corrected ('revised') and facts it made unreliable "
-                         "('invalidated'), including ones derived from it several steps away.")
-def add_memory(content: str, action: str = "save", fact_id: str | None = None,
-               derived_from: list[str] | None = None, container_tag: str | None = None) -> str:
+@server.tool(description="Save a fact (action='save'), retract one (action='forget'), or mark a stale "
+                         "fact as still true (action='confirm', fact_id). Returns facts the change "
+                         "corrected ('revised') and made unreliable ('invalidated'), several steps away. "
+                         "When saving the user's answer to a stale fact, pass resolves=[its id].")
+def add_memory(content: str = "", action: str = "save", fact_id: str | None = None,
+               derived_from: list[str] | None = None, resolves: list[str] | None = None,
+               container_tag: str | None = None) -> str:
     return _run("add_memory", content=content, action=action, fact_id=fact_id,
-                derived_from=derived_from, container_tag=container_tag)
+                derived_from=derived_from, resolves=resolves, container_tag=container_tag)
 
 
 @server.tool(description="Find stored facts relevant to a query. 'results' are still valid; "

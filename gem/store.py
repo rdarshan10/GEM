@@ -98,6 +98,10 @@ class MemoryStore:
     def edges(self) -> list[Edge]:
         return list(self._edges)
 
+    def remove_edge(self, src_id: str, dst_id: str, etype: EdgeType) -> None:
+        self._edges = [e for e in self._edges
+                       if not (e.src_id == src_id and e.dst_id == dst_id and e.type == etype)]
+
     def derived_from_targets(self, node_id: str) -> list[Node]:
         """Nodes that `node_id` is DERIVED_FROM (its parents / what it depends on)."""
         out = []

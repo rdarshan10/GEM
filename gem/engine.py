@@ -65,6 +65,8 @@ class GEMConfig:
     jev_edge: float = 0.6             # P(depends) at/above this -> DERIVED_FROM edge without the LLM
     jev_edge_low: float = 0.2         # P(depends) in (jev_edge_low, jev_edge) -> LLM derive_links
     jev_batch: int = 8                # items per Jev request (Jev degrades with long context)
+    resolve_sim: float = 0.3          # stale facts at least this similar to a new fact are checked
+    resolve_k: int = 3                #   (up to this many) to see whether it answers them
 
 
 class GEM:
@@ -152,11 +154,19 @@ class GEM:
     # INGEST — two distinct passes
     # ------------------------------------------------------------------------- #
     def ingest(self, fact: str, *, provenance=Provenance.FACT,
-               parents: list[str] | None = None, check_conflicts: bool = True) -> Node:
+               parents: list[str] | None = None, check_conflicts: bool = True,
+               resolves: list[str] | None = None) -> Node:
         """Insert a fact. `parents` lets scenarios pin DERIVED_FROM links explicitly;
         if None, the derive_links LLM pass infers them. `check_conflicts=False` skips the
         conflict-detection pass — used when loading known, conflict-free setup memories so
-        only the trigger drives the cascade (keeps scenario setup fast and deterministic)."""
+        only the trigger drives the cascade (keeps scenario setup fast and deterministic).
+        `resolves` names stale facts this one answers (the user gave their current value); if
+        omitted, similar stale facts are checked automatically. See resolve()."""
+        self.last_resolution = {"resolved": [], "reconfirm": []}
+        resolves = list(resolves or [])
+        for rid in resolves:
+            if self.store.get(rid) is None:
+                raise KeyError(f"no fact {rid!r} to resolve")
         emb = self.embedder.embed(fact)
         neighbors = self._neighbors(emb)
 
@@ -183,6 +193,8 @@ class GEM:
                 if route == "skip":                         # confidently no conflict
                     self.stats["jev_decided"] += 1
                     continue
+                if n.id in resolves:                        # handled by resolve() below
+                    continue
                 pending.append((n, route))
 
         # 3. create the node
@@ -201,6 +213,13 @@ class GEM:
         for n, sim in neighbors:
             if n.id not in parent_ids and sim > self.cfg.assoc_threshold:
                 self.store.add_edge(node.id, n.id, EdgeType.ASSOCIATED)
+
+        # 4b. answers to stale facts: the ones named, plus similar stale facts this one updates
+        if check_conflicts:
+            for old in self._stale_answered(fact, emb, exclude=set(resolves)):
+                resolves.append(old.id)
+        for rid in resolves:
+            self.resolve(self.store.get(rid), node)
 
         # 5. fire revision for any conflicts this fact resolved.
         # CRITICAL: one trigger can directly conflict with SEVERAL nodes in the same
@@ -229,6 +248,76 @@ class GEM:
                 self.revise(n, label, revised, trigger=node, visited=visited)
 
         return node
+
+    def _stale_answered(self, fact: str, emb, exclude: set) -> list[Node]:
+        """Stale facts (waiting for review) that this new fact gives the current value of."""
+        waiting = [n for n in self.store.all_nodes()
+                   if n.id not in exclude and n.embedding is not None
+                   and (n.status == Status.STALE or n.meta.get("needs_review"))]
+        if not waiting:
+            return []
+        scored = sorted(((n, E.cosine(emb, n.embedding)) for n in waiting), key=lambda t: -t[1])
+        out = []
+        for n, sim in scored[: self.cfg.resolve_k]:
+            if sim < self.cfg.resolve_sim:
+                break
+            label, _ = self._classify(n.content, fact)
+            if label in (C.Label.UPDATES, C.Label.REPLACES, C.Label.CONTRADICTS):
+                out.append(n)
+        return out
+
+    def resolve(self, old: Node, new: Node) -> None:
+        """`new` gives the current value of `old` (typically a stale fact the user just answered).
+        `old` is superseded; `new` takes its place in the graph: it inherits old's parents when it
+        has none of its own, and old's dependents now derive from `new`. Dependents that are still
+        stale stay stale (their own value is still unknown) and are reported for reconfirmation."""
+        if old is None or old.id == new.id:
+            return
+        old.status = Status.SUPERSEDED
+        old.meta.pop("needs_review", None)
+        old.meta.pop("stale_because", None)
+        old.meta["resolved_by"] = new.id
+        self.store.update_node(old)
+        self.store.add_edge(new.id, old.id, EdgeType.CONTRADICTS)
+        if not self.store.derived_from_targets(new.id):
+            for p in self.store.derived_from_targets(old.id):
+                if p.id != new.id:
+                    self.store.add_edge(new.id, p.id, EdgeType.DERIVED_FROM)
+        for d in self.store.dependents(old.id):
+            if d.id == new.id:
+                continue
+            self.store.remove_edge(d.id, old.id, EdgeType.DERIVED_FROM)
+            self.store.add_edge(d.id, new.id, EdgeType.DERIVED_FROM)
+            if d.meta.get("stale_because") == old.id:
+                d.meta["stale_because"] = new.id
+            self.store.update_node(d)
+            if d.status != Status.ACTIVE and "stale_because" in d.meta or d.meta.get("needs_review"):
+                self.last_resolution["reconfirm"].append(d.id)
+        self.last_resolution["resolved"].append(old.id)
+        self.stats["resolved"] = self.stats.get("resolved", 0) + 1
+        self._log(f"resolve {old.id} '{old.content}' -> {new.id} '{new.content}'")
+
+    def confirm(self, node: Node) -> list[str]:
+        """The stale fact still holds. Restore it, and restore the facts that went stale only
+        because it was in doubt (recursively). Returns the ids restored besides `node`."""
+        restored, stack, seen = [], [node], set()
+        while stack:
+            n = stack.pop()
+            if n.id in seen:
+                continue
+            seen.add(n.id)
+            n.status = Status.ACTIVE
+            n.confidence = 1.0
+            n.meta.pop("needs_review", None)
+            n.meta.pop("stale_because", None)
+            self.store.update_node(n)
+            if n.id != node.id:
+                restored.append(n.id)
+            for d in self.store.dependents(n.id):
+                if d.meta.get("stale_because") == n.id and d.status != Status.ACTIVE:
+                    stack.append(d)
+        self._log(f"confirm {node.id} '{node.content}' (+{len(restored)} restored)")
+        return restored
 
     def _order_actions_root_first(self, actions):
         """Order conflict-actions so an ancestor is revised before any of its descendants
@@ -281,6 +370,11 @@ class GEM:
         self._apply(node, label, revised_content, certain=certain)
         if trigger is not None:                     # None = an explicit retract (forget)
             self.store.add_edge(trigger.id, node.id, EdgeType.CONTRADICTS)
+        # remember why a fact stopped being valid: a stale fact (value unknown), or a dependent
+        # invalidated by the cascade, still needs attention. A fact replaced directly (depth 0),
+        # forgotten, or answered has its replacement and needs none.
+        if node.status == Status.STALE or (node.status != Status.ACTIVE and depth > 0):
+            node.meta["stale_because"] = trigger.id if trigger is not None else None
         self.store.update_node(node)
         self._log(f"{'  ' * depth}revise {node.id}: {label.value} "
                   f"'{old_content}' -> '{node.content}'"
@@ -377,8 +471,7 @@ class GEM:
             else:                                   # unknown value OR uncertain -> stale
                 node.status = Status.STALE
                 node.confidence *= self.cfg.confidence_penalty
-                if not certain:
-                    node.meta["needs_review"] = True
+                node.meta["needs_review"] = True        # someone has to supply the new value
         elif label == C.Label.PARTIALLY_UPDATES:
             if revised_content and certain:
                 node.content = revised_content

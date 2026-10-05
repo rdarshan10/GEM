@@ -152,6 +152,13 @@ class FalkorStore:
         )
         return Edge(src_id, dst_id, etype)
 
+    def remove_edge(self, src_id: str, dst_id: str, etype: EdgeType) -> None:
+        t = etype.value
+        if t not in _VALID_EDGE:
+            raise ValueError(f"bad edge type {t!r}")
+        self._g.query(f"MATCH (a:Memory {{id:$src}})-[r:{t}]->(b:Memory {{id:$dst}}) DELETE r",
+                      params={"src": src_id, "dst": dst_id})
+
     def edges(self) -> list[Edge]:
         out = []
         for t in _VALID_EDGE:

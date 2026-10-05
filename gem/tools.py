@@ -30,25 +30,32 @@ TOOLS = [
     {
         "name": "add_memory",
         "description": (
-            "Save a fact to long-term memory, or forget one. Saving a fact that changes something "
-            "already known updates it AND re-checks every fact derived from it: the result lists "
-            "facts that were corrected ('revised') and facts that are no longer reliable "
-            "('invalidated'). Tell the user about invalidated facts that matter. "
+            "Save a fact to long-term memory, forget one, or confirm one. Saving a fact that changes "
+            "something already known updates it AND re-checks every fact derived from it: the result "
+            "lists facts that were corrected ('revised') and facts that are no longer reliable "
+            "('invalidated'). Stale facts need the user: ask about them, then either save the "
+            "answer with resolves=<stale fact id> (it replaces the stale fact and takes over its "
+            "links; the result's 'reconfirm' lists facts built on it that still need an answer), or "
+            "use action='confirm' with fact_id if the user says the fact is still true. "
             "Use derived_from to record which stored facts (by id) this one was worked out from, "
             "so future changes cascade to it; if omitted, dependencies are inferred."),
         "input_schema": {
             "type": "object",
             "properties": {
                 "content": {"type": "string", "description": "The fact, as one self-contained sentence."},
-                "action": {"type": "string", "enum": ["save", "forget"], "default": "save",
+                "action": {"type": "string", "enum": ["save", "forget", "confirm"], "default": "save",
                            "description": "'forget' retracts a stored fact (give fact_id, or the "
-                                          "fact's text in content) and invalidates what depended on it."},
-                "fact_id": {"type": "string", "description": "Id of the fact to forget (action=forget)."},
+                                          "fact's text in content) and invalidates what depended on it. "
+                                          "'confirm' marks a stale fact (fact_id) as still true."},
+                "fact_id": {"type": "string", "description": "Id of the fact to forget or confirm."},
+                "resolves": {"type": "array", "items": {"type": "string"},
+                             "description": "Ids of stale facts this new fact answers (the user gave "
+                                            "their current value). If omitted, similar stale facts are "
+                                            "matched automatically."},
                 "derived_from": {"type": "array", "items": {"type": "string"},
                                  "description": "Ids of stored facts this fact depends on."},
                 "container_tag": _TAG,
             },
-            "required": ["content"],
         },
     },
     {
@@ -174,9 +181,17 @@ class GemTools:
             return {"error": f"{type(e).__name__}: {e}"}
 
     # --- tools -------------------------------------------------------------- #
-    def _t_add_memory(self, content, action="save", fact_id=None, derived_from=None,
-                      container_tag=None):
+    def _t_add_memory(self, content="", action="save", fact_id=None, derived_from=None,
+                      resolves=None, container_tag=None):
         m = self.memory(container_tag)
+        if action == "confirm":
+            if not fact_id:
+                raise ValueError("confirm needs fact_id (the stale fact the user says is still true)")
+            if m.get(fact_id) is None:
+                raise KeyError(f"no fact {fact_id!r}")
+            r = m.confirm(fact_id)
+            return {"action": "confirm", "confirmed": _fact(m.get(fact_id)),
+                    "restored": [_fact(f) for f in r.restored]}
         if action == "forget":
             if not fact_id:
                 hits = m.search(content, k=3)
@@ -192,19 +207,30 @@ class GemTools:
                     "invalidated": [_fact(f) for f in r.invalidated],
                     "revised": [_fact(f) for f in r.revised]}
         if action != "save":
-            raise ValueError("action must be 'save' or 'forget'")
-        r = m.add(content, derived_from=derived_from)
-        return {"action": "save", "id": r.id,
-                "revised": [_fact(f) for f in r.revised],
-                "invalidated": [_fact(f) for f in r.invalidated]}
+            raise ValueError("action must be 'save', 'forget' or 'confirm'")
+        if not content:
+            raise ValueError("content is required to save a fact")
+        if isinstance(resolves, str):
+            resolves = [resolves]
+        r = m.add(content, derived_from=derived_from, resolves=resolves)
+        out = {"action": "save", "id": r.id,
+               "revised": [_fact(f) for f in r.revised],
+               "invalidated": [_fact(f) for f in r.invalidated]}
+        if r.resolved:
+            out["resolved"] = [_fact(f) for f in r.resolved]
+        if r.reconfirm:
+            out["reconfirm"] = [_fact(f) for f in r.reconfirm]
+        return out
 
     def _t_search_memory(self, query, limit=5, include_stale=False, container_tag=None):
         k = max(1, min(int(limit), 50))
-        hits = self.memory(container_tag).search(query, k=2 * k, include_stale=True)
+        m = self.memory(container_tag)
+        hits = m.search(query, k=2 * k, include_stale=True)
         if include_stale:
             return {"results": [_fact(f) for f in hits[:k]]}
-        valid = [f for f in hits if f.status == "ACTIVE" and not f.needs_review][:k]
-        stale = [f for f in hits if f.status != "ACTIVE" or f.needs_review][:k]
+        waiting = {f.id for f in m.stale}
+        valid = [f for f in hits if f.status == "ACTIVE" and f.id not in waiting][:k]
+        stale = [f for f in hits if f.id in waiting][:k]
         # stale matches are reported separately: the agent learns the fact exists but is out of date
         return {"results": [_fact(f) for f in valid], "stale": [_fact(f) for f in stale]}
 

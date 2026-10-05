@@ -224,7 +224,7 @@ claude mcp add gem -- python -m gem.mcp_server          # Claude Code
 
 | Tool | What it does |
 |---|---|
-| `add_memory` | `save` a fact (optionally `derived_from` ids) or `forget` one; returns `revised` and `invalidated` facts |
+| `add_memory` | `save` a fact (optionally `derived_from` ids), `forget` one, or `confirm` a stale one is still true; returns `revised` and `invalidated` facts. Saving the user's answer to a stale fact (`resolves=[id]`, or matched automatically) replaces it and takes over its links |
 | `search_memory` | still-valid matches in `results`, out-of-date matches in `stale` |
 | `list_memories` | everything in a space, with status |
 | `get_profile` | short summary of the user/project from still-valid facts, plus facts to `reconfirm` (also the `gem://profile` resource) |

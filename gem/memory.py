@@ -58,9 +58,21 @@ class AddResult:
     id: str
     invalidated: list[Fact] = field(default_factory=list)
     revised: list[Fact] = field(default_factory=list)
+    resolved: list[Fact] = field(default_factory=list)    # stale facts this answer replaced
+    reconfirm: list[Fact] = field(default_factory=list)   # facts still waiting for an answer
+    restored: list[Fact] = field(default_factory=list)    # confirm(): facts valid again
 
     def __bool__(self) -> bool:        # truthy if the write changed anything downstream
         return bool(self.invalidated or self.revised)
+
+
+def _needs_attention(n) -> bool:
+    """Out of date and not replaced: its value is unknown (stale), it is flagged for review, or
+    the cascade invalidated it because something it depended on changed. Facts superseded by a
+    replacement (answered, forgotten, directly updated) need nothing."""
+    if n.status == Status.ACTIVE:
+        return bool(n.meta.get("needs_review"))
+    return n.status == Status.STALE or bool(n.meta.get("needs_review")) or "stale_because" in n.meta
 
 
 def _to_fact(n) -> Fact:
@@ -92,7 +104,8 @@ class Memory:
         self._profile_cache: tuple[str, dict] | None = None   # (facts signature, profile)
 
     # --- write -------------------------------------------------------------- #
-    def add(self, content: str, derived_from: list[str] | None = None) -> AddResult:
+    def add(self, content: str, derived_from: list[str] | None = None,
+            resolves: list[str] | str | None = None) -> AddResult:
         """Store a fact; if it conflicts with memory, resolve it and cascade the consequences.
 
         `derived_from` — ids this fact depends on. PIN these for correctness-critical facts:
@@ -101,10 +114,25 @@ class Memory:
         across domains (small N; see runs/diag_derive_*.txt), so a minority of cascades may be
         missed or spurious. Rule of thumb: pin what you can't afford to get wrong, infer the rest.
         """
+        if isinstance(resolves, str):
+            resolves = [resolves]
         with self._write():
             before = self._snapshot()
-            node = self._g.ingest(content, parents=derived_from)
-            return self._changes(node.id, before, skip=node.id)
+            node = self._g.ingest(content, parents=derived_from, resolves=resolves)
+            r = self._changes(node.id, before, skip=node.id,
+                              resolved=set(self._g.last_resolution["resolved"]))
+            r.reconfirm = [_to_fact(self._g.store.get(i)) for i in self._g.last_resolution["reconfirm"]]
+            return r
+
+    def confirm(self, fact_id: str) -> AddResult:
+        """A stale fact is still true (the user said so): restore it, and the facts that went
+        stale only because it was in doubt."""
+        with self._write():
+            node = self._g.store.get(fact_id)
+            if node is None:
+                raise KeyError(fact_id)
+            restored = self._g.confirm(node)
+            return AddResult(id=fact_id, restored=[_to_fact(self._g.store.get(i)) for i in restored])
 
     def forget(self, fact_id: str) -> AddResult:
         """Retract a fact and cascade: everything derived from it is re-checked and goes stale
@@ -120,10 +148,13 @@ class Memory:
     def _snapshot(self) -> dict:
         return {n.id: (n.status, n.content) for n in self._g.store.all_nodes()}
 
-    def _changes(self, fact_id: str, before: dict, *, skip: str) -> AddResult:
-        invalidated, revised = [], []
+    def _changes(self, fact_id: str, before: dict, *, skip: str, resolved: set = frozenset()) -> AddResult:
+        invalidated, revised, done = [], [], []
         for n in self._g.store.all_nodes():
             if n.id == skip:
+                continue
+            if n.id in resolved:
+                done.append(_to_fact(n))
                 continue
             prev = before.get(n.id)
             if not prev or (prev[0] == n.status and prev[1] == n.content):
@@ -133,7 +164,7 @@ class Memory:
                 invalidated.append(f)         # no longer trustworthy
             else:
                 revised.append(f)             # corrected in place, still usable
-        return AddResult(id=fact_id, invalidated=invalidated, revised=revised)
+        return AddResult(id=fact_id, invalidated=invalidated, revised=revised, resolved=done)
 
     # persistent stores that can be shared between processes (JsonStore) expose transaction() for
     # writes (lock + catch up + save) and refresh() for reads; other stores need neither
@@ -175,8 +206,7 @@ class Memory:
     @property
     def stale(self) -> list[Fact]:
         self._read()
-        return [_to_fact(n) for n in self._g.store.all_nodes()
-                if n.status != Status.ACTIVE or n.meta.get("needs_review")]
+        return [_to_fact(n) for n in self._g.store.all_nodes() if _needs_attention(n)]
 
     def facts(self, include_stale: bool = True) -> list[Fact]:
         self._read()
@@ -196,8 +226,7 @@ class Memory:
         nodes = self._g.store.all_nodes()
         active = [n for n in nodes if n.status == Status.ACTIVE and not n.meta.get("needs_review")]
         active = active[-max_facts:]                       # the most recent ones if memory is large
-        reconfirm = [_to_fact(n) for n in nodes
-                     if n.status == Status.STALE or n.meta.get("needs_review")]
+        reconfirm = [_to_fact(n) for n in nodes if _needs_attention(n)]
         sig = hashlib.sha1("\n".join(f"{n.id}\t{n.content}" for n in active).encode()).hexdigest()
         if self._profile_cache and self._profile_cache[0] == sig:
             summary = self._profile_cache[1]
