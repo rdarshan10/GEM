@@ -500,6 +500,21 @@
     if (q.get("view") === "flat") state.view = "flat";
     loadScenario(si);
     if (q.get("step")) go(parseInt(q.get("step"), 10) - 1 || 0);
+
+    // first time the explorer scrolls into view, play the cascade (unless the visitor already
+    // interacted, arrived on a deep link, or prefers reduced motion)
+    let touched = !!(q.get("step") || q.get("view")) || reduceMotion;
+    $(".explorer").addEventListener("pointerdown", () => { touched = true; }, { once: true });
+    $(".scenario-tabs").addEventListener("pointerdown", () => { touched = true; }, { once: true });
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          if (!touched && state.view === "gem" && state.step === 0) play();
+        }
+      }, { threshold: 0.45 });
+      io.observe($(".explorer"));
+    }
   }
 
   fetch("data/scenarios.json")
@@ -574,4 +589,10 @@
 
   dumbbell();
   callbars();
+
+  // hero: result rows appear in cascade order; "replay" restarts it
+  const hero = $(".hero-diff");
+  const replayHero = () => { hero.classList.remove("play"); void hero.offsetWidth; hero.classList.add("play"); };
+  replayHero();
+  $("#hero-replay").addEventListener("click", replayHero);
 })();

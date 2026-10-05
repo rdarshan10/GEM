@@ -353,3 +353,21 @@ html, body { overflow-x: hidden; }
   }
   .canvas-wrap::before { margin: 10px 12px 0; }
 }
+
+/* ---------- motion (all of it off under prefers-reduced-motion) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .g-edge.hot { stroke-dasharray: 7 5; animation: edge-flow .7s linear infinite; }
+  .g-node.current .ring { animation: ring-pulse 1.6s ease-out infinite; }
+  .hero-diff.play .diff-rows li { opacity: 0; transform: translateY(4px); animation: row-in .45s ease-out forwards; }
+  .hero-diff.play .diff-rows li:nth-child(1) { animation-delay: .25s; }
+  .hero-diff.play .diff-rows li:nth-child(2) { animation-delay: .65s; }
+  .hero-diff.play .diff-rows li:nth-child(3) { animation-delay: 1.05s; }
+  .hero-diff.play .diff-rows li:nth-child(4) { animation-delay: 1.45s; }
+  .hero-diff.play .diff-rows li:nth-child(5) { animation-delay: 1.85s; }
+  .hero-diff.play .diff-rows li:nth-child(6) { animation-delay: 2.25s; }
+}
+@keyframes edge-flow { to { stroke-dashoffset: -12; } }
+@keyframes ring-pulse { 0% { opacity: 1; } 70% { opacity: .25; } 100% { opacity: 1; } }
+@keyframes row-in { to { opacity: 1; transform: none; } }
+.replay { margin-left: auto; border: 0; background: none; color: var(--accent); font: 400 12px var(--mono); cursor: pointer; padding: 0; }
+.replay:hover { text-decoration: underline; }
