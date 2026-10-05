@@ -235,3 +235,18 @@ def test_concurrent_processes_lose_no_writes(tmp_path):
     facts = Memory(llm=FakeLLM(), embedder=FakeEmbedder(), store=JsonStore(path)).facts()
     assert len(facts) == 32 and len({f.id for f in facts}) == 32
     assert {f.content for f in facts} == {f"writer {w} fact {i}" for w in range(4) for i in range(8)}
+
+
+def test_mcp_descriptions_match_tool_definitions():
+    """MCP clients see the same tool and parameter descriptions as TOOLS (one source of truth)."""
+    pytest.importorskip("mcp.server.mcpserver")
+    import asyncio
+    from gem import mcp_server
+    listed = {t.name: t for t in asyncio.run(mcp_server.server.list_tools())}
+    for t in TOOLS:
+        m = listed[t["name"]]
+        assert m.description == t["description"]
+        props = m.input_schema["properties"]
+        assert set(props) == set(t["input_schema"]["properties"])
+        assert all(v.get("description") for v in props.values()), t["name"]
+    assert listed["add_memory"].input_schema["properties"]["action"]["enum"] == ["save", "forget", "confirm"]

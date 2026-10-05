@@ -21,7 +21,11 @@ import sys
 from mcp.server.mcpserver import MCPServer
 
 from .llm import load_dotenv
-from .tools import GemTools
+from typing import Annotated, Literal
+
+from pydantic import Field
+
+from .tools import TOOLS, GemTools
 
 INSTRUCTIONS = (
     "Long-term memory that keeps derived facts consistent. Save durable facts about the user or "
@@ -44,33 +48,47 @@ def _run(name: str, **args) -> str:
     return json.dumps(result, ensure_ascii=False)
 
 
-@server.tool(description="Save a fact (action='save'), retract one (action='forget'), or mark a stale "
-                         "fact as still true (action='confirm', fact_id). Returns facts the change "
-                         "corrected ('revised') and made unreliable ('invalidated'), several steps away. "
-                         "When saving the user's answer to a stale fact, pass resolves=[its id].")
-def add_memory(content: str = "", action: str = "save", fact_id: str | None = None,
-               derived_from: list[str] | None = None, resolves: list[str] | None = None,
-               container_tag: str | None = None) -> str:
+# Descriptions (tool and per-parameter) come from gem.tools.TOOLS, the one source of truth, so
+# MCP clients and agents using the Python tool definitions see the same text.
+_DEF = {t["name"]: t for t in TOOLS}
+
+
+def _desc(tool: str) -> str:
+    return _DEF[tool]["description"]
+
+
+def _p(tool: str, param: str):
+    return Field(description=_DEF[tool]["input_schema"]["properties"][param].get("description", ""))
+
+
+@server.tool(description=_desc("add_memory"))
+def add_memory(content: Annotated[str, _p("add_memory", "content")] = "",
+               action: Annotated[Literal["save", "forget", "confirm"], _p("add_memory", "action")] = "save",
+               fact_id: Annotated[str | None, _p("add_memory", "fact_id")] = None,
+               derived_from: Annotated[list[str] | None, _p("add_memory", "derived_from")] = None,
+               resolves: Annotated[list[str] | None, _p("add_memory", "resolves")] = None,
+               container_tag: Annotated[str | None, _p("add_memory", "container_tag")] = None) -> str:
     return _run("add_memory", content=content, action=action, fact_id=fact_id,
                 derived_from=derived_from, resolves=resolves, container_tag=container_tag)
 
 
-@server.tool(description="Find stored facts relevant to a query. 'results' are still valid; "
-                         "'stale' are matching facts now out of date (ask the user, don't use them).")
-def search_memory(query: str, limit: int = 5, include_stale: bool = False,
-                  container_tag: str | None = None) -> str:
+@server.tool(description=_desc("search_memory"))
+def search_memory(query: Annotated[str, _p("search_memory", "query")],
+                  limit: Annotated[int, _p("search_memory", "limit")] = 5,
+                  include_stale: Annotated[bool, _p("search_memory", "include_stale")] = False,
+                  container_tag: Annotated[str | None, _p("search_memory", "container_tag")] = None) -> str:
     return _run("search_memory", query=query, limit=limit, include_stale=include_stale,
                 container_tag=container_tag)
 
 
-@server.tool(description="List stored facts in a memory space with their status.")
-def list_memories(include_stale: bool = False, container_tag: str | None = None) -> str:
+@server.tool(description=_desc("list_memories"))
+def list_memories(include_stale: Annotated[bool, _p("list_memories", "include_stale")] = False,
+                  container_tag: Annotated[str | None, _p("list_memories", "container_tag")] = None) -> str:
     return _run("list_memories", include_stale=include_stale, container_tag=container_tag)
 
 
-@server.tool(description="Summary of what memory holds about the user or project (from still-valid "
-                         "facts), plus facts to reconfirm. Call at the start of a conversation.")
-def get_profile(container_tag: str | None = None) -> str:
+@server.tool(description=_desc("get_profile"))
+def get_profile(container_tag: Annotated[str | None, _p("get_profile", "container_tag")] = None) -> str:
     return _run("get_profile", container_tag=container_tag)
 
 
@@ -80,14 +98,14 @@ def profile_resource() -> str:
     return _run("get_profile")
 
 
-@server.tool(description="List facts that went stale because something they depended on changed. "
-                         "Reconfirm these before acting on them.")
-def get_stale(container_tag: str | None = None) -> str:
+@server.tool(description=_desc("get_stale"))
+def get_stale(container_tag: Annotated[str | None, _p("get_stale", "container_tag")] = None) -> str:
     return _run("get_stale", container_tag=container_tag)
 
 
-@server.tool(description="Show which stored facts a fact was derived from.")
-def why(fact_id: str, container_tag: str | None = None) -> str:
+@server.tool(description=_desc("why"))
+def why(fact_id: Annotated[str, _p("why", "fact_id")],
+        container_tag: Annotated[str | None, _p("why", "container_tag")] = None) -> str:
     return _run("why", fact_id=fact_id, container_tag=container_tag)
 
 

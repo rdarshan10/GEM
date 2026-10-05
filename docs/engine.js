@@ -76,7 +76,10 @@
     card(x0, y0, x1, y1, title) { const c = { card: true, x0, y0, x1, y1, title, status: "", active: 0, activeT: 0, a: 0, aT: 0 }; this.notes.push(c); return c; }
     showNotes(on) { this.notes.forEach((n) => { n.aT = on ? 1 : 0; }); }
     clear() { this.notes = []; this.nodes.clear(); this.edges = []; this.fx = []; this.timers.forEach((t) => t.r()); this.timers = []; }
-    addEdge(a, b, type = "derived") { this.edges.push({ a, b, type, alpha: 1 }); }
+    addEdge(a, b, type = "derived") { this.edges.push({ a, b, type, alpha: 1, lit: 0, litT: 0, litCol: null }); }
+    // keep a link lit after the change has travelled along it, so the cascade's path stays readable
+    light(a, b, color) { const e = this.edges.find((x) => x.a === a && x.b === b); if (e) { e.litT = 1; e.litCol = rgb(color || this.theme.pulse); } }
+    unlight(prefix) { this.edges.forEach((e) => { if (!prefix || e.a.startsWith(prefix)) e.litT = 0; }); }
     removeNode(id) {
       this.nodes.delete(id);
       this.edges = this.edges.filter((e) => e.a !== id && e.b !== id);
@@ -128,9 +131,11 @@
       if (!pts.length) return;
       const lw = this.opts.labels ? this.opts.labelWidth : 0;
       let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-      pts.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x + lw); y0 = Math.min(y0, y - 20); y1 = Math.max(y1, y + 40); });
-      const availW = this.w - 2 * pad - Math.abs(ox) * 2;
-      const availH = this.h - 2 * pad - Math.abs(oy) * 2;
+      pts.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x + lw); y0 = Math.min(y0, y - 24); y1 = Math.max(y1, y + (lw ? 64 : 24)); });
+      // fit inside the canvas around the offset centre, keeping clear of opts.insetTop (a fixed top bar)
+      const cx = this.w / 2 + ox, cy = this.h / 2 + oy, top = Math.max(pad, this.opts.insetTop || 0);
+      const availW = 2 * Math.max(10, Math.min(cx - pad, this.w - pad - cx));
+      const availH = 2 * Math.max(10, Math.min(cy - top, this.h - pad - cy));
       const s = clamp(Math.min(availW / Math.max(1, x1 - x0), availH / Math.max(1, y1 - y0)), minS, maxS);
       this.camT = { x: (x0 + x1) / 2, y: (y0 + y1) / 2, s, ox, oy };
     }
@@ -217,6 +222,7 @@
         n.a = lerp(n.a, n.aT, 1 - Math.exp(-dt * 3));
         if (n.card) n.active = lerp(n.active, n.activeT, 1 - Math.exp(-dt * 5));
       }
+      for (const e of this.edges) e.lit = lerp(e.lit, e.litT, 1 - Math.exp(-dt * 5));
       for (const f of this.fx) f.t += (dt * 1000) / f.dur;
       this.fx = this.fx.filter((f) => {
         if (f.t < 1) return true;
@@ -262,6 +268,14 @@
         ctx.setLineDash(e.type === "assoc" ? [4, 5] : []);
         ctx.stroke();
         ctx.setLineDash([]);
+        if (e.lit > 0.02 && e.litCol) {
+          ctx.beginPath();
+          ctx.moveTo(q.ax, q.ay);
+          ctx.quadraticCurveTo(q.cx, q.cy, q.bx, q.by);
+          ctx.strokeStyle = css(e.litCol, al * 0.7 * e.lit);
+          ctx.lineWidth = 1.7 * sc;
+          ctx.stroke();
+        }
         if (e.type !== "assoc") { // direction chevron at 58%
           const [px, py] = this._pt(q, 0.58), [qx, qy] = this._pt(q, 0.6);
           const ang = Math.atan2(qy - py, qx - px), s = 4.5 * sc;
@@ -295,14 +309,12 @@
           ctx.globalAlpha = nt.a;
           ctx.font = th.cardTitleFont || "500 12px monospace";
           ctx.fillStyle = th.text;
-          ctx.fillText(nt.title, x0 + 16, y0 + 26);
+          const fit = (t) => { const room = x1 - x0 - 24; while (t.length > 4 && ctx.measureText(t).width > room) t = t.slice(0, -2).trimEnd() + "…"; return t; };
+          ctx.fillText(fit(nt.title), x0 + 12, y0 + 22);
           if (nt.status) {
             ctx.font = th.cardStatusFont || "400 11.5px monospace";
             ctx.fillStyle = nt.active > 0.5 ? (th.cardActive || th.pulse) : (th.noteColor || th.text);
-            let st = nt.status;
-            const room = x1 - x0 - 32;
-            while (st.length > 4 && ctx.measureText(st).width > room) st = st.slice(0, -2).trimEnd() + "…";
-            ctx.fillText(st, x0 + 16, y1 - 16);
+            ctx.fillText(fit(nt.status), x0 + 12, y1 - 12);
           }
           ctx.globalAlpha = 1;
           continue;
@@ -366,6 +378,9 @@
       // label type scales with zoom (within limits) so text and spacing stay in proportion
       const fz = clamp(this.cam.s, 0.9, 1.15);
       const font = th.fontSize ? `${th.fontWeight || 400} ${(th.fontSize * fz).toFixed(1)}px ${th.fontFamily}` : th.font || "13px sans-serif";
+      // line breaks come from the unzoomed size, so a label never reflows (jumps between 2 and 3 lines) mid-zoom
+      const wrapFont = th.fontSize ? `${th.fontWeight || 400} ${th.fontSize}px ${th.fontFamily}` : font;
+      const labels = [];   // drawn after every node, so no dot ever sits on top of text
       for (const n of this.nodes.values()) {
         if (n.alpha < 0.02) continue;
         const dropY = (1 - easeOut(n.drop)) * 220;
@@ -403,26 +418,25 @@
           ctx.lineWidth = 2.4 * sc;
           ctx.stroke();
         }
-        // label
+        labels.push(() => {
         // compact: label only the fact being decided (the new fact until a decision starts) or a tapped one
         const spot = !this.opts.compact || this.hover === n || this.spotlight === n.id || (n.kind === "trigger" && !this.spotlight);
         if (this.opts.labels && n.showLabel && n.labelA > 0.03 && spot) {
-          const lx = x + r + 10 * sc, lw = this.opts.labelWidth * sc;
+          const lx = x + r + 10 * sc;
           ctx.font = font;
           const lh = (th.lineHeight || 16) * fz;
           const drawLabel = (text, a) => {
-            const lines = this._wrap(text, lw, font);
+            const lines = this._wrap(text, this.opts.labelWidth, wrapFont);
+            ctx.font = font;                                    // _wrap measured with wrapFont
             const top = y - ((lines.length - 1) * lh) / 2 + 4;
             ctx.globalAlpha = n.alpha * n.labelA * a;
+            // a soft blurred halo keeps text readable over links without a hard dark outline
+            if (th.labelHalo) { ctx.shadowColor = th.labelHalo; ctx.shadowBlur = 7; }
             lines.forEach((ln, i) => {
-              if (th.labelHalo) {
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = th.labelHalo;
-                ctx.strokeText(ln, lx, top + i * lh);
-              }
               ctx.fillStyle = n.kind === "trigger" ? th.triggerText || th.text : th.text;
               ctx.fillText(ln, lx, top + i * lh);
             });
+            ctx.shadowBlur = 0; ctx.shadowColor = "transparent";
             return lines.length;
           };
           let nl = drawLabel(n.label, n.labelT < 1 ? easeIO(n.labelT) : 1);
@@ -432,8 +446,9 @@
             ctx.globalAlpha = n.alpha * n.labelA * easeOut(n.badgeT);
             ctx.fillStyle = css(n.col);
             const by = y + ((nl - 1) * lh) / 2 + 4 + lh + 1;
-            if (th.labelHalo) { ctx.lineWidth = 4; ctx.strokeStyle = th.labelHalo; ctx.strokeText(n.badge, lx, by); }
+            if (th.labelHalo) { ctx.shadowColor = th.labelHalo; ctx.shadowBlur = 6; }
             ctx.fillText(n.badge, lx, by);
+            ctx.shadowBlur = 0; ctx.shadowColor = "transparent";
           }
         } else if (this.hover === n && n.label) {
           ctx.font = font;
@@ -442,7 +457,10 @@
           ctx.fillText(n.label.length > 60 ? n.label.slice(0, 57) + "…" : n.label, x + r + 8, y + 4);
         }
         ctx.globalAlpha = 1;
+        });
+        ctx.globalAlpha = 1;
       }
+      for (const draw of labels) draw();
       if (th.foreground) th.foreground(ctx, this);
     }
 
@@ -472,19 +490,25 @@
     sc.nodes.forEach((n) => d(n.id));
     const rows = [];
     sc.nodes.forEach((n) => (rows[depth[n.id]] = rows[depth[n.id]] || []).push(n.id));
-    const assocA = new Set(sc.assoc.map(([a]) => a));
-    const r0 = rows[0].filter((id) => !assocA.has(id));
-    const ordered = [];
-    r0.forEach((id) => { ordered.push(id); sc.assoc.filter(([, b]) => b === id).forEach(([a]) => ordered.push(a)); });
-    rows[0] = ordered;
-    const pos = {};
-    rows[0].forEach((id, i) => { pos[id] = [i * dx, 0]; });
-    for (let r = 1; r < rows.length; r++) {
-      const want = rows[r].map((id) => [id, by[id].parents.reduce((s, p) => s + pos[p][0], 0) / by[id].parents.length]).sort((a, b) => a[1] - b[1]);
-      let last = -Infinity;
-      const placed = want.map(([id, w]) => { const v = Math.max(w, last + dx); last = v; return [id, v, w]; });
-      const shift = placed.reduce((s, p) => s + p[2] - p[1], 0) / placed.length;
-      placed.forEach(([id, v]) => { pos[id] = [v + shift, r * dy]; });
+    // try each order of the roots (an associated fact stays next to its partner); keep the narrowest
+    const perms = (a) => (a.length <= 1 ? [a] : a.flatMap((x, i) => perms(a.slice(0, i).concat(a.slice(i + 1))).map((p) => [x].concat(p))));
+    const assocOk = (row) => sc.assoc.every(([a, b]) => Math.abs(row.indexOf(a) - row.indexOf(b)) === 1);
+    let pos = null, bestW = Infinity;
+    for (const r0 of perms(rows[0])) {
+      if (!assocOk(r0)) continue;
+      const P = {};
+      r0.forEach((id, i) => { P[id] = [i * dx, 0]; });
+      for (let r = 1; r < rows.length; r++) {
+        const want = rows[r].map((id) => [id, by[id].parents.reduce((s, p) => s + P[p][0], 0) / by[id].parents.length]).sort((a, b) => a[1] - b[1]);
+        let last = -Infinity;
+        const placed = want.map(([id, w]) => { const v = Math.max(w, last + dx); last = v; return [id, v, w]; });
+        const shift = placed.reduce((s, p) => s + p[2] - p[1], 0) / placed.length;
+        placed.forEach(([id, v]) => { P[id] = [v + shift, r * dy]; });
+      }
+      // on a tie, prefer associated facts to the right: a dashed link drawn leftwards runs through the label
+      const xs = Object.values(P).map((p) => p[0]);
+      const w = Math.max(...xs) - Math.min(...xs) + (sc.assoc.some(([a, b]) => r0.indexOf(a) < r0.indexOf(b)) ? 0.01 * dx : 0);
+      if (w < bestW - 1e-6) { bestW = w; pos = P; }
     }
     const direct = sc.steps.filter((s) => s.kind === "revise" && s.depth === 0).map((s) => s.id);
     const anchor = direct.length ? direct : rows[0];
@@ -512,6 +536,7 @@
 
   GemGraph.reset = function (g, sc, prefix) {
     g.removeNode(prefix + "new");
+    g.unlight(prefix);
     sc.nodes.forEach((n) => {
       const node = g.nodes.get(prefix + n.id);
       if (!node) return;
@@ -555,7 +580,6 @@
       await wait(700); if (!live()) return;
       for (const c of scan.checked) {
         if (c.route === "skip") {
-          g.setBadge(P(c.id), opts.badges === false ? "" : `no direct conflict · ${c.p_no_conflict.toFixed(2)}`);
           log("jev", `  ${txt(c.id)} → no conflict (${c.p_no_conflict.toFixed(2)})`);
         }
       }
@@ -576,7 +600,7 @@
           log("flat", `${n.text} → ${f.status === "ACTIVE" ? f.content : f.status}`);
         } else if (gemChanged) {
           await wait(260); if (!live()) return;
-          g.setState(P(n.id), "wrong", { badge: "outdated · still served as true" });
+          g.setState(P(n.id), "wrong", { badge: "still served as true" });
           log("wrong", `${n.text} (still served as true)`);
         }
       }
@@ -592,6 +616,7 @@
         const from = s.depth === 0 ? "new" : parentOf(sc, s.id, done);
         if (s.depth === 0) g.addEdge(P("new"), P(s.id), "trigger");
         await g.pulse(P(from), P(s.id), { speed: sp }); if (!live()) return;
+        if (s.depth > 0) g.light(P(from), P(s.id));
         if (s.jev && s.depth > 0 && opts.dials !== false) {
           g.dial(P(s.id), s.jev.p_affected, "affected", s.status === "ACTIVE" ? "updated" : "stale");
           await wait(650); if (!live()) return;
@@ -600,7 +625,7 @@
         if (s.via !== "jev") llm += 1;
         const state = s.status === "ACTIVE" ? "updated" : s.status === "SUPERSEDED" ? "superseded" : "stale";
         const who = opts.who === false ? "" : ` · ${s.via === "jev" ? "Jev" : "LLM"}`;
-        const badge = state === "updated" ? `updated${who}` : `stale · review${who}`;
+        const badge = state === "updated" ? `updated${who}` : `stale${who}`;
         g.setState(P(s.id), state, { label: state === "updated" ? s.content : undefined, badge: opts.badges === false ? "" : badge });
         if (opts.onStep) opts.onStep({ id: s.id, state, text: state === "updated" ? s.content : txt(s.id), via: s.via });
         log(s.via, `${s.depth === 0 ? "conflict" : "hop " + s.depth} · ${txt(s.id)} → ${state === "updated" ? s.content : "STALE"}${s.jev && s.jev.p_affected != null ? ` (P affected ${s.jev.p_affected.toFixed(2)})` : ""}`);
@@ -612,6 +637,7 @@
         const from = parentOf(sc, s.id, done);
         hop(from);
         await g.pulse(P(from), P(s.id), { speed: sp }); if (!live()) return;
+        g.light(P(from), P(s.id), g.theme.states.kept);
         if (s.jev && opts.dials !== false) { g.dial(P(s.id), s.jev.p_unaffected, "unaffected", "kept"); await wait(650); if (!live()) return; }
         g.setState(P(s.id), "kept", { badge: opts.badges === false ? "" : opts.who === false ? "unaffected" : `unaffected · ${s.via === "jev" ? "Jev" : "LLM"}${s.jev ? " " + s.jev.p_unaffected.toFixed(2) : ""}` });
         if (opts.onStep) opts.onStep({ id: s.id, state: "kept", text: txt(s.id), via: s.via });

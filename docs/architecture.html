@@ -74,11 +74,11 @@
 </head>
 <body>
 <header class="top solid">
-  <a class="brand" href="index.html" aria-label="GEM home"><b>GEM</b><span>architecture</span></a>
-  <nav aria-label="Sections">
-    <a href="index.html">Overview</a><a href="#write">Write path</a><a href="#graph">Graph</a><a href="#decisions">Decisions</a><a href="#cost">Cost</a><a href="#models">Models</a>
-    <a class="gh" href="https://github.com/rdarshan10/GEM">GitHub ↗</a>
+  <nav class="pill" aria-label="Sections">
+    <a class="keep" href="index.html">Overview</a><a href="#write">Write path</a><a href="#graph">Graph</a><a href="#decisions">Decisions</a><a href="#cost">Cost</a><a href="#models">Models</a>
+    <a class="gh keep" href="https://github.com/rdarshan10/GEM">GitHub ↗</a>
   </nav>
+  <div class="brand"><a class="home" href="index.html" aria-label="GEM home"><b>GEM</b><span>architecture</span></a><a class="by" href="https://www.revanthdarshan.me/" target="_blank" rel="noopener">by Revanth Darshan D R ↗</a></div>
 </header>
 
 <main>
@@ -136,6 +136,7 @@
     <div class="prose" style="align-self:center">
       <p><strong>Where edges come from.</strong> Pass <span class="mono">derived_from=[ids]</span> when you store a fact and the edge is exact. Leave it out and GEM infers the links from similar facts, with about 85–88% recall and 75–84% precision in our tests. Pin the ones you can't afford to miss.</p>
       <p><strong>What a fact can become.</strong> <em>Active</em>, possibly rewritten in place when its new value follows from the change. <em>Stale</em> with <span class="mono">needs_review</span> when its value is now unknown. <em>Superseded</em> when it was directly contradicted or forgotten. Nothing is deleted, so every change can be traced with <span class="mono">why</span>.</p>
+      <p><strong>Closing the loop.</strong> A stale fact waits for the user. When the agent saves the answer, GEM matches it to the stale fact (or the agent names it with <span class="mono">resolves</span>): the answer replaces it, inherits its parents and takes over its dependents, so the next change still reaches it. If the user says the old value holds, <span class="mono">confirm</span> restores it, along with the facts that went stale only because it was in doubt.</p>
       <p><strong>Where it lives.</strong> In memory, in a JSON file per memory space (safe across processes: writes take a file lock), or in FalkorDB.</p>
     </div>
   </div>
@@ -247,9 +248,10 @@ def make_llm():
     <li><a href="index.html">Overview</a></li>
     <li><a href="https://github.com/rdarshan10/GEM">GitHub</a></li>
     <li><a href="https://github.com/rdarshan10/GEM/blob/main/RELATED_WORK.md">Related work</a></li>
+    <li><a href="https://www.revanthdarshan.me/" target="_blank" rel="noopener">Revanth Darshan D R ↗</a></li>
   </ul>
 </footer>
-<p class="legal"><span>© 2026 Revanth Darshan · PolyForm Noncommercial 1.0.0</span><span>Jev is a product of TypeSafe AI</span></p>
+<p class="legal"><span>© 2026 <a href="https://www.revanthdarshan.me/" target="_blank" rel="noopener">Revanth Darshan D R</a> · PolyForm Noncommercial 1.0.0</span><span>Jev is a product of TypeSafe AI</span></p>
 <div class="tip" id="tip" hidden></div>
 
 <script>

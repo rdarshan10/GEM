@@ -61,14 +61,18 @@ TOOLS = [
     {
         "name": "search_memory",
         "description": ("Find stored facts relevant to a query. 'results' holds facts that are still "
-                        "valid; 'stale' holds matching facts that went out of date because something "
-                        "they depended on changed — don't use their values, ask the user instead."),
+                        "valid. 'stale' holds matching facts that are out of date (something they depended "
+                        "on changed): don't use their values; ask the user, then save the answer with "
+                        "add_memory(resolves=[id]) or, if it still holds, add_memory(action='confirm', "
+                        "fact_id=id)."),
         "input_schema": {
             "type": "object",
             "properties": {
-                "query": {"type": "string"},
-                "limit": {"type": "integer", "default": 5, "minimum": 1, "maximum": 50},
-                "include_stale": {"type": "boolean", "default": False},
+                "query": {"type": "string", "description": "What to look for, in plain words."},
+                "limit": {"type": "integer", "default": 5, "minimum": 1, "maximum": 50,
+                          "description": "Maximum results (and maximum stale matches)."},
+                "include_stale": {"type": "boolean", "default": False,
+                                  "description": "Return every match in one list, valid or not."},
                 "container_tag": _TAG,
             },
             "required": ["query"],
@@ -80,7 +84,8 @@ TOOLS = [
         "input_schema": {
             "type": "object",
             "properties": {
-                "include_stale": {"type": "boolean", "default": False},
+                "include_stale": {"type": "boolean", "default": False,
+                                  "description": "Also list facts that are out of date or replaced."},
                 "container_tag": _TAG,
             },
         },
@@ -94,8 +99,9 @@ TOOLS = [
     },
     {
         "name": "get_stale",
-        "description": ("List facts that are no longer reliable because something they depended on "
-                        "changed. Reconfirm these with the user before acting on them."),
+        "description": ("List facts waiting for the user: out of date because something they depended "
+                        "on changed. Ask about each, then save the answer with add_memory(resolves=[id]) "
+                        "or, if it still holds, add_memory(action='confirm', fact_id=id)."),
         "input_schema": {"type": "object", "properties": {"container_tag": _TAG}},
     },
     {
@@ -103,7 +109,8 @@ TOOLS = [
         "description": "Show the facts a stored fact was derived from (why it may have gone stale).",
         "input_schema": {
             "type": "object",
-            "properties": {"fact_id": {"type": "string"}, "container_tag": _TAG},
+            "properties": {"fact_id": {"type": "string", "description": "Id of the fact to explain."},
+                           "container_tag": _TAG},
             "required": ["fact_id"],
         },
     },

@@ -16,15 +16,16 @@
 <link rel="stylesheet" href="site.css">
 </head>
 <body>
-<a class="skip" href="#play">Skip to the playground</a>
+<a class="skip" href="#play">Skip to the use cases</a>
 <header class="top" id="top-bar">
-  <a class="brand" href="#hero" aria-label="GEM, back to top"><b>GEM</b><span>governed evolving memory</span></a>
-  <nav aria-label="Sections">
-    <a href="#how">How it works</a><a href="#play">Playground</a><a href="#cases">Use cases</a><a href="#numbers">Numbers</a><a href="#install">Install</a><a href="architecture.html">Architecture</a>
-    <a class="gh" href="https://github.com/rdarshan10/GEM">GitHub ↗</a>
+  <nav class="pill" aria-label="Sections">
+    <a href="#how">How it works</a><a class="keep" href="#play">Use cases</a><a href="#numbers">Numbers</a><a href="#install">Install</a><a href="architecture.html">Architecture</a>
+    <a class="gh keep" href="https://github.com/rdarshan10/GEM">GitHub ↗</a>
   </nav>
+  <div class="brand"><a class="home" href="#hero" aria-label="GEM, back to top"><b>GEM</b><span>governed evolving memory</span></a><a class="by" href="https://www.revanthdarshan.me/" target="_blank" rel="noopener">by Revanth Darshan D R ↗</a></div>
 </header>
 <nav class="rail" aria-label="Story steps"></nav>
+<canvas class="field" id="field" aria-hidden="true"></canvas>
 <canvas class="grain" id="grain" aria-hidden="true"></canvas>
 
 <main>
@@ -33,35 +34,33 @@
   <div class="stage">
     <canvas id="stage" role="img" aria-label="Animated memory graph. The text beside it describes each step."></canvas>
     <div class="callpanel" id="callpanel" aria-hidden="true">
-      <header><span class="call" id="cp-call"></span><span class="meta">recorded run</span></header>
+      <header><span class="call" id="cp-call"></span></header>
       <ol id="cp-rows"></ol>
       <div class="cp-foot" id="cp-foot"></div>
     </div>
   </div>
 
   <div class="steps">
-    <section class="step" id="hero" data-beat="hero" aria-labelledby="h-hero"><div class="card">
-      <p class="kicker">GEM · memory for AI agents</p>
+    <section class="step on" id="hero" data-beat="hero" aria-labelledby="h-hero"><div class="card">
       <h1 class="display" id="h-hero">Change one fact. GEM fixes what <em>depended</em> on it.</h1>
       <p class="lead">Agent memory that keeps track of which facts were worked out from which. When one changes, GEM rewrites what it can, flags what it can't, and leaves the rest alone.</p>
       <div class="actions"><a class="btn primary" href="#how">See how it works ↓</a><a class="btn" href="#install">Add it to your agent</a></div>
-      <p class="status">MCP server + Python library · bring your own model</p>
     </div></section>
 
     <section class="step" id="how" data-beat="built" aria-labelledby="h-built"><div class="card">
-      <p class="kicker"><b>01</b> · the problem</p>
+      <p class="kicker"><b>01</b></p>
       <h2 class="display" id="h-built">Memories depend on other memories.</h2>
       <p>Your commute was worked out from where you live. Your alarm, from the commute. The coffee maker, from the alarm. GEM records each of these dependencies as it stores a fact, whether you give it or GEM infers it.</p>
     </div></section>
 
     <section class="step" data-beat="change" aria-labelledby="h-change"><div class="card">
-      <p class="kicker"><b>02</b> · the problem</p>
+      <p class="kicker"><b>02</b></p>
       <h2 class="display" id="h-change">Then one changes.</h2>
       <p>“I moved to Mumbai.” Before storing it, GEM compares it with similar facts. One conflicts directly, where you live, and is <span class="k k-up">updated</span>.</p>
     </div></section>
 
     <section class="step" data-beat="flat" aria-labelledby="h-flat"><div class="card">
-      <p class="kicker"><b>03</b> · the problem</p>
+      <p class="kicker"><b>03</b></p>
       <h2 class="display" id="h-flat">Ordinary memory stops <em>there</em>.</h2>
       <p>Same write, flat memory. The direct conflict is fixed. The four facts built on it are <span class="k k-bad">still served as true</span>, and nothing marks them wrong. This is what your agent reads back:</p>
       <div class="io" aria-label="Flat memory search result">
@@ -71,19 +70,19 @@
     </div></section>
 
     <section class="step" data-beat="cascade" aria-labelledby="h-cascade"><div class="card">
-      <p class="kicker"><b>04</b> · how GEM works</p>
+      <p class="kicker"><b>04</b></p>
       <h2 class="display" id="h-cascade">GEM follows the links.</h2>
       <p>The change runs down every derived-from link, and each fact is checked against <em>this</em> change. Commute, alarm, coffee maker and rent go <span class="k k-st">stale</span>. Your timezone is <span class="k k-ok">unaffected</span>: Mumbai is still IST, so the cascade stops there.</p>
     </div></section>
 
     <section class="step" data-beat="rewrite" aria-labelledby="h-rewrite"><div class="card">
-      <p class="kicker"><b>05</b> · how GEM works</p>
+      <p class="kicker"><b>05</b></p>
       <h2 class="display" id="h-rewrite">When the new value follows, it's <em>rewritten</em>.</h2>
       <p>A different memory: your manager changes from Alice to Bob. Here every new value can be worked out from the change, so each routine built on it is <span class="k k-up">rewritten</span>. Bob gets the weekly report, approves time off, and writes your review.</p>
     </div></section>
 
     <section class="step" data-beat="stale" aria-labelledby="h-stale"><div class="card">
-      <p class="kicker"><b>06</b> · how GEM works</p>
+      <p class="kicker"><b>06</b></p>
       <h2 class="display" id="h-stale">When it doesn't, it's <em>flagged</em>, not guessed.</h2>
       <p>Nothing in “I moved to Mumbai” says how long the new commute is, so GEM doesn't invent one. The fact is marked stale and handed to your agent, which asks you:</p>
       <div class="io" aria-label="GEM search result">
@@ -91,23 +90,21 @@
         <div><span>results</span><span>only facts that are still true</span></div>
         <div class="ok"><span>stale</span><span>My commute to the office is 45 minutes → ask the user</span></div>
       </div>
-      <p>Stale facts also come back in each write's result and from <span class="mono">get_stale</span>. Your answer is saved as a new fact.</p>
+      <p>Your answer replaces the stale fact and takes over its links, so the next change still reaches it. If the old value still holds, the agent confirms it instead.</p>
     </div></section>
 
     <section class="step" data-beat="cheap" aria-labelledby="h-cheap"><div class="card">
-      <p class="kicker"><b>07</b> · how GEM works</p>
+      <p class="kicker"><b>07</b></p>
       <h2 class="display" id="h-cheap">Most decisions are <em>cheap</em>.</h2>
       <p>Each hop is one batched question to a small decision model that answers with probabilities: the rings. The LLM only writes corrections and settles doubts. Stopping the cascade takes 90% confidence; anything doubtful goes to the LLM.</p>
       <div class="meter"><div><b id="m-cheap">5 of 6</b><span>decided without the LLM</span></div><div><b id="m-llm">1</b><span>LLM call</span></div></div>
-      <p class="ex">for the whole “I moved to Mumbai” write · <a href="architecture.html#decisions">how the decision layer works →</a></p>
     </div></section>
 
     <section class="step" data-beat="scale" aria-labelledby="h-scale"><div class="card">
-      <p class="kicker"><b>08</b> · cost</p>
+      <p class="kicker"><b>08</b></p>
       <h2 class="display" id="h-scale">A write costs what it <em>touches</em>.</h2>
       <p>Here is all of memory: six groups, <b id="s-total">33</b> facts. Six changes arrive, one at a time. Each one lights up only its own group: GEM checks a few similar facts, then follows the links from the one that changed. Everything else stays dark.</p>
       <div class="meter"><div><b id="s-checked">6</b><span>similar facts checked</span></div><div><b id="s-links">5</b><span>links followed</span></div><div><b id="s-llm">4</b><span>LLM calls</span></div></div>
-      <p class="ex" id="s-now">now: “The launch date slipped to December 1”</p>
     </div></section>
   </div>
 </div>
@@ -117,32 +114,22 @@
   <section class="sec" id="play" aria-labelledby="h-play">
     <div class="head">
       <h2 class="display" id="h-play">Make a <em>change</em>.</h2>
-      <p>Pick something that happens and watch what else it touches. Then switch to flat memory to see what it leaves behind. Every run is recorded from the real engine.</p>
+      <p>Six recorded runs, from coding agents to planning. Pick one, then switch to flat memory to see what it leaves behind.</p>
     </div>
-    <div class="play-ui">
-      <div id="chips" style="display:contents"></div>
-      <div class="seg" role="radiogroup" aria-label="Memory type"><button type="button" role="radio" aria-checked="true" data-m="gem">GEM</button><button type="button" role="radio" aria-checked="false" data-m="flat">FLAT</button></div>
+    <div class="play">
+      <ul class="picks" id="picks" aria-label="Recorded changes"></ul>
+      <div class="play-main">
+        <div class="play-bar">
+          <p class="play-q" id="play-q"></p>
+          <div class="seg" role="radiogroup" aria-label="Memory type"><button type="button" role="radio" aria-checked="true" data-m="gem">GEM</button><button type="button" role="radio" aria-checked="false" data-m="flat">FLAT</button></div>
+          <button type="button" class="replay" id="replay">replay</button>
+        </div>
+        <div class="play-stage">
+          <canvas id="play-canvas" role="img" aria-label="Interactive memory graph"></canvas>
+          <div class="readout" aria-live="polite" id="readout"><span><b id="r-llm">0</b> LLM calls</span><span><b id="r-up">0</b> updated</span><span><b id="r-st">0</b> stale</span></div>
+        </div>
+      </div>
     </div>
-    <div class="play-stage">
-      <canvas id="play-canvas" role="img" aria-label="Interactive memory graph"></canvas>
-      <p class="play-q" id="play-q"></p>
-      <button type="button" class="replay" id="replay">replay</button>
-      <div class="readout" aria-live="polite" id="readout"><span><b id="r-llm">0</b> LLM calls</span><span><b id="r-up">0</b> updated</span><span><b id="r-st">0</b> stale</span><span class="last" id="r-last"></span></div>
-    </div>
-    <p class="play-note">Drag a fact to move it, tap or hover one to read it. GEM and flat memory replay the same write.</p>
-  </section>
-
-  <section class="sec" id="cases" aria-labelledby="h-cases">
-    <div class="head">
-      <h2 class="display" id="h-cases">Where it <em>matters</em>.</h2>
-      <p>GEM pays off wherever an agent acts on facts that were worked out from other facts. Each example runs in the playground.</p>
-    </div>
-    <ul class="cases">
-      <li><span class="n">1</span><h3><span>Coding agents</span>Project memory that doesn't rot.</h3><p>A platform decision changes. The limits, budgets and workarounds built on it never mention the platform, so text search can't find them. GEM reaches them through the links.</p><button class="try" data-try="runtime">try it →</button></li>
-      <li><span class="n">2</span><h3><span>Personal assistants</span>Life changes, routines follow.</h3><p>A move, a new manager. Routines are rewritten when the new value is known and flagged for you when it isn't, so the assistant never plans around the old life.</p><button class="try" data-try="relocation">try it →</button></li>
-      <li><span class="n">3</span><h3><span>Planning &amp; operations</span>Plans made of dependencies.</h3><p>Dates set relative to other dates, budgets that depend on two facts at once. One change reaches everything downstream and nothing beside it.</p><button class="try" data-try="launch">try it →</button></li>
-      <li><span class="n">4</span><h3><span>Change impact</span>Precision instead of alarms.</h3><p>Only what depends on the changed property is touched; a neighbouring dependency tree is left alone. Fewer false alarms than marking everything linked as suspect.</p><button class="try" data-try="email">try it →</button></li>
-    </ul>
   </section>
 
   <section class="sec" id="numbers" aria-labelledby="h-numbers">
@@ -154,9 +141,9 @@
       <div><b>37<small>/37</small></b><p>facts handled correctly across 12 cross-domain scenarios: medical, legal, finance, six-step chains.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/eval_diverse_groq20b_jev.txt">eval_diverse_groq20b_jev.txt</a></div>
       <div><b>5<small>/5</small></b><p>repeat runs at 100% on 19 scenarios held out from tuning; none flipped between runs. LLM-only: 99.0%.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b.txt">determinism_jev_groq120b.txt</a></div>
       <div><b>117<small> vs 91</small></b><p>facts right out of 117, GEM against flat memory on the same 37 propagation scenarios.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/propagation_eval_strat_clean.txt">propagation_eval_strat_clean.txt</a></div>
-      <div><b>1.3</b><p>LLM calls per write, with the decision layer answering first: about 25 LLM calls for 19 writes. <a href="architecture.html#cost">Cost details</a></p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b_calls.txt">determinism_jev_groq120b_calls.txt</a></div>
+      <div><b>1.3</b><p>LLM calls per write: about 25 for 19 writes, with the decision layer answering first.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b_calls.txt">determinism_jev_groq120b_calls.txt</a></div>
     </div>
-    <p class="method">Scenarios are hand-built with ground truth for every fact: which should change and which must survive. Flat memory is the same engine with the cascade switched off. Protocol: <a href="https://github.com/rdarshan10/GEM/blob/main/BASELINE_PROTOCOL.md">BASELINE_PROTOCOL.md</a>.</p>
+    <p class="method">Flat memory is the same engine with the cascade switched off. <a href="https://github.com/rdarshan10/GEM/blob/main/BASELINE_PROTOCOL.md">Protocol</a></p>
   </section>
 
   <section class="sec" id="install" aria-labelledby="h-install">
@@ -183,14 +170,14 @@ r.invalidated   <span class="c"># [My commute is 45 minutes]</span></pre></div>
       </div>
       <div>
         <ul class="tools">
-          <li><span>add_memory</span><span>Save or forget a fact. Returns what it updated and what it made stale, several links away.</span></li>
+          <li><span>add_memory</span><span>Save, forget or confirm a fact. Returns what it updated and what it made stale, several links away. An answer to a stale fact replaces it.</span></li>
           <li><span>search_memory</span><span>Valid matches, with outdated ones in a separate list.</span></li>
           <li><span>get_profile</span><span>A summary built only from facts that are still true.</span></li>
           <li><span>get_stale</span><span>Facts to reconfirm with the user.</span></li>
           <li><span>why</span><span>The facts a fact was derived from.</span></li>
           <li><span>list_memories</span><span>Everything in a memory space.</span></li>
         </ul>
-        <p class="tools-note"><strong>Bring your own model.</strong> Ollama (local or cloud) and Groq are built in and chosen in <span class="mono">.env</span>. Any other provider takes one small class in <a href="https://github.com/rdarshan10/GEM/blob/main/gem/llm.py"><span class="mono">gem/llm.py</span></a> with two methods. An optional decision layer cuts LLM calls further (<a href="architecture.html#decisions">architecture</a>). Memory is saved as JSON files by default, or in FalkorDB.</p>
+        <p class="tools-note"><strong>Bring your own model.</strong> Ollama and Groq are built in; any other provider is one small class in <a href="https://github.com/rdarshan10/GEM/blob/main/gem/llm.py"><span class="mono">gem/llm.py</span></a>.</p>
       </div>
     </div>
   </section>
@@ -218,9 +205,10 @@ r.invalidated   <span class="c"># [My commute is 45 minutes]</span></pre></div>
     <li><a href="architecture.html">Architecture</a></li>
     <li><a href="https://github.com/rdarshan10/GEM/blob/main/PRODUCTIONIZATION.md">Roadmap &amp; limits</a></li>
     <li><a href="https://github.com/rdarshan10/GEM/blob/main/RELATED_WORK.md">Related work</a></li>
+    <li><a href="https://www.revanthdarshan.me/" target="_blank" rel="noopener">Revanth Darshan D R ↗</a></li>
   </ul>
 </footer>
-<p class="legal after"><span>© 2026 Revanth Darshan · PolyForm Noncommercial 1.0.0</span><span id="data-stamp">graphs replay recorded GEM runs</span></p>
+<p class="legal after"><span>© 2026 <a href="https://www.revanthdarshan.me/" target="_blank" rel="noopener">Revanth Darshan D R</a> · PolyForm Noncommercial 1.0.0</span><span id="data-stamp">graphs replay recorded GEM runs</span></p>
 
 <script src="engine.js"></script>
 <script src="site.js"></script>
