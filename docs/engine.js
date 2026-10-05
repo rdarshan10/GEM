@@ -36,7 +36,10 @@
       this.timers = [];
       this.wrapCache = new Map();
       this.hover = null;
+      this.active = true;
       this.resize();
+      if ("IntersectionObserver" in window)
+        new IntersectionObserver((es) => { this.active = es.some((e) => e.isIntersecting); }, { rootMargin: "120px" }).observe(canvas);
       if ("ResizeObserver" in window) new ResizeObserver(() => this.resize()).observe(canvas);
       if (this.opts.drag) this._bindPointer();
       requestAnimationFrame((t) => this._frame(t));
@@ -49,6 +52,7 @@
       this.h = Math.max(1, r.height);
       this.c.width = Math.round(this.w * this.dpr);
       this.c.height = Math.round(this.h * this.dpr);
+      if (this._framed) this.frame(...this._framed); // keep the framing right when the canvas changes size
     }
 
     // ---------------------------------------------------------------- model
@@ -117,6 +121,7 @@
     showLabels(ids, on) { ids.forEach((id) => { const n = this.nodes.get(id); if (n) n.labelAT = on ? 1 : 0; }); }
 
     frame(ids, pad = 90, maxS = 1.3, minS = 0.18, extra = [], ox = this.opts.offsetX) {
+      this._framed = [ids, pad, maxS, minS, extra, ox];
       const pts = ids.map((id) => this.nodes.get(id)).filter(Boolean).map((n) => [n.hx, n.hy]).concat(extra);
       if (!pts.length) return;
       const lw = this.opts.labels ? this.opts.labelWidth : 0;
@@ -176,9 +181,10 @@
     _frame(ts) {
       const dt = Math.min(0.05, (ts - (this.last || ts)) / 1000);
       this.last = ts;
+      // off-screen or hidden: keep time and effects moving (so awaited pulses resolve) but skip drawing
       this.time += dt;
       this._update(dt);
-      this._draw();
+      if (this.active && !document.hidden) this._draw();
       requestAnimationFrame((t) => this._frame(t));
     }
 

@@ -1,391 +1,220 @@
 <!doctype html>
-<html lang="en" class="type-1">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0d'/%3E%3Ccircle cx='11' cy='10' r='3.4' fill='%23ece8df'/%3E%3Ccircle cx='21' cy='17' r='3.4' fill='%2386a8ff'/%3E%3Ccircle cx='11' cy='24' r='3.4' fill='%23f4b443'/%3E%3Cpath d='M13.5 11.6 18.6 15.3M18.6 18.8 13.5 22.4' stroke='%23ece8df' stroke-width='1.3'/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GEM — Memory that follows through</title>
-<meta name="description" content="When a fact changes, GEM finds everything that was built on it, even several links away, and leaves the rest alone. Agent memory with a dependency cascade.">
+<meta name="description" content="Agent memory that notices when one change makes other memories wrong. GEM finds every fact built on the one that changed, even four links away, then fixes it, flags it, or leaves it alone.">
+<meta name="theme-color" content="#0a0b0d">
+<meta property="og:type" content="website">
+<meta property="og:title" content="GEM — Memory that follows through">
+<meta property="og:description" content="When a fact changes, GEM finds everything that was built on it and fixes it, flags it, or leaves it alone. MCP server and Python library.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0d'/%3E%3Ccircle cx='11' cy='10' r='3.4' fill='%23ece8df'/%3E%3Ccircle cx='21' cy='17' r='3.4' fill='%2386a8ff'/%3E%3Ccircle cx='11' cy='24' r='3.4' fill='%23f4b443'/%3E%3Cpath d='M13.5 11.6 18.6 15.3M18.6 18.8 13.5 22.4' stroke='%23ece8df' stroke-width='1.3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..600,0..100;1,9..144,300..600,0..100&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..700&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg:#0a0b0d; --bg2:#101216; --ink:#ece8df; --ink2:#aaa69c; --ink3:#6c6b66; --line:#22252a;
-    --blue:#86a8ff; --amber:#f4b443; --green:#6bd59a; --red:#ff6b5d;
-    --body: "Geist", system-ui, sans-serif; --mono: "Geist Mono", ui-monospace, monospace;
-    --display: "Fraunces", Georgia, serif; --d-weight: 340; --d-track: -0.02em; --d-lh: .95; --d-var: "SOFT" 60, "opsz" 144; --d-scale: 1;
-  }
-  .type-2 { --display: "Instrument Serif", Georgia, serif; --d-weight: 400; --d-track: -0.01em; --d-lh: .92; --d-var: normal; --d-scale: 1.08; }
-  .type-3 .display em { margin-right: .12em; }
-  .type-3 { --display: "Bricolage Grotesque", system-ui, sans-serif; --d-weight: 560; --d-track: -0.035em; --d-lh: .94; --d-var: "wdth" 80, "opsz" 96; --d-scale: .92; }
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
-  a { color: var(--ink); text-decoration-color: var(--ink3); text-underline-offset: 3px; }
-  a:hover { text-decoration-color: var(--blue); }
-  .mono { font-family: var(--mono); }
-  .display { font-family: var(--display); font-weight: var(--d-weight); letter-spacing: var(--d-track); line-height: var(--d-lh); font-variation-settings: var(--d-var); }
-  .display em { font-style: italic; color: var(--blue); }
-
-  /* ---------------- chrome */
-  .brand { position: fixed; top: 22px; left: 28px; z-index: 10; display: flex; gap: 14px; align-items: baseline; text-decoration: none; }
-  .brand b { font-family: var(--display); font-weight: var(--d-weight); font-variation-settings: var(--d-var); font-size: 26px; line-height: 1; color: var(--ink); }
-  .brand span { font: 400 11px var(--mono); color: var(--ink3); letter-spacing: .12em; text-transform: uppercase; }
-  .topnav { position: fixed; top: 24px; right: 28px; z-index: 10; display: flex; gap: 22px; font: 400 12.5px var(--mono); }
-  .topnav a { color: var(--ink2); text-decoration: none; }
-  .topnav a:hover { color: var(--ink); }
-  .rail { position: fixed; left: 28px; top: 50%; transform: translateY(-50%); z-index: 10; display: flex; flex-direction: column; gap: 10px; transition: opacity .4s; }
-  .rail i { width: 2px; height: 22px; background: #2a2b2f; display: block; transition: background .3s, height .3s; }
-  .rail i.on { background: var(--ink); height: 34px; }
-  .rail.off { opacity: 0; pointer-events: none; }
-
-  /* ---------------- story */
-  .story-wrap { position: relative; }
-  .stage { position: sticky; top: 0; height: 100vh; width: 100%; z-index: 0; overflow: hidden; }
-  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  .stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 65% 45%, transparent 40%, rgba(0,0,0,.55) 100%); }
-  .grain { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .07; mix-blend-mode: overlay; z-index: 20; }
-  .story { position: relative; z-index: 2; margin-top: -100vh; }
-  .step { min-height: 100vh; display: flex; align-items: center; padding: 0 0 0 9vw; pointer-events: none; }
-  .card { max-width: 450px; pointer-events: auto; }
-  .num { font: 500 11px var(--mono); letter-spacing: .14em; color: var(--ink3); margin: 0; }
-  h1.display { font-size: calc(clamp(54px, 7.2vw, 104px) * var(--d-scale)); margin: 10px 0 20px; }
-  h2.display { font-size: calc(clamp(38px, 4.3vw, 60px) * var(--d-scale)); margin: 10px 0 18px; }
-  .card p { color: var(--ink2); margin: 0 0 14px; }
-  .k { display: inline-block; padding: 0 6px; border-radius: 3px; font: 500 12.5px/1.6 var(--mono); }
-  .k-st { color: #1a1305; background: var(--amber); } .k-up { color: #0b1430; background: var(--blue); }
-  .k-ok { color: #062012; background: var(--green); } .k-bad { color: #2a0603; background: var(--red); }
-  .hint { margin-top: 26px; font: 400 12px var(--mono); color: var(--ink3); letter-spacing: .08em; }
-  .hint::after { content: " ↓"; display: inline-block; animation: bob 1.6s ease-in-out infinite; }
-  @keyframes bob { 50% { transform: translateY(4px); } }
-  .meter { margin-top: 18px; display: flex; gap: 26px; }
-  .meter div { display: flex; flex-direction: column; }
-  .meter b { font-family: var(--display); font-weight: var(--d-weight); font-variation-settings: var(--d-var); font-size: 46px; line-height: 1; color: var(--ink); }
-  .meter span { font: 400 11px var(--mono); color: var(--ink3); letter-spacing: .1em; text-transform: uppercase; margin-top: 6px; }
-
-  /* ---------------- sections after the story */
-  .after { position: relative; z-index: 3; background: var(--bg); }
-  .sec { max-width: 1180px; margin: 0 auto; padding: 120px 28px 40px; }
-  .sec-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: end; margin-bottom: 28px; }
-  .sec-head h2 { font-size: calc(clamp(38px, 4.3vw, 60px) * var(--d-scale)); margin: 0; }
-  .sec-head p { color: var(--ink2); margin: 0; max-width: 460px; }
-  @media (max-width: 860px) { .sec-head { grid-template-columns: 1fr; gap: 10px; } }
-
-  /* playground */
-  .play-ui { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-  .chip { border: 1px solid var(--line); background: transparent; color: var(--ink2); font: 400 13.5px var(--body); padding: 8px 14px; border-radius: 999px; cursor: pointer; transition: border-color .2s, color .2s, background .2s; }
-  .chip:hover { border-color: var(--ink3); color: var(--ink); }
-  .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
-  .seg { margin-left: auto; display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
-  .seg button { border: 0; background: none; color: var(--ink3); font: 500 12px var(--mono); letter-spacing: .08em; padding: 6px 14px; border-radius: 999px; cursor: pointer; }
-  .seg button[aria-checked="true"] { background: #1d2027; color: var(--ink); }
-  .play-stage { position: relative; height: min(620px, 72vh); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: radial-gradient(90% 80% at 50% 40%, #121419, var(--bg)); }
-  .play-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  .readout { position: absolute; left: 18px; right: 18px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; font: 400 12.5px var(--mono); color: var(--ink3); pointer-events: none; }
-  .readout b { color: var(--ink); font-weight: 500; }
-  .readout .last { margin-left: auto; color: var(--ink2); max-width: 60%; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .drag { position: absolute; top: 14px; right: 18px; font: 400 11.5px var(--mono); color: var(--ink3); pointer-events: none; }
-  @media (max-width: 700px) { .seg { margin-left: 0; } .readout .last { margin-left: 0; max-width: 100%; text-align: left; } .play-ui { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; } .chip { white-space: nowrap; } }
-
-  /* numbers */
-  .numbers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); }
-  .numbers div { padding: 26px 22px 6px 0; border-right: 1px solid var(--line); }
-  .numbers div + div { padding-left: 22px; }
-  .numbers div:last-child { border-right: 0; }
-  .numbers b { display: block; font-family: var(--display); font-weight: var(--d-weight); font-variation-settings: var(--d-var); font-size: 56px; line-height: 1; letter-spacing: var(--d-track); }
-  .numbers b small { font-size: .45em; color: var(--ink3); }
-  .numbers p { color: var(--ink2); font-size: 14.5px; margin: 12px 0 10px; }
-  .numbers a { font: 400 11px var(--mono); color: var(--ink3); word-break: break-all; }
-  @media (max-width: 900px) { .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); } .numbers div:nth-child(2) { border-right: 0; } .numbers div:nth-child(3) { padding-left: 0; } .numbers div:nth-child(n+3) { border-top: 1px solid var(--line); } }
-  @media (max-width: 520px) { .numbers { grid-template-columns: 1fr; } .numbers div, .numbers div + div { border-right: 0; padding-left: 0; } .numbers div + div { border-top: 1px solid var(--line); } }
-
-  /* install */
-  .install { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
-  @media (max-width: 860px) { .install { grid-template-columns: 1fr; } }
-  pre { margin: 0; background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; font: 400 13.5px/1.7 var(--mono); color: var(--ink); overflow-x: auto; }
-  pre .c { color: var(--ink3); }
-  .tools { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
-  .tools li { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 15px; color: var(--ink2); }
-  .tools li span:first-child { font: 400 13px var(--mono); color: var(--ink); }
-  footer { max-width: 1180px; margin: 0 auto; padding: 60px 28px 50px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font: 400 12px var(--mono); color: var(--ink3); }
-
-  /* type switcher (preview only) */
-  .typesw { position: fixed; right: 18px; bottom: 18px; z-index: 30; display: flex; gap: 4px; align-items: center; background: #15171c; border: 1px solid var(--line); border-radius: 999px; padding: 4px 4px 4px 12px; font: 400 11px var(--mono); color: var(--ink3); }
-  .typesw button { border: 0; background: none; color: var(--ink2); font: 500 11px var(--mono); padding: 5px 10px; border-radius: 999px; cursor: pointer; }
-  .typesw button.on { background: var(--ink); color: var(--bg); }
-
-  @media (max-width: 760px) {
-    .rail, .topnav a:not(:last-child) { display: none; }
-    .step { align-items: flex-end; padding: 0 16px 9vh; }
-    .card { background: rgba(10,11,13,.86); backdrop-filter: blur(6px); padding: 18px; border-radius: 12px; border: 1px solid #1f2125; max-width: none; }
-    .sec { padding: 90px 16px 30px; }
-    .tools li { grid-template-columns: 1fr; gap: 2px; }
-  }
-  @media (prefers-reduced-motion: reduce) { .hint::after { animation: none; } html { scroll-behavior: auto; } }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..500,0..100;1,9..144,300..500,0..100&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
 </head>
 <body>
-<a class="brand" href="#top"><b>GEM</b><span>governed evolving memory</span></a>
-<nav class="topnav"><a href="#play">playground</a><a href="#numbers">numbers</a><a href="#use">use it</a><a href="https://github.com/rdarshan10/GEM">github ↗</a></nav>
-<nav class="rail" aria-hidden="true"></nav>
+<a class="skip" href="#play">Skip to the playground</a>
+<header class="top" id="top-bar">
+  <a class="brand" href="#hero" aria-label="GEM, back to top"><b>GEM</b><span>governed evolving memory</span></a>
+  <nav aria-label="Sections">
+    <a href="#how">How it works</a><a href="#play">Playground</a><a href="#cases">Use cases</a><a href="#numbers">Numbers</a><a href="#install">Install</a>
+    <a class="gh" href="https://github.com/rdarshan10/GEM">GitHub ↗</a>
+  </nav>
+</header>
+<nav class="rail" aria-label="Story steps"></nav>
 <canvas class="grain" id="grain" aria-hidden="true"></canvas>
 
-<div class="story-wrap" id="top">
-  <div class="stage" aria-hidden="true"><canvas id="c"></canvas></div>
-  <main class="story">
-    <section class="step" data-beat="0"><div class="card">
-      <p class="num">RESEARCH BUILD</p>
-      <h1 class="display">Memory that <em>follows</em> through.</h1>
-      <p>When a fact changes, GEM finds everything that was built on it, even four links away, and leaves the rest alone.</p>
-      <p class="hint">scroll</p>
+<main>
+<!-- ============================================================ STORY: one pinned graph, steps scroll over it -->
+<div class="story-wrap">
+  <div class="stage">
+    <canvas id="stage" role="img" aria-label="Animated memory graph. The text beside it describes each step."></canvas>
+    <p class="stage-cap" id="stage-cap">replaying a recorded run · <b>4 Jev calls · 1 LLM call</b></p>
+  </div>
+
+  <div class="steps">
+    <section class="step" id="hero" data-beat="hero" aria-labelledby="h-hero"><div class="card">
+      <p class="kicker">Agent memory · research build</p>
+      <h1 class="display" id="h-hero">Memory that <em>follows</em> through.</h1>
+      <p class="lead">Agent memory that notices when one change makes other memories wrong. GEM finds every fact built on the one that changed, even four links away, then fixes it, flags it, or leaves it alone.</p>
+      <div class="actions"><a class="btn primary" href="#how">See how it works ↓</a><a class="btn" href="#install">Add it to your agent</a></div>
+      <p class="status">MCP server + Python library · open source</p>
     </div></section>
-    <section class="step" data-beat="1"><div class="card">
-      <p class="num">01</p>
-      <h2 class="display">Every memory is built on others.</h2>
-      <p>Your commute was worked out from where you live. The alarm from the commute. The coffee maker from the alarm. GEM keeps those links as it stores facts.</p>
+
+    <section class="step" id="how" data-beat="built" aria-labelledby="h-built"><div class="card">
+      <p class="kicker"><b>01</b> · the problem</p>
+      <h2 class="display" id="h-built">Facts are built on facts.</h2>
+      <p>Your commute was worked out from where you live. Your alarm, from the commute. The coffee maker, from the alarm. Each arrow is a link GEM keeps as it stores a fact, either given or inferred.</p>
     </div></section>
-    <section class="step" data-beat="2"><div class="card">
-      <p class="num">02</p>
-      <h2 class="display">Then something changes.</h2>
-      <p>“I moved to Mumbai.” Before it's stored, GEM checks it against similar facts. One conflicts directly, and is <span class="k k-up">updated</span>.</p>
+
+    <section class="step" data-beat="change" aria-labelledby="h-change"><div class="card">
+      <p class="kicker"><b>02</b> · the problem</p>
+      <h2 class="display" id="h-change">Then one changes.</h2>
+      <p>“I moved to Mumbai.” Before storing it, GEM compares it with similar facts. One conflicts directly, where you live, and is <span class="k k-up">updated</span>.</p>
     </div></section>
-    <section class="step" data-beat="3"><div class="card">
-      <p class="num">03</p>
-      <h2 class="display">Ordinary memory stops <em>there</em>.</h2>
-      <p>Same write, flat memory. The fact that conflicted is fixed. The four facts built on it are <span class="k k-bad">still served as true</span>, and nothing about them looks wrong.</p>
+
+    <section class="step" data-beat="flat" aria-labelledby="h-flat"><div class="card">
+      <p class="kicker"><b>03</b> · the problem</p>
+      <h2 class="display" id="h-flat">Ordinary memory stops <em>there</em>.</h2>
+      <p>Same write, flat memory. The direct conflict is fixed. The four facts built on it are <span class="k k-bad">still served as true</span>, and nothing marks them wrong. This is what your agent reads back:</p>
+      <div class="io" aria-label="Flat memory search result">
+        <div class="q">search_memory("how long is my commute?")</div>
+        <div class="bad"><span>results</span><span>My commute to the office is 45 minutes</span></div>
+      </div>
     </div></section>
-    <section class="step" data-beat="4"><div class="card">
-      <p class="num">04</p>
-      <h2 class="display">GEM follows the links.</h2>
-      <p>The change runs down every derived-from link. Each fact is re-checked against <i>this</i> change: <span class="k k-st">stale</span>, rewritten, or <span class="k k-ok">unaffected</span>, like your timezone. Mumbai is still IST.</p>
+
+    <section class="step" data-beat="cascade" aria-labelledby="h-cascade"><div class="card">
+      <p class="kicker"><b>04</b> · how GEM works</p>
+      <h2 class="display" id="h-cascade">GEM follows the links.</h2>
+      <p>The change runs down every derived-from link, and each fact is checked against <em>this</em> change. Commute, alarm, coffee maker and rent go <span class="k k-st">stale</span>. Your timezone is <span class="k k-ok">unaffected</span>: Mumbai is still IST, so the cascade stops there.</p>
     </div></section>
-    <section class="step" data-beat="5"><div class="card">
-      <p class="num">05</p>
-      <h2 class="display">Cheap judgment first.</h2>
-      <p>Each hop is one batched question to Jev, a small model that answers with probabilities. The rings are its answers. The LLM is only called to write a correction or settle a doubt.</p>
+
+    <section class="step" data-beat="rewrite" aria-labelledby="h-rewrite"><div class="card">
+      <p class="kicker"><b>05</b> · how GEM works</p>
+      <h2 class="display" id="h-rewrite">When the new value follows, it's <em>rewritten</em>.</h2>
+      <p>A different memory: your manager changes from Alice to Bob. Here every new value can be worked out from the change, so each routine built on it is <span class="k k-up">rewritten</span>. Bob gets the weekly report, approves time off, and writes your review.</p>
+    </div></section>
+
+    <section class="step" data-beat="stale" aria-labelledby="h-stale"><div class="card">
+      <p class="kicker"><b>06</b> · how GEM works</p>
+      <h2 class="display" id="h-stale">When it doesn't, it's <em>flagged</em>, not guessed.</h2>
+      <p>Nothing in “I moved to Mumbai” says how long the new commute is, so GEM doesn't invent one. The fact is marked stale and handed to your agent, which asks you:</p>
+      <div class="io" aria-label="GEM search result">
+        <div class="q">search_memory("how long is my commute?")</div>
+        <div><span>results</span><span>only facts that are still true</span></div>
+        <div class="ok"><span>stale</span><span>My commute to the office is 45 minutes → ask the user</span></div>
+      </div>
+      <p>Stale facts also come back in each write's result and from <span class="mono">get_stale</span>. Your answer is saved as a new fact.</p>
+    </div></section>
+
+    <section class="step" data-beat="cheap" aria-labelledby="h-cheap"><div class="card">
+      <p class="kicker"><b>07</b> · how GEM works</p>
+      <h2 class="display" id="h-cheap">Cheap judgment first.</h2>
+      <p>Each hop is one batched question to Jev, a small model that answers with probabilities: the rings. The LLM only writes corrections and settles doubts. Stopping the cascade takes 90% confidence; anything doubtful goes to the LLM.</p>
       <div class="meter"><div><b id="m-jev">4</b><span>Jev calls</span></div><div><b id="m-llm">1</b><span>LLM call</span></div></div>
+      <p class="ex">for the whole “I moved to Mumbai” write</p>
     </div></section>
-    <section class="step" data-beat="6"><div class="card">
-      <p class="num">06</p>
-      <h2 class="display">A write costs what it <em>touches</em>.</h2>
-      <p>Six memories, one change: the launch slipped. Only that plan lights up, six links deep. Nothing else is read or rewritten.</p>
+
+    <section class="step" data-beat="scale" aria-labelledby="h-scale"><div class="card">
+      <p class="kicker"><b>08</b> · cost</p>
+      <h2 class="display" id="h-scale">A write costs what it <em>touches</em>.</h2>
+      <p>Six memories, one change: the launch slipped. Only that plan is read and rewritten, six links deep. The cost grows with the change, not with the size of memory.</p>
     </div></section>
-  </main>
+  </div>
 </div>
 
+<!-- ============================================================ AFTER THE STORY -->
 <div class="after">
-  <section class="sec" id="play">
-    <div class="sec-head">
-      <h2 class="display">Make a <em>change</em>.</h2>
-      <p>Pick something that happens and watch what else it touches. Switch to flat memory to see what that memory leaves behind. Every run is a recorded GEM run.</p>
+  <section class="sec" id="play" aria-labelledby="h-play">
+    <div class="head">
+      <h2 class="display" id="h-play">Make a <em>change</em>.</h2>
+      <p>Pick something that happens and watch what else it touches. Then switch to flat memory to see what it leaves behind. Every run is recorded from the real engine.</p>
     </div>
     <div class="play-ui">
       <div id="chips" style="display:contents"></div>
-      <div class="seg" role="radiogroup" aria-label="Memory"><button type="button" role="radio" aria-checked="true" data-m="gem">GEM</button><button type="button" role="radio" aria-checked="false" data-m="flat">FLAT</button></div>
+      <div class="seg" role="radiogroup" aria-label="Memory type"><button type="button" role="radio" aria-checked="true" data-m="gem">GEM</button><button type="button" role="radio" aria-checked="false" data-m="flat">FLAT</button></div>
     </div>
     <div class="play-stage">
-      <canvas id="pc" aria-label="Playground memory graph"></canvas>
-      <span class="drag" id="draghint">drag any fact</span>
-      <div class="readout" aria-live="polite"><span><b id="r-jev">0</b> Jev</span><span><b id="r-llm">0</b> LLM</span><span><b id="r-up">0</b> updated</span><span><b id="r-st">0</b> stale</span><span class="last" id="r-last"></span></div>
+      <canvas id="play-canvas" role="img" aria-label="Interactive memory graph"></canvas>
+      <p class="play-q" id="play-q"></p>
+      <button type="button" class="replay" id="replay">replay</button>
+      <div class="readout" aria-live="polite" id="readout"><span><b id="r-jev">0</b> Jev</span><span><b id="r-llm">0</b> LLM</span><span><b id="r-up">0</b> updated</span><span><b id="r-st">0</b> stale</span><span class="last" id="r-last"></span></div>
     </div>
+    <p class="play-note">Drag a fact to move it, tap or hover one to read it. GEM and flat memory replay the same write.</p>
   </section>
 
-  <section class="sec" id="numbers">
-    <div class="sec-head">
-      <h2 class="display">Measured, not <em>asserted</em>.</h2>
-      <p>Each number comes from a run file in the repository that you can regenerate.</p>
+  <section class="sec" id="cases" aria-labelledby="h-cases">
+    <div class="head">
+      <h2 class="display" id="h-cases">Where it <em>matters</em>.</h2>
+      <p>GEM pays off wherever an agent acts on facts that were worked out from other facts. Each example runs in the playground.</p>
+    </div>
+    <ul class="cases">
+      <li><span class="n">1</span><h3><span>Coding agents</span>Project memory that doesn't rot.</h3><p>A platform decision changes. The limits, budgets and workarounds built on it never mention the platform, so text search can't find them. GEM reaches them through the links.</p><button class="try" data-try="runtime">try it →</button></li>
+      <li><span class="n">2</span><h3><span>Personal assistants</span>Life changes, routines follow.</h3><p>A move, a new manager. Routines are rewritten when the new value is known and flagged for you when it isn't, so the assistant never plans around the old life.</p><button class="try" data-try="relocation">try it →</button></li>
+      <li><span class="n">3</span><h3><span>Planning &amp; operations</span>Plans made of dependencies.</h3><p>Dates set relative to other dates, budgets that depend on two facts at once. One change reaches everything downstream and nothing beside it.</p><button class="try" data-try="launch">try it →</button></li>
+      <li><span class="n">4</span><h3><span>Change impact</span>Precision instead of alarms.</h3><p>Only what depends on the changed property is touched; a neighbouring dependency tree is left alone. Fewer false alarms than marking everything linked as suspect.</p><button class="try" data-try="email">try it →</button></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="numbers" aria-labelledby="h-numbers">
+    <div class="head">
+      <h2 class="display" id="h-numbers">Measured, not <em>asserted</em>.</h2>
+      <p>Each number comes from a run file in the repository. Re-run the script and you get the file.</p>
     </div>
     <div class="numbers">
-      <div><b>37<small>/37</small></b><p>facts right across 12 cross-domain scenarios: medical, legal, finance, six-step chains.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/eval_diverse_groq20b_jev.txt">eval_diverse_groq20b_jev.txt</a></div>
-      <div><b>5<small>/5</small></b><p>repeat runs at 100% on 19 scenarios held out from tuning; none flipped (LLM-only: 99.0%).</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b.txt">determinism_jev_groq120b.txt</a></div>
-      <div><b>117<small> vs 91</small></b><p>facts right out of 117, GEM against flat memory on the same 37 scenarios.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/propagation_eval_strat_clean.txt">propagation_eval_strat_clean.txt</a></div>
-      <div><b>1.3</b><p>LLM calls per write with Jev deciding first (about 25 LLM and 45 Jev calls for 19 writes).</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b_calls.txt">determinism_jev_groq120b_calls.txt</a></div>
+      <div><b>37<small>/37</small></b><p>facts handled correctly across 12 cross-domain scenarios: medical, legal, finance, six-step chains.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/eval_diverse_groq20b_jev.txt">eval_diverse_groq20b_jev.txt</a></div>
+      <div><b>5<small>/5</small></b><p>repeat runs at 100% on 19 scenarios held out from tuning; none flipped between runs. LLM-only: 99.0%.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b.txt">determinism_jev_groq120b.txt</a></div>
+      <div><b>117<small> vs 91</small></b><p>facts right out of 117, GEM against flat memory on the same 37 propagation scenarios.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/propagation_eval_strat_clean.txt">propagation_eval_strat_clean.txt</a></div>
+      <div><b>1.3</b><p>LLM calls per write with Jev deciding first: about 25 LLM and 45 Jev calls for 19 writes.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b_calls.txt">determinism_jev_groq120b_calls.txt</a></div>
     </div>
+    <p class="method">Scenarios are hand-built with ground truth for every fact: which should change and which must survive. Flat memory is the same engine with the cascade switched off. Protocol: <a href="https://github.com/rdarshan10/GEM/blob/main/BASELINE_PROTOCOL.md">BASELINE_PROTOCOL.md</a>.</p>
   </section>
 
-  <section class="sec" id="use">
-    <div class="sec-head">
-      <h2 class="display">Give your agent <em>this</em> memory.</h2>
-      <p>An MCP server for Claude Code, Claude Desktop, Cursor and other clients, or a Python library. Every save reports what it changed further down.</p>
+  <section class="sec" id="install" aria-labelledby="h-install">
+    <div class="head">
+      <h2 class="display" id="h-install">Add it to your <em>agent</em>.</h2>
+      <p>Run GEM as an MCP server for Claude Code, Claude Desktop, Cursor and other clients, or import it as a Python library.</p>
     </div>
     <div class="install">
-      <pre><span class="c"># MCP server</span>
+      <div>
+        <div class="code"><header><span>MCP SERVER</span><button class="copy" data-copy="mcp">copy</button></header>
+<pre id="mcp">git clone https://github.com/rdarshan10/GEM && cd GEM
 pip install -e ".[mcp,embeddings,jev]"
-claude mcp add gem -- python -m gem.mcp_server
+claude mcp add gem -- python -m gem.mcp_server</pre></div>
+        <div class="code"><header><span>PYTHON</span><button class="copy" data-copy="py">copy</button></header>
+<pre id="py">from gem import Memory
 
-<span class="c"># or the library</span>
-from gem import Memory
 m = Memory()
 home = m.add("I live in Bangalore").id
 m.add("My commute is 45 minutes", derived_from=[home])
-m.add("I moved to Mumbai").invalidated   <span class="c"># [commute]</span></pre>
-      <ul class="tools">
-        <li><span>add_memory</span><span>save or forget a fact; returns what it updated and what went stale</span></li>
-        <li><span>search_memory</span><span>valid matches, with outdated ones in a separate list</span></li>
-        <li><span>get_profile</span><span>a summary built only from facts still true</span></li>
-        <li><span>get_stale</span><span>facts to reconfirm with the user</span></li>
-        <li><span>why</span><span>the facts a fact was derived from</span></li>
-        <li><span>list_memories</span><span>everything in a memory space</span></li>
-      </ul>
+
+r = m.add("I moved to Mumbai")
+r.invalidated   <span class="c"># [My commute is 45 minutes]</span></pre></div>
+      </div>
+      <div>
+        <ul class="tools">
+          <li><span>add_memory</span><span>Save or forget a fact. Returns what it updated and what it made stale, several links away.</span></li>
+          <li><span>search_memory</span><span>Valid matches, with outdated ones in a separate list.</span></li>
+          <li><span>get_profile</span><span>A summary built only from facts that are still true.</span></li>
+          <li><span>get_stale</span><span>Facts to reconfirm with the user.</span></li>
+          <li><span>why</span><span>The facts a fact was derived from.</span></li>
+          <li><span>list_memories</span><span>Everything in a memory space.</span></li>
+        </ul>
+        <p class="tools-note">Needs an LLM: Ollama locally or Groq. Jev is optional and cuts LLM calls; set <span class="mono">TYPESAFE_API_KEY</span>. Memory is saved as JSON files by default, or in FalkorDB.</p>
+      </div>
     </div>
   </section>
 
-  <footer><span>GEM · research build by Revanth Darshan · PolyForm Noncommercial</span><span>animations replay recorded runs (Jev + gpt-oss-120b) · <a href="https://github.com/rdarshan10/GEM">github</a></span></footer>
+  <section class="sec" id="limits" aria-labelledby="h-limits">
+    <div class="head">
+      <h2 class="display" id="h-limits">Honest about the <em>edges</em>.</h2>
+      <p>What GEM isn't for, and what it can't do yet.</p>
+    </div>
+    <div class="limits">
+      <div><h3>Built for chains</h3><p>If your facts are independent, such as preferences and profile fields, flat memory is as accurate and cheaper.</p></div>
+      <div><h3>Inferred links miss some</h3><p>When you don't pass <span class="mono">derived_from</span>, GEM infers links with about 85–88% recall in our tests. Pin the ones you can't afford to miss.</p></div>
+      <div><h3>Stale facts wait for an answer</h3><p>When a new value can't be worked out, GEM flags the fact instead of guessing. Someone still has to answer.</p></div>
+      <div><h3>A research build</h3><p>Measured on hand-built scenarios and benchmarks, not yet run in production. Licensed PolyForm Noncommercial; the API may change.</p></div>
+    </div>
+  </section>
 </div>
+</main>
 
-<div class="typesw" role="group" aria-label="Typeface (preview)">type <button data-t="1" class="on">Fraunces</button><button data-t="2">Instrument</button><button data-t="3">Bricolage</button></div>
+<footer class="after">
+  <p class="big">Memory that<br><em>follows</em> through.</p>
+  <ul>
+    <li><a href="https://github.com/rdarshan10/GEM">GitHub</a></li>
+    <li><a href="https://github.com/rdarshan10/GEM#readme">README</a></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/PRODUCTIONIZATION.md">Roadmap &amp; limits</a></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/RELATED_WORK.md">Related work</a></li>
+  </ul>
+</footer>
+<p class="legal after"><span>© 2026 Revanth Darshan · PolyForm Noncommercial 1.0.0</span><span id="data-stamp">graphs replay recorded GEM runs</span></p>
 
 <script src="engine.js"></script>
-<script>
-(async function () {
-  // ---------------- typeface preview switcher
-  const html = document.documentElement;
-  const setType = (t) => { html.className = "type-" + t; document.querySelectorAll(".typesw button").forEach((b) => b.classList.toggle("on", b.dataset.t === t)); };
-  document.querySelectorAll(".typesw button").forEach((b) => b.addEventListener("click", () => setType(b.dataset.t)));
-  const qt = new URLSearchParams(location.search).get("type");
-  if (qt) setType(qt);
-
-  // ---------------- film grain, generated once
-  const gr = document.getElementById("grain"), gx = gr.getContext("2d");
-  gr.width = gr.height = 256;
-  const img = gx.createImageData(256, 256);
-  for (let i = 0; i < img.data.length; i += 4) { const v = Math.random() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
-  gx.putImageData(img, 0, 0);
-  gr.style.backgroundImage = `url(${gr.toDataURL()})`; gr.width = gr.height = 1;
-
-  const theme = {
-    states: { active: "#d9d5ca", trigger: "#ffffff", updated: "#86a8ff", stale: "#f4b443", kept: "#6bd59a", wrong: "#ff6b5d", superseded: "#6c6b66", accent: "#86a8ff" },
-    edge: "#8d8f98", edgeAlpha: 0.42, pulse: "#a9c2ff", text: "#ece8df", triggerText: "#ffffff",
-    labelHalo: "rgba(10,11,13,.9)", fontSize: 14, fontFamily: "'Geist', sans-serif", badgeFont: "500 10px 'Geist Mono', monospace",
-    lineHeight: 17, breath: 3.2, glow: 18, dim: 0.16, camSpeed: 2.2,
-    noteFont: "500 12px 'Geist Mono', monospace", noteColor: "#8a8880",
-    drawNode(ctx, n, x, y, r) {
-      ctx.save();
-      if (n.state !== "active") { ctx.shadowColor = `rgba(${n.col.join(",")},.65)`; ctx.shadowBlur = 16; }
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgb(${n.col.join(",")})`; ctx.fill();
-      ctx.restore();
-      if (n.kind === "trigger") { ctx.beginPath(); ctx.arc(x, y, r + 5, 0, Math.PI * 2); ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 1; ctx.stroke(); }
-    },
-  };
-  const wide = window.innerWidth > 760;
-  // phones: compact mode shows only the new fact, the fact being decided, and any fact you tap
-  const compact = !wide, lay = compact ? { dx: 120, dy: 96 } : {};
-  const g = new GemGraph(document.getElementById("c"), theme, { offsetX: wide ? window.innerWidth * 0.17 : 0, offsetY: wide ? 0 : -window.innerHeight * 0.2, labelWidth: compact ? 150 : 180, compact });
-  const data = await GemGraph.loadData("data/scenarios.json");
-  const S = Object.fromEntries(data.scenarios.map((s) => [s.key, s]));
-
-  // ---------------- story
-  const spots = { relocation: [0, 0], runtime: [1250, -60], launch: [-1250, -330], cloud: [1180, 760], reorg: [-1150, 800], email: [40, 900] };
-  const C = {};
-  Object.entries(spots).forEach(([k, [x, y]]) => { C[k] = GemGraph.build(g, S[k], k + ":", x, y, lay); });
-  const all = [].concat(...Object.values(C).map((c) => c.ids));
-  const reloc = C.relocation;
-  // a title above each memory group, shown only in the zoomed-out view
-  Object.entries(C).forEach(([k, c]) => {
-    const ys = c.ids.map((id) => g.nodes.get(id).hy), xs = c.ids.map((id) => g.nodes.get(id).hx);
-    g.note((Math.min(...xs) + Math.max(...xs)) / 2, Math.max(...ys) + 70, S[k].title.toUpperCase());
-  });
-  const WIDE_OX = wide ? window.innerWidth * 0.24 : 0, ZOOM_OX = wide ? window.innerWidth * 0.21 : 0;
-  let current = -1;
-
-  const rail = document.querySelector(".rail");
-  const steps = [...document.querySelectorAll(".step")];
-  steps.forEach(() => rail.appendChild(document.createElement("i")));
-  let token = { cancelled: true };
-  const fresh = () => { token.cancelled = true; token = { cancelled: false }; g.clearDials(); return token; };
-  const resetAll = () => Object.keys(C).forEach((k) => GemGraph.reset(g, S[k], k + ":"));
-  // story steps stay on the relocation memory; the other groups are hidden until the zoom-out
-  const zoom = () => { g.showNotes(false); g.setFocus(reloc.ids.concat("relocation:new"), 0); g.frame(reloc.ids, 40, 1.15, 0.18, [reloc.home], ZOOM_OX); };
-  const overview = () => { g.setFocus(all, 1); all.forEach((id) => (g.nodes.get(id).labelAT = 0)); g.showNotes(true); g.frame(all, 60, 0.5, 0.18, Object.values(C).map((c) => [c.home[0], c.home[1] - 40]), WIDE_OX); };
-
-  const beats = {
-    // hero: the relocation write plays on a loop, so the first screen shows what GEM does
-    async 0() {
-      const t = fresh(); resetAll(); zoom();
-      await g.wait(700);
-      while (!t.cancelled) {
-        await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, dials: false });
-        if (t.cancelled) return;
-        await g.wait(3200); if (t.cancelled) return;
-        GemGraph.reset(g, S.relocation, "relocation:"); g.spotlight = null;
-        await g.wait(900);
-      }
-    },
-    1() { fresh(); resetAll(); zoom(); },
-    async 2() { const t = fresh(); resetAll(); zoom(); await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, until: "conflict", dials: false }); },
-    async 3() { const t = fresh(); resetAll(); zoom(); await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, mode: "flat", speed: 1.4 }); },
-    async 4() { const t = fresh(); resetAll(); zoom(); await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, speed: 1.05 }); },
-    async 5() {
-      const t = fresh(); zoom();
-      if (g.nodes.get("relocation:n2").state === "active") await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, speed: 6, dials: false });
-      if (t.cancelled) return;
-      S.relocation.steps.forEach((s) => { if (s.jev && s.depth > 0) g.dial("relocation:" + s.id, s.kind === "stop" ? s.jev.p_unaffected : s.jev.p_affected, "", s.kind === "stop" ? "kept" : "stale"); });
-      document.getElementById("m-jev").textContent = S.relocation.calls.jev;
-      document.getElementById("m-llm").textContent = S.relocation.calls.llm;
-    },
-    async 6() {
-      const t = fresh(); resetAll(); overview();
-      await g.wait(900); if (t.cancelled) return;
-      g.setFocus(C.launch.ids.concat("launch:new"), 0.3); all.forEach((id) => (g.nodes.get(id).labelAT = 0));
-      await GemGraph.play(g, S.launch, "launch:", C.launch.home, { token: t, speed: 1.3, badges: false, dials: false });
-    },
-  };
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (!e.isIntersecting) return;
-      const i = +e.target.dataset.beat;
-      if (i === current) return;
-      current = i;
-      [...rail.children].forEach((r, j) => r.classList.toggle("on", j === i));
-      beats[i]();
-    });
-  }, { threshold: 0.55 });
-  steps.forEach((s) => io.observe(s));
-  new IntersectionObserver((es) => es.forEach((e) => rail.classList.toggle("off", e.isIntersecting)), { threshold: 0.05 }).observe(document.querySelector(".after"));
-  beats[0](); current = 0; g.snap();
-
-  // ---------------- mini playground
-  if (compact) document.getElementById("draghint").textContent = "tap a fact to read it";
-  const SHORT = { relocation: "I moved to Mumbai", runtime: "Lambda → containers", launch: "Launch slipped to Dec 1", cloud: "m5.large → m5.xlarge", reorg: "Bob is my new manager", email: "Gmail → Fastmail" };
-  const pg = new GemGraph(document.getElementById("pc"), theme, { drag: true, labelWidth: compact ? 150 : 175, offsetY: -14, compact });
-  let pKey = "relocation", pMode = "gem", pTok = { cancelled: true }, started = false, pIv = null;
-  const chips = document.getElementById("chips");
-  data.scenarios.forEach((sc) => {
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.textContent = SHORT[sc.key] || sc.title;
-    b.setAttribute("aria-pressed", String(sc.key === pKey));
-    b.addEventListener("click", () => { pKey = sc.key; runPlay(); });
-    chips.appendChild(b);
-  });
-  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => { pMode = b.dataset.m; runPlay(); }));
-  const setR = (id, v) => { document.getElementById(id).textContent = v; };
-
-  async function runPlay() {
-    pTok.cancelled = true; pTok = { cancelled: false }; const my = pTok;
-    [...chips.children].forEach((b, i) => b.setAttribute("aria-pressed", String(data.scenarios[i].key === pKey)));
-    document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.m === pMode)));
-    const sc = S[pKey];
-    pg.clear();
-    const built = GemGraph.build(pg, sc, "p:", 0, 0, lay);
-    pg.frame(built.ids, 50, 1.1, 0.18, [built.home]);
-    if (!started) { pg.snap(); started = true; }
-    setR("r-jev", pMode === "flat" ? "–" : 0); setR("r-llm", pMode === "flat" ? "–" : 0); setR("r-up", 0); setR("r-st", 0); setR("r-last", "");
-    const tick = () => {
-      let up = 0, st = 0, wr = 0;
-      built.ids.forEach((id) => { const n = pg.nodes.get(id); if (!n) return; if (n.state === "updated") up++; if (n.state === "stale" || n.state === "superseded") st++; if (n.state === "wrong") wr++; });
-      setR("r-up", up); setR("r-st", pMode === "flat" ? `${st} · ${wr} still served as true` : st);
-    };
-    clearInterval(pIv); pIv = setInterval(tick, 150);
-    await GemGraph.play(pg, sc, "p:", built.home, {
-      token: my, mode: pMode,
-      log: (k, x) => { if (!my.cancelled && k !== "write") setR("r-last", x.trim()); },
-      count: pMode === "flat" ? null : ({ jev, llm }) => { setR("r-jev", jev); setR("r-llm", llm); },
-    });
-    if (!my.cancelled) { tick(); clearInterval(pIv); }
-  }
-  new IntersectionObserver((es, o) => { if (es.some((e) => e.isIntersecting)) { o.disconnect(); runPlay(); } }, { threshold: 0.4 }).observe(document.querySelector(".play-stage"));
-})();
-</script>
+<script src="site.js"></script>
 </body>
 </html>
