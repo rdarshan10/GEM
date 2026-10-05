@@ -29,8 +29,8 @@
       this.edges = [];
       this.fx = [];
       this.notes = [];
-      this.cam = { x: 0, y: 0, s: 0.6, ox: this.opts.offsetX };
-      this.camT = { x: 0, y: 0, s: 0.6, ox: this.opts.offsetX };
+      this.cam = { x: 0, y: 0, s: 0.6, ox: this.opts.offsetX, oy: this.opts.offsetY };
+      this.camT = { x: 0, y: 0, s: 0.6, ox: this.opts.offsetX, oy: this.opts.offsetY };
       this.time = 0;
       this.last = 0;
       this.timers = [];
@@ -120,17 +120,17 @@
     }
     showLabels(ids, on) { ids.forEach((id) => { const n = this.nodes.get(id); if (n) n.labelAT = on ? 1 : 0; }); }
 
-    frame(ids, pad = 90, maxS = 1.3, minS = 0.18, extra = [], ox = this.opts.offsetX) {
-      this._framed = [ids, pad, maxS, minS, extra, ox];
+    frame(ids, pad = 90, maxS = 1.3, minS = 0.18, extra = [], ox = this.opts.offsetX, oy = this.opts.offsetY) {
+      this._framed = [ids, pad, maxS, minS, extra, ox, oy];
       const pts = ids.map((id) => this.nodes.get(id)).filter(Boolean).map((n) => [n.hx, n.hy]).concat(extra);
       if (!pts.length) return;
       const lw = this.opts.labels ? this.opts.labelWidth : 0;
       let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
       pts.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x + lw); y0 = Math.min(y0, y - 20); y1 = Math.max(y1, y + 40); });
       const availW = this.w - 2 * pad - Math.abs(ox) * 2;
-      const availH = this.h - 2 * pad - Math.abs(this.opts.offsetY) * 2;
+      const availH = this.h - 2 * pad - Math.abs(oy) * 2;
       const s = clamp(Math.min(availW / Math.max(1, x1 - x0), availH / Math.max(1, y1 - y0)), minS, maxS);
-      this.camT = { x: (x0 + x1) / 2, y: (y0 + y1) / 2, s, ox };
+      this.camT = { x: (x0 + x1) / 2, y: (y0 + y1) / 2, s, ox, oy };
     }
     snap() { this.cam = { ...this.camT }; }
 
@@ -161,10 +161,10 @@
       this.c.addEventListener("pointerleave", () => { this.hover = null; });
     }
     toScreen(x, y) {
-      return [(x - this.cam.x) * this.cam.s + this.w / 2 + this.cam.ox, (y - this.cam.y) * this.cam.s + this.h / 2 + this.opts.offsetY];
+      return [(x - this.cam.x) * this.cam.s + this.w / 2 + this.cam.ox, (y - this.cam.y) * this.cam.s + this.h / 2 + this.cam.oy];
     }
     toWorld(x, y) {
-      return [(x - this.w / 2 - this.cam.ox) / this.cam.s + this.cam.x, (y - this.h / 2 - this.opts.offsetY) / this.cam.s + this.cam.y];
+      return [(x - this.w / 2 - this.cam.ox) / this.cam.s + this.cam.x, (y - this.h / 2 - this.cam.oy) / this.cam.s + this.cam.y];
     }
     pick(x, y) {
       let best = null, bd = this.opts.compact ? 30 : 18;
@@ -194,6 +194,7 @@
       this.cam.y = lerp(this.cam.y, this.camT.y, k);
       this.cam.s = lerp(this.cam.s, this.camT.s, k);
       this.cam.ox = lerp(this.cam.ox, this.camT.ox, k);
+      this.cam.oy = lerp(this.cam.oy, this.camT.oy, k);
       const amp = reduceMotion ? 0 : this.theme.breath ?? 3;
       this.nodes.forEach((n) => {
         n.x = n.hx + Math.sin(this.time * 0.55 + n.phase) * amp;
@@ -560,6 +561,7 @@
         const who = s.via === "jev" ? "Jev" : "LLM";
         const badge = state === "updated" ? `updated · ${who}` : `stale · review · ${who}`;
         g.setState(P(s.id), state, { label: state === "updated" ? s.content : undefined, badge: opts.badges === false ? "" : badge });
+        if (opts.onStep) opts.onStep({ id: s.id, state, text: state === "updated" ? s.content : txt(s.id), via: s.via });
         log(s.via, `${s.depth === 0 ? "conflict" : "hop " + s.depth} · ${txt(s.id)} → ${state === "updated" ? s.content : "STALE"}${s.jev && s.jev.p_affected != null ? ` (P affected ${s.jev.p_affected.toFixed(2)})` : ""}`);
         done.add(s.id);
         count();
@@ -571,6 +573,7 @@
         await g.pulse(P(from), P(s.id), { speed: sp }); if (!live()) return;
         if (s.jev && opts.dials !== false) { g.dial(P(s.id), s.jev.p_unaffected, "unaffected", "kept"); await wait(650); if (!live()) return; }
         g.setState(P(s.id), "kept", { badge: opts.badges === false ? "" : `unaffected · ${s.via === "jev" ? "Jev" : "LLM"}${s.jev ? " " + s.jev.p_unaffected.toFixed(2) : ""}` });
+        if (opts.onStep) opts.onStep({ id: s.id, state: "kept", text: txt(s.id), via: s.via });
         if (s.via !== "jev") llm += 1;
         log(s.via, `stop · ${txt(s.id)} unaffected${s.jev ? ` (P unaffected ${s.jev.p_unaffected.toFixed(2)})` : ""}`);
         done.add(s.id);

@@ -1,9 +1,18 @@
-"""Backend-agnostic LLM client.
+"""LLM clients used by GEM.
 
-Talks to Ollama's REST API over HTTP (default http://localhost:11434), so the only
-dependency is `requests` — no `ollama` Python package required. The gate is about
-whether a *local* model can do the job, so the default backend is Ollama, but the
-same interface could point at any OpenAI-compatible /chat endpoint later.
+Built in: Ollama (local or Ollama Cloud, the default) and Groq. Pick one in .env:
+
+    GEM_LLM=ollama   GEM_MODEL=gpt-oss:120b-cloud   OLLAMA_HOST=http://localhost:11434
+    GEM_LLM=groq     GROQ_MODEL=openai/gpt-oss-120b  GROQ_API_KEY=...
+
+BRING YOUR OWN MODEL. GEM needs any object with these two methods:
+
+    chat(system, user, *, json_mode=False, temperature=None) -> str
+    chat_json(system, user, *, retries=1, temperature=None) -> dict
+
+Write a small class (see GroqClient below for an HTTP example, or README "Choose your model"),
+then return it from make_llm() at the bottom of this file. That is the only place to change.
+Pass temperature through when given: self-consistency voting relies on it.
 """
 
 from __future__ import annotations
@@ -26,8 +35,9 @@ def _normalize_host(host: str) -> str:
 
 @dataclass
 class LLMConfig:
-    model: str = os.environ.get("GEM_MODEL", "gpt-oss:120b-cloud")
-    host: str = _normalize_host(os.environ.get("OLLAMA_HOST", "http://localhost:11434"))
+    # read at construction, not import, so values from a .env loaded after import apply
+    model: str = field(default_factory=lambda: os.environ.get("GEM_MODEL", "gpt-oss:120b-cloud"))
+    host: str = field(default_factory=lambda: os.environ.get("OLLAMA_HOST", "http://localhost:11434"))
     temperature: float = 0.0          # deterministic: this is measurement, not generation
     num_ctx: int = 8192               # must hold a 4k-token chunk + prompt comfortably
     timeout: int = 600                # absorbs first-call model load (6.6GB into memory)
@@ -218,7 +228,16 @@ class GroqClient:
 
 
 def make_llm():
-    """Factory: GEM_LLM=groq -> GroqClient (model from GROQ_MODEL); else OllamaClient."""
-    if os.environ.get("GEM_LLM", "").lower() == "groq":
+    """The one place GEM picks its LLM. GEM_LLM=groq -> GroqClient; otherwise Ollama.
+    To use another provider, add a branch here returning your own client (see module docstring)."""
+    # settings can live in .env here or in ~/.gem/.env (handy when an MCP client starts the
+    # server from another folder); real environment variables always win
+    load_dotenv(".env")
+    load_dotenv(os.path.join(os.path.expanduser(os.environ.get("GEM_HOME", "~/.gem")), ".env"))
+    backend = os.environ.get("GEM_LLM", "ollama").lower()
+    if backend == "groq":
         return GroqClient()
-    return OllamaClient(LLMConfig())
+    if backend in ("", "ollama"):
+        return OllamaClient(LLMConfig())
+    raise ValueError(f"GEM_LLM={backend!r} is not built in. Use 'ollama' or 'groq', or add a "
+                     "branch for your own client in make_llm() in gem/llm.py.")

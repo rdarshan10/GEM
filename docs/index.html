@@ -32,22 +32,26 @@
 <div class="story-wrap">
   <div class="stage">
     <canvas id="stage" role="img" aria-label="Animated memory graph. The text beside it describes each step."></canvas>
-    <p class="stage-cap" id="stage-cap">replaying a recorded run · <b>4 Jev calls · 1 LLM call</b></p>
+    <div class="callpanel" id="callpanel" aria-hidden="true">
+      <header><span class="call" id="cp-call"></span><span class="meta">recorded run</span></header>
+      <ol id="cp-rows"></ol>
+      <div class="cp-foot" id="cp-foot"></div>
+    </div>
   </div>
 
   <div class="steps">
     <section class="step" id="hero" data-beat="hero" aria-labelledby="h-hero"><div class="card">
-      <p class="kicker">Agent memory · research build</p>
-      <h1 class="display" id="h-hero">Memory that <em>follows</em> through.</h1>
-      <p class="lead">Agent memory that notices when one change makes other memories wrong. GEM finds every fact built on the one that changed, even four links away, then fixes it, flags it, or leaves it alone.</p>
+      <p class="kicker">GEM · memory for AI agents</p>
+      <h1 class="display" id="h-hero">Change one fact. GEM fixes what <em>depended</em> on it.</h1>
+      <p class="lead">Agent memory that keeps track of which facts were worked out from which. When one changes, GEM rewrites what it can, flags what it can't, and leaves the rest alone.</p>
       <div class="actions"><a class="btn primary" href="#how">See how it works ↓</a><a class="btn" href="#install">Add it to your agent</a></div>
-      <p class="status">MCP server + Python library · open source</p>
+      <p class="status">MCP server + Python library · bring your own model</p>
     </div></section>
 
     <section class="step" id="how" data-beat="built" aria-labelledby="h-built"><div class="card">
       <p class="kicker"><b>01</b> · the problem</p>
-      <h2 class="display" id="h-built">Facts are built on facts.</h2>
-      <p>Your commute was worked out from where you live. Your alarm, from the commute. The coffee maker, from the alarm. Each arrow is a link GEM keeps as it stores a fact, either given or inferred.</p>
+      <h2 class="display" id="h-built">Memories depend on other memories.</h2>
+      <p>Your commute was worked out from where you live. Your alarm, from the commute. The coffee maker, from the alarm. GEM records each of these dependencies as it stores a fact, whether you give it or GEM infers it.</p>
     </div></section>
 
     <section class="step" data-beat="change" aria-labelledby="h-change"><div class="card">
@@ -163,6 +167,7 @@
         <div class="code"><header><span>MCP SERVER</span><button class="copy" data-copy="mcp">copy</button></header>
 <pre id="mcp">git clone https://github.com/rdarshan10/GEM && cd GEM
 pip install -e ".[mcp,embeddings,jev]"
+cp .env.example .env        <span class="c"># pick your model here</span>
 claude mcp add gem -- python -m gem.mcp_server</pre></div>
         <div class="code"><header><span>PYTHON</span><button class="copy" data-copy="py">copy</button></header>
 <pre id="py">from gem import Memory
@@ -183,7 +188,7 @@ r.invalidated   <span class="c"># [My commute is 45 minutes]</span></pre></div>
           <li><span>why</span><span>The facts a fact was derived from.</span></li>
           <li><span>list_memories</span><span>Everything in a memory space.</span></li>
         </ul>
-        <p class="tools-note">Needs an LLM: Ollama locally or Groq. Jev is optional and cuts LLM calls; set <span class="mono">TYPESAFE_API_KEY</span>. Memory is saved as JSON files by default, or in FalkorDB.</p>
+        <p class="tools-note"><strong>Bring your own model.</strong> Ollama (local or cloud) and Groq are built in and chosen in <span class="mono">.env</span>. Any other provider takes one small class in <a href="https://github.com/rdarshan10/GEM/blob/main/gem/llm.py"><span class="mono">gem/llm.py</span></a> with two methods. Jev is optional and cuts LLM calls. Memory is saved as JSON files by default, or in FalkorDB.</p>
       </div>
     </div>
   </section>

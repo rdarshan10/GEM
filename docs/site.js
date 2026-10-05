@@ -56,13 +56,12 @@
 
   let data;
   try { data = await GemGraph.loadData("data/scenarios.json"); }
-  catch (e) { $("#stage-cap").textContent = "the recorded runs could not be loaded"; return; }
+  catch (e) { $("#cp-call").textContent = "the recorded runs could not be loaded"; return; }
   const S = Object.fromEntries(data.scenarios.map((s) => [s.key, s]));
   $("#data-stamp").textContent = `graphs replay GEM runs recorded ${data.generated} · Jev + ${data.llm}`;
   const rel = S.relocation;
   $("#m-jev").textContent = rel.calls.jev;
   $("#m-llm").textContent = rel.calls.llm;
-  $("#stage-cap").innerHTML = `replaying a recorded run · <b>${rel.calls.jev} Jev calls · ${rel.calls.llm} LLM call${rel.calls.llm === 1 ? "" : "s"}</b>`;
 
   // ------------------------------------------------------------------ story
   const g = new GemGraph($("#stage"), theme, {
@@ -84,11 +83,32 @@
   let token = { cancelled: true }, current = null;
   const fresh = () => { token.cancelled = true; token = { cancelled: false }; g.clearDials(); g.spotlight = null; return token; };
   const resetAll = () => Object.keys(C).forEach((k) => GemGraph.reset(g, S[k], k + ":"));
-  const focusOn = (key) => {
+  // hero: graph sits higher so the tool-call panel fits under it
+  const HERO_OY = wide ? -window.innerHeight * 0.13 : undefined;
+  const focusOn = (key, hero = false) => {
     const c = C[key];
     g.showNotes(false);
     g.setFocus(c.ids.concat(key + ":new"), 0);
-    g.frame(c.ids, 40, 1.15, 0.18, [c.home], ZOOM_OX);
+    g.frame(c.ids, 40, 1.15, 0.18, [c.home], ZOOM_OX, hero ? HERO_OY : undefined);
+  };
+
+  // ---------------- hero tool-call panel: the call types itself, results fill in as the cascade runs
+  const cpCall = $("#cp-call"), cpRows = $("#cp-rows"), cpFoot = $("#cp-foot");
+  const ROW = { updated: "updated", stale: "stale", kept: "unaffected", superseded: "superseded" };
+  async function typeCall(t, text) {
+    cpCall.classList.add("typing");
+    for (let i = 1; i <= text.length; i++) {
+      if (t.cancelled) return;
+      cpCall.textContent = text.slice(0, i);
+      await g.wait(RM ? 0 : 26);
+    }
+    cpCall.classList.remove("typing");
+  }
+  const addRow = ({ state, text }) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="t-${state}">${ROW[state] || state}</span><span></span>`;
+    li.lastChild.textContent = text;
+    cpRows.appendChild(li);
   };
   const overview = () => {
     g.setFocus(all, 1);
@@ -101,15 +121,20 @@
   const settled = (key) => g.nodes.get(key + ":" + S[key].steps.find((s) => s.kind === "revise" && s.depth > 0)?.id)?.state !== "active";
 
   const beats = {
-    async hero() { // the relocation write, on a loop: the first screen shows what GEM does
-      const t = fresh(); resetAll(); focusOn("relocation");
-      await g.wait(700);
+    async hero() { // the relocation write on a loop, with the tool call and what it returns
+      const t = fresh(); resetAll(); focusOn("relocation", true);
+      await g.wait(500);
       do {
-        await play("relocation", t);
-        if (t.cancelled || RM) return;
-        await g.wait(3400); if (t.cancelled) return;
+        cpRows.innerHTML = ""; cpFoot.textContent = ""; cpCall.textContent = "";
+        await typeCall(t, `add_memory("${rel.trigger}")`);
+        if (t.cancelled) return;
+        await play("relocation", t, { onStep: (st) => { if (!t.cancelled) addRow(st); } });
+        if (t.cancelled) return;
+        cpFoot.innerHTML = `<b>${rel.calls.jev}</b> Jev calls · <b>${rel.calls.llm}</b> LLM call${rel.calls.llm === 1 ? "" : "s"} · everything else left alone`;
+        if (RM) return;
+        await g.wait(4200); if (t.cancelled) return;
         GemGraph.reset(g, rel, "relocation:"); g.spotlight = null;
-        await g.wait(900);
+        await g.wait(700);
       } while (!t.cancelled);
     },
     async built() { // the links, traced from the root down
@@ -166,7 +191,7 @@
     a.setAttribute("aria-label", s.querySelector("h1, h2").textContent);
     rail.appendChild(a);
   });
-  const stageCap = $("#stage-cap");
+  const panel = $("#callpanel");
   const storyIO = new IntersectionObserver((es) => {
     es.forEach((e) => {
       if (!e.isIntersecting) return;
@@ -174,7 +199,7 @@
       if (beat === current) return;
       current = beat;
       [...rail.children].forEach((a, i) => a.classList.toggle("on", steps[i] === e.target));
-      stageCap.style.opacity = beat === "hero" ? 1 : 0;
+      panel.classList.toggle("off", beat !== "hero");
       beats[beat]();
     });
   }, { threshold: 0.55 });

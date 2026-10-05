@@ -163,7 +163,29 @@ m.search("how do tests authenticate?")                  # ACTIVE facts only — 
 
 > **`Memory.add()` / `search()` call an LLM**, so the snippet above needs a model: point
 > `OLLAMA_HOST` at an [Ollama](https://ollama.com) server (default model `gpt-oss:120b-cloud`),
-> or set `GEM_LLM=groq` with a `GROQ_API_KEY`.
+> or set `GEM_LLM=groq` with a `GROQ_API_KEY`. See *Choose your model* below.
+
+### Choose your model
+
+Copy `.env.example` to `.env` and pick a backend. Ollama (local or Ollama Cloud) and Groq are
+built in. Any other model takes one small class in [gem/llm.py](gem/llm.py) with two methods,
+returned from `make_llm()`:
+
+```python
+class MyClient:
+    def chat(self, system, user, *, json_mode=False, temperature=None) -> str:
+        ...  # call your provider; return the reply text
+
+    def chat_json(self, system, user, *, retries=1, temperature=None) -> dict:
+        return _salvage_json(self.chat(system, user, json_mode=True, temperature=temperature))
+
+def make_llm():
+    return MyClient()
+```
+
+GEM's prompts expect a capable instruction-following model: the published numbers use
+`gpt-oss-120b` and `gpt-oss-20b`. Smaller models work but over-invalidate more; pair them with
+`Memory(conservative=True)`, which flags facts for review instead of superseding them.
 >
 > **No model handy? You can still verify the entire cascade engine offline** — the test suite
 > uses a mock LLM + mock embedder, so it needs no network and no API key:
