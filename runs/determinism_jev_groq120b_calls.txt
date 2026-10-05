@@ -1,0 +1,10 @@
+19 scenarios from 19 templates (stratified 1/template)
+
+run 1/2: 19/19 scen, 61/61 nodes (100.0%)  clean   LLM calls 25  Jev calls 45  jev fallbacks 0
+run 2/2: 19/19 scen, 61/61 nodes (100.0%)  clean   LLM calls 24  Jev calls 45  jev fallbacks 0
+
+================================================================
+determinism over 2 CLEAN runs (0 discarded as rate-limited):
+  node accuracy: min 100.0%  mean 100.0%  max 100.0%
+  scenarios that flipped pass/fail at least once: 0/19
+================================================================

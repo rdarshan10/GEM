@@ -1,0 +1,32 @@
+decider=jev  llm=openai/gpt-oss-120b
+
+--- structural run 1
+   f0 CHANGED [ACTIVE] The product launch is scheduled for March 1
+   f1 CHANGED [STALE] The marketing campaign kicks off November 17, two weeks before launch
+   f2 CHANGED [STALE] The press embargo lifts on November 17 to match the campaign
+   f3 CHANGED [STALE] Analyst briefings are booked for November 16, the day before embargo
+   f4 CHANGED [STALE] The demo video must be finalized by November 14 for the briefings
+   f5 CHANGED [STALE] Video production starts October 20 to finish the demo by November 14
+   chain nodes invalidated 6/6   stats {'capable_calls': 3, 'cheap_calls': 0, 'cache_hits': 0, 'sim_skipped': 0, 'derive_calls': 0, 'jev_calls': 7, 'jev_decided': 12}   jev fallbacks 0  degraded 0
+--- structural run 2
+   f0 CHANGED [ACTIVE] The product launch is scheduled for March 1
+   f1 CHANGED [STALE] The marketing campaign kicks off November 17, two weeks before launch
+   f2 CHANGED [STALE] The press embargo lifts on November 17 to match the campaign
+   f3 CHANGED [STALE] Analyst briefings are booked for November 16, the day before embargo
+   f4 CHANGED [STALE] The demo video must be finalized by November 14 for the briefings
+   f5 CHANGED [STALE] Video production starts October 20 to finish the demo by November 14
+   chain nodes invalidated 6/6   stats {'capable_calls': 3, 'cheap_calls': 0, 'cache_hits': 0, 'sim_skipped': 0, 'derive_calls': 0, 'jev_calls': 7, 'jev_decided': 12}   jev fallbacks 0  degraded 0
+--- structural run 3
+   f0 CHANGED [ACTIVE] The product launch is scheduled for March 1
+   f1 CHANGED [STALE] The marketing campaign kicks off November 17, two weeks before launch
+   f2 CHANGED [STALE] The press embargo lifts on November 17 to match the campaign
+   f3 CHANGED [STALE] Analyst briefings are booked for November 16, the day before embargo
+   f4 CHANGED [STALE] The demo video must be finalized by November 14 for the briefings
+   f5 CHANGED [STALE] Video production starts October 20 to finish the demo by November 14
+   chain nodes invalidated 6/6   stats {'capable_calls': 3, 'cheap_calls': 0, 'cache_hits': 0, 'sim_skipped': 0, 'derive_calls': 0, 'jev_calls': 7, 'jev_decided': 12}   jev fallbacks 0  degraded 0
+
+--- judged eager_pinned (STALE rubric)
+  eager_pinned dim1=P dim2=P dim3=F   2/3
+    dim1_response: The note that video production starts on October 20 is marked **[OUTDATED]**, so that date is no longer reliable and can’t be assumed to still be correct. You’l
+    dim2_response: The note that video production starts on October 20 is marked [OUTDATED], so that start date is no longer reliable. I can’t confirm a studio reservation for tha
+    dim3_response: The previous plan to start video production on October 20 is marked as outdated, so that date can’t be relied on. I don’t have a current start‑date in your memo

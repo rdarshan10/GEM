@@ -88,7 +88,17 @@ silently trusted. Everything below is intentionally not.
   ("is now: Delaware law"), so Jev more often sees a dependent's new value as derivable and routes
   it to the LLM for the rewrite (e.g. the 6-hop chain's dates shifted to Nov 17 / Nov 16).
   No LLM-only run on gpt-oss-20b yet, so the saving against it is not measured.
-  **Still to measure:** the thresholds on held-out tests (`stale_eval/depth_test.py`, `gem/eval.py --repeat 5`) — 37 facts can overfit.
+  **Held-out check** (thresholds untouched; Groq `openai/gpt-oss-120b` to match the LLM-only
+  reference `runs/determinism_120b.txt`):
+  - `gem/eval.py --per-template 1 --repeat 5` (19 scenarios, 19 templates): **100% in all 5 runs,
+    0/19 flips** (`runs/determinism_jev_groq120b.txt`), vs LLM-only 99.0% mean with 2 flips. Two
+    more runs with call counts: 100%, **~25 LLM + 45 Jev calls for 19 writes, 0 Jev fallbacks**
+    (`runs/determinism_jev_groq120b_calls.txt`).
+  - 6-hop depth chain (`runs/stale_depth_jev_groq120b.txt`): the cascade reaches the leaf in all
+    3 runs (6/6 nodes, identical), 3 LLM + 7 Jev calls each. The judged answer test scored 2/3 —
+    the miss is answer wording ("no current start date"), and LLM-only varied 3/3 to 1/3 there.
+  - Not yet measured: an LLM-only call count on the same held-out set, so the held-out saving is
+    unquantified; and a larger held-out sweep (all 139 scenarios).
 - **Conclusion:** the *wasteful* part of the cascade cost (scanning every neighbor) is eliminable
   with no accuracy loss; the *irreducible* part (classifying the real candidates + one capable
   call per actual cascade hop) is inherent to the capability. Decision caching (accuracy-free) is

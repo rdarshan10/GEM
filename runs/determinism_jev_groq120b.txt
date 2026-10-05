@@ -1,0 +1,15 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+19 scenarios from 19 templates (stratified 1/template)
+
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 3448.99it/s]
+run 1/5: 19/19 scen, 61/61 nodes (100.0%)  clean
+run 2/5: 19/19 scen, 61/61 nodes (100.0%)  clean
+run 3/5: 19/19 scen, 61/61 nodes (100.0%)  clean
+run 4/5: 19/19 scen, 61/61 nodes (100.0%)  clean
+run 5/5: 19/19 scen, 61/61 nodes (100.0%)  clean
+
+================================================================
+determinism over 5 CLEAN runs (0 discarded as rate-limited):
+  node accuracy: min 100.0%  mean 100.0%  max 100.0%
+  scenarios that flipped pass/fail at least once: 0/19
+================================================================

@@ -589,7 +589,9 @@ def _aggregate(results: list[dict]) -> dict:
     nt = sum(r["node_total"] for r in results)
     return {"scenarios": len(results), "passed": passed,
             "node_correct": nc, "node_total": nt,
-            "node_acc": nc / nt if nt else 0.0}
+            "node_acc": nc / nt if nt else 0.0,
+            "llm_calls": sum(r.get("stats", {}).get("capable_calls", 0) for r in results),
+            "jev_calls": sum(r.get("stats", {}).get("jev_calls", 0) for r in results)}
 
 
 def _by_category(results: list[dict]) -> dict:
@@ -627,7 +629,7 @@ def _print_integrity() -> None:
     cl, dl = C.DEGRADED["classify"], C.DEGRADED["derive_links"]
     tot = cl + dl
     if tot == 0:
-        print("integrity:       clean (0 degraded calls)")
+        print(f"integrity:       clean (0 degraded calls; {C.DEGRADED['jev']} jev fallbacks)")
         return
     print("!" * 70)
     print(f"RUN INVALID — {tot} degraded LLM calls (classify={cl}, derive_links={dl}).")
@@ -704,7 +706,8 @@ def main(argv=None) -> int:
             pass_vectors.append({r["name"]: r["passed"] for r in results})
             print(f"run {run + 1}/{args.repeat}: {agg['passed']}/{agg['scenarios']} scen, "
                   f"{agg['node_correct']}/{agg['node_total']} nodes "
-                  f"({agg['node_acc']:.1%})  clean", flush=True)
+                  f"({agg['node_acc']:.1%})  clean   LLM calls {agg['llm_calls']}  "
+                  f"Jev calls {agg['jev_calls']}  jev fallbacks {C.DEGRADED['jev']}", flush=True)
 
         print("\n" + "=" * 64)
         if not run_accs:
