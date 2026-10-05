@@ -20,7 +20,7 @@
 <header class="top" id="top-bar">
   <a class="brand" href="#hero" aria-label="GEM, back to top"><b>GEM</b><span>governed evolving memory</span></a>
   <nav aria-label="Sections">
-    <a href="#how">How it works</a><a href="#play">Playground</a><a href="#cases">Use cases</a><a href="#numbers">Numbers</a><a href="#install">Install</a>
+    <a href="#how">How it works</a><a href="#play">Playground</a><a href="#cases">Use cases</a><a href="#numbers">Numbers</a><a href="#install">Install</a><a href="architecture.html">Architecture</a>
     <a class="gh" href="https://github.com/rdarshan10/GEM">GitHub ↗</a>
   </nav>
 </header>
@@ -96,16 +96,18 @@
 
     <section class="step" data-beat="cheap" aria-labelledby="h-cheap"><div class="card">
       <p class="kicker"><b>07</b> · how GEM works</p>
-      <h2 class="display" id="h-cheap">Cheap judgment first.</h2>
-      <p>Each hop is one batched question to Jev, a small model that answers with probabilities: the rings. The LLM only writes corrections and settles doubts. Stopping the cascade takes 90% confidence; anything doubtful goes to the LLM.</p>
-      <div class="meter"><div><b id="m-jev">4</b><span>Jev calls</span></div><div><b id="m-llm">1</b><span>LLM call</span></div></div>
-      <p class="ex">for the whole “I moved to Mumbai” write</p>
+      <h2 class="display" id="h-cheap">Most decisions are <em>cheap</em>.</h2>
+      <p>Each hop is one batched question to a small decision model that answers with probabilities: the rings. The LLM only writes corrections and settles doubts. Stopping the cascade takes 90% confidence; anything doubtful goes to the LLM.</p>
+      <div class="meter"><div><b id="m-cheap">5 of 6</b><span>decided without the LLM</span></div><div><b id="m-llm">1</b><span>LLM call</span></div></div>
+      <p class="ex">for the whole “I moved to Mumbai” write · <a href="architecture.html#decisions">how the decision layer works →</a></p>
     </div></section>
 
     <section class="step" data-beat="scale" aria-labelledby="h-scale"><div class="card">
       <p class="kicker"><b>08</b> · cost</p>
       <h2 class="display" id="h-scale">A write costs what it <em>touches</em>.</h2>
-      <p>Six memories, one change: the launch slipped. Only that plan is read and rewritten, six links deep. The cost grows with the change, not with the size of memory.</p>
+      <p>Here is all of memory: six groups, <b id="s-total">33</b> facts. The launch slips. GEM checks a handful of similar facts, then follows only the links from the one that changed. The rest of memory isn't touched.</p>
+      <div class="meter"><div><b id="s-checked">6</b><span>similar facts checked</span></div><div><b id="s-links">5</b><span>links followed</span></div><div><b id="s-llm">4</b><span>LLM calls</span></div></div>
+      <p class="ex">the work grows with the change, not with the size of memory</p>
     </div></section>
   </div>
 </div>
@@ -125,7 +127,7 @@
       <canvas id="play-canvas" role="img" aria-label="Interactive memory graph"></canvas>
       <p class="play-q" id="play-q"></p>
       <button type="button" class="replay" id="replay">replay</button>
-      <div class="readout" aria-live="polite" id="readout"><span><b id="r-jev">0</b> Jev</span><span><b id="r-llm">0</b> LLM</span><span><b id="r-up">0</b> updated</span><span><b id="r-st">0</b> stale</span><span class="last" id="r-last"></span></div>
+      <div class="readout" aria-live="polite" id="readout"><span><b id="r-llm">0</b> LLM calls</span><span><b id="r-up">0</b> updated</span><span><b id="r-st">0</b> stale</span><span class="last" id="r-last"></span></div>
     </div>
     <p class="play-note">Drag a fact to move it, tap or hover one to read it. GEM and flat memory replay the same write.</p>
   </section>
@@ -152,7 +154,7 @@
       <div><b>37<small>/37</small></b><p>facts handled correctly across 12 cross-domain scenarios: medical, legal, finance, six-step chains.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/eval_diverse_groq20b_jev.txt">eval_diverse_groq20b_jev.txt</a></div>
       <div><b>5<small>/5</small></b><p>repeat runs at 100% on 19 scenarios held out from tuning; none flipped between runs. LLM-only: 99.0%.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b.txt">determinism_jev_groq120b.txt</a></div>
       <div><b>117<small> vs 91</small></b><p>facts right out of 117, GEM against flat memory on the same 37 propagation scenarios.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/propagation_eval_strat_clean.txt">propagation_eval_strat_clean.txt</a></div>
-      <div><b>1.3</b><p>LLM calls per write with Jev deciding first: about 25 LLM and 45 Jev calls for 19 writes.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b_calls.txt">determinism_jev_groq120b_calls.txt</a></div>
+      <div><b>1.3</b><p>LLM calls per write, with the decision layer answering first: about 25 LLM calls for 19 writes. <a href="architecture.html#cost">Cost details</a></p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b_calls.txt">determinism_jev_groq120b_calls.txt</a></div>
     </div>
     <p class="method">Scenarios are hand-built with ground truth for every fact: which should change and which must survive. Flat memory is the same engine with the cascade switched off. Protocol: <a href="https://github.com/rdarshan10/GEM/blob/main/BASELINE_PROTOCOL.md">BASELINE_PROTOCOL.md</a>.</p>
   </section>
@@ -166,7 +168,7 @@
       <div>
         <div class="code"><header><span>MCP SERVER</span><button class="copy" data-copy="mcp">copy</button></header>
 <pre id="mcp">git clone https://github.com/rdarshan10/GEM && cd GEM
-pip install -e ".[mcp,embeddings,jev]"
+pip install -e ".[mcp,embeddings]"
 cp .env.example .env        <span class="c"># pick your model here</span>
 claude mcp add gem -- python -m gem.mcp_server</pre></div>
         <div class="code"><header><span>PYTHON</span><button class="copy" data-copy="py">copy</button></header>
@@ -188,7 +190,7 @@ r.invalidated   <span class="c"># [My commute is 45 minutes]</span></pre></div>
           <li><span>why</span><span>The facts a fact was derived from.</span></li>
           <li><span>list_memories</span><span>Everything in a memory space.</span></li>
         </ul>
-        <p class="tools-note"><strong>Bring your own model.</strong> Ollama (local or cloud) and Groq are built in and chosen in <span class="mono">.env</span>. Any other provider takes one small class in <a href="https://github.com/rdarshan10/GEM/blob/main/gem/llm.py"><span class="mono">gem/llm.py</span></a> with two methods. Jev is optional and cuts LLM calls. Memory is saved as JSON files by default, or in FalkorDB.</p>
+        <p class="tools-note"><strong>Bring your own model.</strong> Ollama (local or cloud) and Groq are built in and chosen in <span class="mono">.env</span>. Any other provider takes one small class in <a href="https://github.com/rdarshan10/GEM/blob/main/gem/llm.py"><span class="mono">gem/llm.py</span></a> with two methods. An optional decision layer cuts LLM calls further (<a href="architecture.html#decisions">architecture</a>). Memory is saved as JSON files by default, or in FalkorDB.</p>
       </div>
     </div>
   </section>
@@ -213,6 +215,7 @@ r.invalidated   <span class="c"># [My commute is 45 minutes]</span></pre></div>
   <ul>
     <li><a href="https://github.com/rdarshan10/GEM">GitHub</a></li>
     <li><a href="https://github.com/rdarshan10/GEM#readme">README</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
     <li><a href="https://github.com/rdarshan10/GEM/blob/main/PRODUCTIONIZATION.md">Roadmap &amp; limits</a></li>
     <li><a href="https://github.com/rdarshan10/GEM/blob/main/RELATED_WORK.md">Related work</a></li>
   </ul>

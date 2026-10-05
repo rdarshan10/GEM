@@ -61,7 +61,7 @@
     addNode(id, o) {
       const c = this.color(o.state || "active");
       const n = {
-        id, label: o.label || "", x: o.x, y: o.y, hx: o.x, hy: o.y, r: o.r || 6,
+        id, label: o.label || "", x: o.x, y: o.y, hx: o.x, hy: o.y, bx: o.x, by: o.y, r: o.r || 6,
         state: o.state || "active", col: c, colFrom: c, colTo: c, tState: 1,
         alpha: o.alpha ?? 1, alphaT: o.alpha ?? 1, phase: Math.random() * TAU,
         labelOld: null, labelT: 1, badge: "", badgeT: 0, dial: null,
@@ -149,7 +149,7 @@
         const [x, y] = pos(e);
         if (drag) {
           const [wx, wy] = this.toWorld(x, y);
-          drag.hx = wx; drag.hy = wy;
+          drag.hx = drag.bx = wx; drag.hy = drag.by = wy;
         } else {
           this.hover = this.pick(x, y);
           this.c.style.cursor = this.hover ? "grab" : "default";
@@ -197,8 +197,11 @@
       this.cam.oy = lerp(this.cam.oy, this.camT.oy, k);
       const amp = reduceMotion ? 0 : this.theme.breath ?? 3;
       this.nodes.forEach((n) => {
-        n.x = n.hx + Math.sin(this.time * 0.55 + n.phase) * amp;
-        n.y = n.hy + Math.cos(this.time * 0.47 + n.phase * 1.7) * amp;
+        const kb = 1 - Math.exp(-dt * 3);   // ease toward home, so a new layout morphs in
+        n.bx = lerp(n.bx, n.hx, kb);
+        n.by = lerp(n.by, n.hy, kb);
+        n.x = n.bx + Math.sin(this.time * 0.55 + n.phase) * amp;
+        n.y = n.by + Math.cos(this.time * 0.47 + n.phase * 1.7) * amp;
         n.alpha = lerp(n.alpha, n.alphaT, 1 - Math.exp(-dt * 4));
         n.labelA = lerp(n.labelA, n.labelAT, 1 - Math.exp(-dt * 4));
         if (n.tState < 1) n.tState = Math.min(1, n.tState + dt / 0.55);
@@ -365,7 +368,8 @@
           ctx.stroke();
         }
         // label
-        const spot = !this.opts.compact || n.kind === "trigger" || this.spotlight === n.id || this.hover === n;
+        // compact: label only the fact being decided (the new fact until a decision starts) or a tapped one
+        const spot = !this.opts.compact || this.hover === n || this.spotlight === n.id || (n.kind === "trigger" && !this.spotlight);
         if (this.opts.labels && n.showLabel && n.labelA > 0.03 && spot) {
           const lx = x + r + 10 * sc, lw = this.opts.labelWidth * sc;
           ctx.font = font;
@@ -490,6 +494,7 @@
   // opts: speed, log(kind, text), count({jev, llm}), token {cancelled}, dials, badges
   GemGraph.play = async function (g, sc, prefix, home, opts = {}) {
     const sp = opts.speed || 1, tok = opts.token || {}, P = (id) => prefix + id;
+    if (tok.cancelled) return;
     const log = opts.log || (() => {}), wait = (ms) => g.wait(ms / sp);
     const live = () => !tok.cancelled;
     const txt = (id) => sc.nodes.find((n) => n.id === id).text;
@@ -558,8 +563,8 @@
         if (s.depth > 0) hop(from);
         if (s.via !== "jev") llm += 1;
         const state = s.status === "ACTIVE" ? "updated" : s.status === "SUPERSEDED" ? "superseded" : "stale";
-        const who = s.via === "jev" ? "Jev" : "LLM";
-        const badge = state === "updated" ? `updated · ${who}` : `stale · review · ${who}`;
+        const who = opts.who === false ? "" : ` · ${s.via === "jev" ? "Jev" : "LLM"}`;
+        const badge = state === "updated" ? `updated${who}` : `stale · review${who}`;
         g.setState(P(s.id), state, { label: state === "updated" ? s.content : undefined, badge: opts.badges === false ? "" : badge });
         if (opts.onStep) opts.onStep({ id: s.id, state, text: state === "updated" ? s.content : txt(s.id), via: s.via });
         log(s.via, `${s.depth === 0 ? "conflict" : "hop " + s.depth} · ${txt(s.id)} → ${state === "updated" ? s.content : "STALE"}${s.jev && s.jev.p_affected != null ? ` (P affected ${s.jev.p_affected.toFixed(2)})` : ""}`);
@@ -572,7 +577,7 @@
         hop(from);
         await g.pulse(P(from), P(s.id), { speed: sp }); if (!live()) return;
         if (s.jev && opts.dials !== false) { g.dial(P(s.id), s.jev.p_unaffected, "unaffected", "kept"); await wait(650); if (!live()) return; }
-        g.setState(P(s.id), "kept", { badge: opts.badges === false ? "" : `unaffected · ${s.via === "jev" ? "Jev" : "LLM"}${s.jev ? " " + s.jev.p_unaffected.toFixed(2) : ""}` });
+        g.setState(P(s.id), "kept", { badge: opts.badges === false ? "" : opts.who === false ? "unaffected" : `unaffected · ${s.via === "jev" ? "Jev" : "LLM"}${s.jev ? " " + s.jev.p_unaffected.toFixed(2) : ""}` });
         if (opts.onStep) opts.onStep({ id: s.id, state: "kept", text: txt(s.id), via: s.via });
         if (s.via !== "jev") llm += 1;
         log(s.via, `stop · ${txt(s.id)} unaffected${s.jev ? ` (P unaffected ${s.jev.p_unaffected.toFixed(2)})` : ""}`);

@@ -58,10 +58,17 @@
   try { data = await GemGraph.loadData("data/scenarios.json"); }
   catch (e) { $("#cp-call").textContent = "the recorded runs could not be loaded"; return; }
   const S = Object.fromEntries(data.scenarios.map((s) => [s.key, s]));
-  $("#data-stamp").textContent = `graphs replay GEM runs recorded ${data.generated} · Jev + ${data.llm}`;
+  $("#data-stamp").textContent = `graphs replay GEM runs recorded ${data.generated} · ${data.llm}`;
   const rel = S.relocation;
-  $("#m-jev").textContent = rel.calls.jev;
+  const relDecided = rel.steps.filter((s) => s.kind === "revise" || s.kind === "stop");
+  $("#m-cheap").textContent = `${relDecided.filter((s) => s.via === "jev").length} of ${relDecided.length}`;
   $("#m-llm").textContent = rel.calls.llm;
+  // step 08 numbers, from the recorded launch run
+  const la = S.launch, laScan = la.steps.find((s) => s.kind === "scan");
+  $("#s-checked").textContent = laScan ? laScan.checked.length : 0;
+  $("#s-links").textContent = la.steps.filter((s) => (s.kind === "revise" || s.kind === "stop") && s.depth > 0).length;
+  $("#s-llm").textContent = la.calls.llm;
+  $("#s-total").textContent = data.scenarios.reduce((a, s) => a + s.nodes.length, 0);
 
   // ------------------------------------------------------------------ story
   const g = new GemGraph($("#stage"), theme, {
@@ -71,9 +78,22 @@
   const spots = { relocation: [0, 0], runtime: [1250, -60], launch: [-1250, -330], cloud: [1180, 760], reorg: [-1150, 800], email: [40, 900] };
   const C = {};
   Object.entries(spots).forEach(([k, [x, y]]) => { C[k] = GemGraph.build(g, S[k], k + ":", x, y, lay); });
-  Object.entries(C).forEach(([k, c]) => {
-    const xs = c.ids.map((id) => g.nodes.get(id).hx), ys = c.ids.map((id) => g.nodes.get(id).hy);
-    g.note((Math.min(...xs) + Math.max(...xs)) / 2, Math.max(...ys) + 70, S[k].title.toUpperCase());
+  // step 08's map: the six memories as compact graphs in a 3x2 grid, titled, so the whole
+  // memory is readable at once. Nodes glide between this and the story layout.
+  const MAP = [["launch", 0, 0], ["relocation", 1, 0], ["runtime", 2, 0], ["reorg", 0, 1], ["email", 1, 1], ["cloud", 2, 1]];
+  const CELL_W = 560, CELL_H = 520;
+  MAP.forEach(([k, col, row]) => {
+    const L = GemGraph.layout(S[k], col * CELL_W, row * CELL_H, 110, 64);
+    const c = C[k];
+    c.story = Object.fromEntries(c.ids.map((id) => [id, [g.nodes.get(id).hx, g.nodes.get(id).hy]]));
+    c.storyHome = c.home;
+    c.map = Object.fromEntries(S[k].nodes.map((n) => [k + ":" + n.id, L[n.id]]));
+    c.mapHome = L.__trigger;
+    g.note(col * CELL_W, row * CELL_H - 135, S[k].title.toUpperCase());
+  });
+  const placeAll = (which) => Object.values(C).forEach((c) => {
+    Object.entries(c[which]).forEach(([id, [x, y]]) => { const n = g.nodes.get(id); n.hx = x; n.hy = y; });
+    c.home = which === "map" ? c.mapHome : c.storyHome;
   });
   const all = [].concat(...Object.values(C).map((c) => c.ids));
   const R = C.relocation;
@@ -87,6 +107,8 @@
   const HERO_OY = wide ? -window.innerHeight * 0.13 : undefined;
   const focusOn = (key, hero = false) => {
     const c = C[key];
+    placeAll("story");
+    g.opts.compact = compact;
     g.showNotes(false);
     g.setFocus(c.ids.concat(key + ":new"), 0);
     g.frame(c.ids, 40, 1.15, 0.18, [c.home], ZOOM_OX, hero ? HERO_OY : undefined);
@@ -111,13 +133,15 @@
     cpRows.appendChild(li);
   };
   const overview = () => {
+    placeAll("map");
+    g.opts.compact = true;            // in the map only the fact being decided is labelled
     g.setFocus(all, 1);
-    all.forEach((id) => (g.nodes.get(id).labelAT = 0));
     g.showNotes(true);
-    g.frame(all, 60, 0.5, 0.18, Object.values(C).map((c) => [c.home[0], c.home[1] - 40]), WIDE_OX);
+    const xs = MAP.map(([, c]) => c * CELL_W), ys = MAP.map(([, , r]) => r * CELL_H);
+    g.frame(all, 50, 0.95, 0.18, [[Math.min(...xs) - 160, Math.min(...ys) - 150], [Math.max(...xs) + 40, Math.max(...ys) + 330]], WIDE_OX, 0);
   };
-  const play = (key, t, o = {}) =>
-    GemGraph.play(g, S[key], key + ":", C[key].home, Object.assign({ token: t, dials: false }, o, { speed: (o.speed || 1) * speed }));
+  const play = (key, t, o = {}) => t.cancelled ? Promise.resolve() :
+    GemGraph.play(g, S[key], key + ":", C[key].home, Object.assign({ token: t, dials: false, who: false }, o, { speed: (o.speed || 1) * speed }));
   const settled = (key) => g.nodes.get(key + ":" + S[key].steps.find((s) => s.kind === "revise" && s.depth > 0)?.id)?.state !== "active";
 
   const beats = {
@@ -130,7 +154,7 @@
         if (t.cancelled) return;
         await play("relocation", t, { onStep: (st) => { if (!t.cancelled) addRow(st); } });
         if (t.cancelled) return;
-        cpFoot.innerHTML = `<b>${rel.calls.jev}</b> Jev calls · <b>${rel.calls.llm}</b> LLM call${rel.calls.llm === 1 ? "" : "s"} · everything else left alone`;
+        cpFoot.innerHTML = `<b>${rel.calls.llm}</b> LLM call${rel.calls.llm === 1 ? "" : "s"} · everything else left alone`;
         if (RM) return;
         await g.wait(4200); if (t.cancelled) return;
         GemGraph.reset(g, rel, "relocation:"); g.spotlight = null;
@@ -173,12 +197,11 @@
         if (s.jev && s.depth > 0) g.dial("relocation:" + s.id, s.kind === "stop" ? s.jev.p_unaffected : s.jev.p_affected, "", s.kind === "stop" ? "kept" : "stale");
       });
     },
-    async scale() {
+    async scale() { // the whole memory at once; one write lights up only what it touches
       const t = fresh(); resetAll(); overview();
-      await g.wait(RM ? 0 : 900); if (t.cancelled) return;
-      g.setFocus(C.launch.ids.concat("launch:new"), 0.3);
-      all.forEach((id) => (g.nodes.get(id).labelAT = 0));
-      await play("launch", t, { speed: 1.3, badges: false });
+      await g.wait(RM ? 0 : 1300); if (t.cancelled) return;
+      g.setFocus(C.launch.ids.concat("launch:new"), 0.32);
+      await play("launch", t, { badges: false });
     },
   };
 
@@ -234,7 +257,7 @@
     pg.frame(built.ids, 60, 1.1, 0.18, [built.home]);
     if (!started) { pg.snap(); started = true; }
     const flat = pMode === "flat";
-    setR("r-jev", flat ? "–" : 0); setR("r-llm", flat ? "–" : 0); setR("r-up", 0); setR("r-st", 0); setR("r-last", "");
+    setR("r-llm", flat ? "–" : 0); setR("r-up", 0); setR("r-st", 0); setR("r-last", "");
     const tick = () => {
       let up = 0, st = 0, wr = 0;
       built.ids.forEach((id) => { const n = pg.nodes.get(id); if (!n) return; if (n.state === "updated") up++; if (n.state === "stale" || n.state === "superseded") st++; if (n.state === "wrong") wr++; });
@@ -242,9 +265,9 @@
     };
     clearInterval(pIv); pIv = setInterval(tick, 150);
     await GemGraph.play(pg, sc, "p:", built.home, {
-      token: my, mode: pMode, speed,
-      log: (k, x) => { if (!my.cancelled && k !== "write") setR("r-last", x.trim()); },
-      count: flat ? null : ({ jev, llm }) => { setR("r-jev", jev); setR("r-llm", llm); },
+      token: my, mode: pMode, speed, who: false,
+      log: (k, x) => { if (!my.cancelled && k !== "write") setR("r-last", x.trim().replace(/ \(P (un)?affected [0-9.]+\)/, "")); },
+      count: flat ? null : ({ llm }) => { setR("r-llm", llm); },
     });
     if (!my.cancelled) { tick(); clearInterval(pIv); }
   }

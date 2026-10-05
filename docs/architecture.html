@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GEM — Architecture</title>
+<meta name="description" content="How GEM works inside: the write path, the dependency graph, the decision layer that keeps it cheap, the cost measurements, and how to plug in your own model.">
+<meta name="theme-color" content="#0a0b0d">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0d'/%3E%3Ccircle cx='11' cy='10' r='3.4' fill='%23ece8df'/%3E%3Ccircle cx='21' cy='17' r='3.4' fill='%2386a8ff'/%3E%3Ccircle cx='11' cy='24' r='3.4' fill='%23f4b443'/%3E%3Cpath d='M13.5 11.6 18.6 15.3M18.6 18.8 13.5 22.4' stroke='%23ece8df' stroke-width='1.3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..500,0..100;1,9..144,300..500,0..100&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<style>
+  .arch-hero { max-width: 1180px; margin: 0 auto; padding: 150px var(--gutter) 10px; }
+  .arch-hero h1 { font-size: clamp(48px, 6vw, 88px); margin: 14px 0 22px; }
+  .arch-hero p { color: var(--ink2); max-width: 640px; font-size: 18px; }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 30px; font: 400 13px var(--mono); }
+  .toc a { color: var(--ink2); text-decoration: none; }
+  .toc a:hover { color: var(--ink); }
+  .prose { max-width: 720px; color: var(--ink2); }
+  .prose p + p { margin-top: 14px; }
+  .prose strong { color: var(--ink); font-weight: 500; }
+  .fig { margin: 30px 0 0; border: 1px solid var(--line); border-radius: 14px; background: var(--bg2); padding: 22px; }
+  .fig figcaption { margin-top: 14px; color: var(--ink3); font-size: 14px; max-width: 780px; }
+  .fig-scroll { overflow-x: auto; }
+  .dia { display: block; width: 100%; min-width: 760px; height: auto; color: var(--ink); }
+  .dia .box rect { fill: var(--bg); stroke: #4a4d55; stroke-width: 1.2; }
+  .dia .box.key rect { stroke: var(--ink2); stroke-width: 1.5; }
+  .dia .box.dec rect { fill: #121a2e; stroke: var(--blue); stroke-width: 1.4; }
+  .dia .box.llm rect { fill: #17181c; stroke: #6f6e68; }
+  .dia .box.new rect { fill: #121a2e; stroke: var(--blue); }
+  .dia .o-kept rect { fill: #0f2318; stroke: var(--green); }
+  .dia .o-stale rect { fill: #2a2010; stroke: var(--amber); }
+  .dia .o-llm rect { fill: #17181c; stroke: #6f6e68; }
+  .dia .n { font: 500 11px var(--mono); fill: var(--ink3); }
+  .dia .t { font: 500 14px var(--body); fill: var(--ink); }
+  .dia .s { font: 400 12px var(--body); fill: var(--ink2); }
+  .dia .e { font: 400 11.5px var(--mono); fill: var(--ink2); }
+  .dia .acc { fill: var(--blue); }
+  .dia .ln { stroke: #8d8f98; stroke-width: 1.3; fill: none; }
+  .dia .dash { stroke-dasharray: 4 4; }
+  .dia .lnacc { stroke: var(--blue); stroke-width: 1.5; fill: none; }
+  .dia .arrow { fill: #8d8f98; } .dia .arrowacc { fill: var(--blue); }
+  .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+  .rules { list-style: none; margin: 26px 0 0; padding: 0; border-top: 1px solid var(--line); max-width: 860px; }
+  .rules li { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line); color: var(--ink2); }
+  .rules li b { font: 340 26px/1 var(--display); font-variation-settings: "SOFT" 60, "opsz" 144; color: var(--ink3); }
+  .rules li strong { color: var(--ink); font-weight: 500; }
+  .chart-title { font: 500 15px var(--body); color: var(--ink); margin: 0 0 4px; }
+  .chart-sub { font-size: 13.5px; color: var(--ink3); margin: 0 0 14px; }
+  .chart svg { display: block; width: 100%; height: auto; }
+  .legend-row { display: flex; gap: 18px; font: 400 12.5px var(--mono); color: var(--ink2); margin-bottom: 8px; }
+  .legend-row span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend-row i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); margin-top: 28px; }
+  .stats div { padding: 22px 20px 4px 0; border-right: 1px solid var(--line); }
+  .stats div + div { padding-left: 20px; }
+  .stats div:last-child { border-right: 0; }
+  .stats b { display: block; font: 340 46px/1 var(--display); font-variation-settings: "SOFT" 60, "opsz" 144; }
+  .stats p { color: var(--ink2); font-size: 14.5px; margin-top: 10px; }
+  .note { margin-top: 18px; color: var(--ink3); font-size: 14px; max-width: 820px; }
+  .cfg { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 8px; }
+  .cfg th, .cfg td { text-align: left; padding: 12px 14px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .cfg th { font: 500 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); }
+  .cfg td { color: var(--ink2); }
+  .cfg td:first-child { color: var(--ink); white-space: nowrap; }
+  .codemap { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .codemap li { display: grid; grid-template-columns: 220px 1fr; gap: 18px; padding: 13px 0; border-bottom: 1px solid var(--line); color: var(--ink2); font-size: 15px; }
+  .codemap a { font: 400 13px var(--mono); color: var(--ink); }
+  .tip { position: fixed; z-index: 60; pointer-events: none; background: var(--ink); color: var(--bg); font: 400 12.5px/1.45 var(--body); padding: 7px 9px; border-radius: 6px; max-width: 280px; }
+  @media (max-width: 900px) { .two { grid-template-columns: minmax(0, 1fr); } .stats { grid-template-columns: minmax(0, 1fr); } .stats div, .stats div + div { border-right: 0; padding-left: 0; } .stats div + div { border-top: 1px solid var(--line); } .codemap li { grid-template-columns: 1fr; gap: 2px; } }
+  @media (max-width: 760px) { .arch-hero { padding-top: 110px; } .dia { min-width: 640px; } .fig { padding: 14px; } }
+</style>
+</head>
+<body>
+<header class="top solid">
+  <a class="brand" href="index.html" aria-label="GEM home"><b>GEM</b><span>architecture</span></a>
+  <nav aria-label="Sections">
+    <a href="index.html">Overview</a><a href="#write">Write path</a><a href="#graph">Graph</a><a href="#decisions">Decisions</a><a href="#cost">Cost</a><a href="#models">Models</a>
+    <a class="gh" href="https://github.com/rdarshan10/GEM">GitHub ↗</a>
+  </nav>
+</header>
+
+<main>
+<section class="arch-hero">
+  <p class="kicker">Architecture</p>
+  <h1 class="display">How GEM works <em>inside</em>.</h1>
+  <p>The overview shows what GEM does. This page is for engineers: the path every write takes, how dependencies are stored, the decision layer that keeps it cheap, what that saves, and where to plug in your own model.</p>
+  <nav class="toc" aria-label="On this page"><a href="#write">01 Write path</a><a href="#graph">02 Memory graph</a><a href="#decisions">03 Decision layer</a><a href="#cost">04 Cost</a><a href="#models">05 Models</a><a href="#code">06 Code map</a></nav>
+</section>
+
+<!-- ============================================================ 01 WRITE PATH -->
+<section class="sec" id="write" aria-labelledby="h-write">
+  <div class="head"><h2 class="display" id="h-write">The write <em>path</em>.</h2>
+    <p>Two passes on every write, and a cascade only when something changed. Reads are plain similarity search over facts that are still valid.</p></div>
+  <figure class="fig"><div class="fig-scroll">
+    <svg class="dia" viewBox="0 0 1100 330" role="img" aria-label="The write path: new fact, neighbours, conflict scan, store and link, cascade one hop at a time, result. The conflict scan and each cascade hop ask the decision layer in one batched call; only rewrites and unsure cases go to the LLM.">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="arrow"/></marker>
+            <marker id="aha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" class="arrowacc"/></marker></defs>
+      <g class="box"><rect x="10" y="30" width="150" height="80" rx="8"/><text x="24" y="54" class="n">01</text><text x="24" y="77" class="t">New fact</text><text x="24" y="96" class="s">add_memory(…)</text></g>
+      <g class="box"><rect x="195" y="30" width="150" height="80" rx="8"/><text x="209" y="54" class="n">02</text><text x="209" y="77" class="t">Neighbours</text><text x="209" y="96" class="s">similarity top-k</text></g>
+      <g class="box key"><rect x="380" y="30" width="150" height="80" rx="8"/><text x="394" y="54" class="n">03</text><text x="394" y="77" class="t">Conflict scan</text><text x="394" y="96" class="s">changes a stored fact?</text></g>
+      <g class="box"><rect x="565" y="30" width="150" height="80" rx="8"/><text x="579" y="54" class="n">04</text><text x="579" y="77" class="t">Store + link</text><text x="579" y="96" class="s">derived-from edges</text></g>
+      <g class="box key"><rect x="750" y="30" width="150" height="80" rx="8"/><text x="764" y="54" class="n">05</text><text x="764" y="77" class="t">Cascade</text><text x="764" y="96" class="s">one hop at a time</text></g>
+      <g class="box"><rect x="935" y="30" width="155" height="80" rx="8"/><text x="949" y="54" class="n">06</text><text x="949" y="77" class="t">Result</text><text x="949" y="96" class="s">updated · stale · kept</text></g>
+      <g class="ln" marker-end="url(#ah)"><line x1="160" y1="70" x2="193" y2="70"/><line x1="345" y1="70" x2="378" y2="70"/><line x1="530" y1="70" x2="563" y2="70"/><line x1="715" y1="70" x2="748" y2="70"/><line x1="900" y1="70" x2="933" y2="70"/></g>
+      <g class="ln dash"><line x1="455" y1="112" x2="455" y2="208" marker-start="url(#ah)" marker-end="url(#ah)"/><line x1="825" y1="112" x2="825" y2="208" marker-start="url(#ah)" marker-end="url(#ah)"/></g>
+      <text x="465" y="164" class="e">one batched question</text><text x="835" y="164" class="e">one call per hop</text>
+      <g class="box dec"><rect x="380" y="210" width="480" height="96" rx="8"/><text x="396" y="236" class="t">Decision layer</text><text x="396" y="258" class="s">typed questions answered with probabilities, every item in one request</text><text x="396" y="282" class="s">settles: no conflict · fully replaced · stop here · mark stale</text></g>
+      <g class="box llm"><rect x="935" y="210" width="155" height="96" rx="8"/><text x="949" y="236" class="t">LLM</text><text x="949" y="258" class="s">writes corrected</text><text x="949" y="276" class="s">facts, settles</text><text x="949" y="294" class="s">unsure cases</text></g>
+      <line x1="862" y1="258" x2="931" y2="258" class="lnacc" marker-end="url(#aha)"/><text x="897" y="248" text-anchor="middle" class="e acc">only if</text><text x="897" y="276" text-anchor="middle" class="e acc">needed</text>
+    </svg></div>
+    <figcaption>Stages 03 and 05 ask the decision layer; only rewrites and doubtful cases reach the LLM. Without the decision layer configured, the LLM answers every question: same pipeline, more calls.</figcaption>
+  </figure>
+</section>
+
+<!-- ============================================================ 02 MEMORY GRAPH -->
+<section class="sec" id="graph" aria-labelledby="h-graph">
+  <div class="head"><h2 class="display" id="h-graph">The memory <em>graph</em>.</h2>
+    <p>Facts are nodes. Edges are typed, and only one type carries a change.</p></div>
+  <div class="two">
+    <figure class="fig" style="margin:0"><div class="fig-scroll">
+      <svg class="dia" style="min-width:520px" viewBox="0 0 600 340" role="img" aria-label="Edge types: derived-from edges carry a change and are followed by the cascade; associated edges link similar text and are never followed; contradicts edges record which new fact replaced an old one.">
+        <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" class="arrow"/></marker>
+              <marker id="ah2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" class="arrowacc"/></marker></defs>
+        <g class="box new"><rect x="20" y="20" width="200" height="50" rx="8"/><text x="34" y="50" class="t">I moved to Mumbai</text></g>
+        <g class="box"><rect x="20" y="144" width="200" height="50" rx="8"/><text x="34" y="174" class="t">I live in Bangalore</text></g>
+        <g class="box"><rect x="20" y="272" width="200" height="50" rx="8"/><text x="34" y="302" class="t">Commute is 45 minutes</text></g>
+        <g class="box"><rect x="380" y="144" width="200" height="50" rx="8"/><text x="394" y="174" class="t">Visited Bangalore Palace</text></g>
+        <line x1="120" y1="72" x2="120" y2="140" class="lnacc" marker-end="url(#ah2a)"/><text x="132" y="102" class="e acc">contradicts</text><text x="132" y="118" class="e">audit: what replaced it</text>
+        <line x1="120" y1="196" x2="120" y2="268" class="ln" marker-end="url(#ah2)"/><text x="132" y="228" class="e">derived from</text><text x="132" y="244" class="e">the cascade follows this</text>
+        <line x1="222" y1="169" x2="378" y2="169" class="ln dash"/><text x="236" y="158" class="e">associated</text><text x="236" y="190" class="e">similar text, never followed</text>
+      </svg></div>
+      <figcaption>A fact that only mentions the same place, name or number is associated, not derived, so a change never travels to it.</figcaption>
+    </figure>
+    <div class="prose" style="align-self:center">
+      <p><strong>Where edges come from.</strong> Pass <span class="mono">derived_from=[ids]</span> when you store a fact and the edge is exact. Leave it out and GEM infers the links from similar facts, with about 85–88% recall and 75–84% precision in our tests. Pin the ones you can't afford to miss.</p>
+      <p><strong>What a fact can become.</strong> <em>Active</em>, possibly rewritten in place when its new value follows from the change. <em>Stale</em> with <span class="mono">needs_review</span> when its value is now unknown. <em>Superseded</em> when it was directly contradicted or forgotten. Nothing is deleted, so every change can be traced with <span class="mono">why</span>.</p>
+      <p><strong>Where it lives.</strong> In memory, in a JSON file per memory space (safe across processes: writes take a file lock), or in FalkorDB.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 03 DECISION LAYER -->
+<section class="sec" id="decisions" aria-labelledby="h-dec">
+  <div class="head"><h2 class="display" id="h-dec">The decision <em>layer</em>.</h2>
+    <p>Most of GEM's work is judgment calls. A small typed-decision model answers them first; the LLM only does what needs one.</p></div>
+  <div class="prose">
+    <p>Every write raises a series of small questions. Does this new fact conflict with that stored one? Is this dependent affected by this specific change? Can its new value be worked out? Asking a large language model each question is accurate but slow and costly, and most answers are easy.</p>
+    <p>So GEM puts a decision layer in front: <strong>Jev</strong>, from <a href="https://typesafe.ai">TypeSafe</a>, a small model that answers typed questions (yes/no, multiple choice, 0–3 scores) with probabilities instead of text. GEM batches every question in a step into one request and routes each answer:</p>
+  </div>
+  <figure class="fig"><div class="fig-scroll">
+    <svg class="dia" viewBox="0 0 1000 360" role="img" aria-label="Routing one dependent fact: the decision layer scores the probability it is unaffected and the probability its new value follows. At least 0.9 unaffected stops the cascade. Between 0.35 and 0.9 goes to the LLM. Otherwise, if the new value follows, the LLM rewrites it; if not, the fact is marked stale.">
+      <defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" class="arrow"/></marker></defs>
+      <g class="box"><rect x="10" y="140" width="190" height="80" rx="8"/><text x="24" y="168" class="t">A dependent fact</text><text x="24" y="190" class="s">+ the change upstream</text></g>
+      <g class="box dec"><rect x="250" y="126" width="230" height="108" rx="8"/><text x="266" y="154" class="t">Decision layer</text><text x="266" y="178" class="s">P(unaffected)</text><text x="266" y="198" class="s">P(new value follows)</text><text x="266" y="218" class="e">one batched call per hop</text></g>
+      <line x1="200" y1="180" x2="248" y2="180" class="ln" marker-end="url(#ah3)"/>
+      <g class="ln" marker-end="url(#ah3)"><path d="M480 160 C 540 160, 540 46, 604 46"/><path d="M480 172 C 540 172, 540 134, 604 134"/><path d="M480 188 C 540 188, 540 226, 604 226"/><path d="M480 200 C 540 200, 540 314, 604 314"/></g>
+      <g class="box o-kept"><rect x="606" y="12" width="380" height="68" rx="8"/><text x="622" y="36" class="e">P(unaffected) ≥ 0.9</text><text x="622" y="60" class="t">Stop here: the fact is kept, nothing below is checked</text></g>
+      <g class="box o-llm"><rect x="606" y="100" width="380" height="68" rx="8"/><text x="622" y="124" class="e">0.35 &lt; P(unaffected) &lt; 0.9</text><text x="622" y="148" class="t">Unsure: the LLM decides</text></g>
+      <g class="box o-llm"><rect x="606" y="192" width="380" height="68" rx="8"/><text x="622" y="216" class="e">affected · new value follows</text><text x="622" y="240" class="t">The LLM writes the corrected fact</text></g>
+      <g class="box o-stale"><rect x="606" y="280" width="380" height="68" rx="8"/><text x="622" y="304" class="e">affected · new value unknown</text><text x="622" y="328" class="t">Marked stale and flagged for review, no LLM</text></g>
+    </svg></div>
+    <figcaption>One decision in the cascade. The conflict scan works the same way: a confident “no conflict” settles it, a fact the new one fully replaces is rewritten, and anything else goes to the LLM.</figcaption>
+  </figure>
+  <ul class="rules">
+    <li><b>1</b><span><strong>Stopping needs 90% confidence.</strong> A wrong “unaffected” would hide a stale fact, so anything doubtful costs an LLM call instead.</span></li>
+    <li><b>2</b><span><strong>The decision layer never supersedes a dependent on its own.</strong> It can stop the cascade or mark a fact stale for review; a destructive change needs the LLM.</span></li>
+    <li><b>3</b><span><strong>If it's unavailable, nothing is skipped.</strong> Every decision falls back to the LLM, and the fallback is counted so a run can be checked.</span></li>
+  </ul>
+</section>
+
+<!-- ============================================================ 04 COST -->
+<section class="sec" id="cost" aria-labelledby="h-cost">
+  <div class="head"><h2 class="display" id="h-cost">Same accuracy, <em>fewer</em> LLM calls.</h2>
+    <p>Measured on the repository's evaluation suites. Each chart names its run files.</p></div>
+  <div class="two">
+    <figure class="fig chart" style="margin:0">
+      <p class="chart-title">LLM calls to run the same 12 scenarios</p>
+      <p class="chart-sub">All three answered 37 of 37 facts correctly</p>
+      <div id="chart-calls"></div>
+      <figcaption>The first two bars are the LLM making every decision; the second skips conflict checks on facts the cascade already reached. Measured with the expected answers supplied, so the decisions are identical and only the calls differ. With a real model (gpt-oss-20b), the decision layer used 20 LLM calls and still scored 37/37. Source: <span class="mono">gem/eval_diverse.py</span>, <span class="mono">runs/eval_diverse_groq20b_jev.txt</span>.</figcaption>
+    </figure>
+    <figure class="fig chart" style="margin:0">
+      <p class="chart-title">Accuracy on 19 held-out scenarios, five runs each</p>
+      <p class="chart-sub">Share of facts handled correctly; the axis starts at 90%</p>
+      <div class="legend-row"><span><i style="background:#d95926"></i>LLM decides everything</span><span><i style="background:#5a84ec"></i>with the decision layer</span></div>
+      <div id="chart-runs"></div>
+      <figcaption>Scenarios not used to set the thresholds. With the decision layer, all five runs scored 100% and no scenario flipped between runs; the LLM-only runs averaged 99.0% with two flips. Same model (gpt-oss-120b). Source: <span class="mono">runs/determinism_120b.txt</span>, <span class="mono">runs/determinism_jev_groq120b.txt</span>.</figcaption>
+    </figure>
+  </div>
+  <div class="stats">
+    <div><b>≈1.3</b><p>LLM calls per write on the held-out set (about 25 for 19 writes)</p></div>
+    <div><b>79%</b><p>fewer LLM calls than the original engine on the 12-scenario suite (58 → 12)</p></div>
+    <div><b>0</b><p>decision-layer failures in the measured runs: no decision fell back to the LLM</p></div>
+  </div>
+  <p class="note">Not yet measured: the LLM-only call count on the held-out set, so the saving there is not quantified; and a sweep over all 139 generated scenarios. Details in <a href="https://github.com/rdarshan10/GEM/blob/main/PRODUCTIONIZATION.md">PRODUCTIONIZATION.md</a>.</p>
+</section>
+
+<!-- ============================================================ 05 MODELS -->
+<section class="sec" id="models" aria-labelledby="h-models">
+  <div class="head"><h2 class="display" id="h-models">Bring your own <em>model</em>.</h2>
+    <p>Everything is set in one <span class="mono">.env</span> file. Copy <span class="mono">.env.example</span> and pick a backend.</p></div>
+  <div class="two">
+    <table class="cfg">
+      <thead><tr><th>Backend</th><th>Settings</th></tr></thead>
+      <tbody>
+        <tr><td>Ollama, local or cloud</td><td><span class="mono">GEM_LLM=ollama · GEM_MODEL · OLLAMA_HOST</span></td></tr>
+        <tr><td>Groq</td><td><span class="mono">GEM_LLM=groq · GROQ_MODEL · GROQ_API_KEY</span></td></tr>
+        <tr><td>Anything else</td><td>A class with <span class="mono">chat()</span> and <span class="mono">chat_json()</span>, returned from <span class="mono">make_llm()</span> in <span class="mono">gem/llm.py</span></td></tr>
+        <tr><td>Decision layer</td><td>Optional: <span class="mono">pip install -e ".[jev]"</span>, then <span class="mono">GEM_DECIDER=jev · TYPESAFE_API_KEY</span></td></tr>
+      </tbody>
+    </table>
+    <div class="code"><header><span>gem/llm.py</span></header>
+<pre>class MyClient:
+    def chat(self, system, user, *, json_mode=False, temperature=None) -> str:
+        ...  <span class="c"># call your provider, return the reply text</span>
+
+    def chat_json(self, system, user, *, retries=1, temperature=None) -> dict:
+        return _salvage_json(self.chat(system, user, json_mode=True,
+                                       temperature=temperature))
+
+def make_llm():
+    return MyClient()</pre></div>
+  </div>
+  <p class="note">The published numbers use gpt-oss-120b and gpt-oss-20b. Smaller models work but over-invalidate more; pair them with <span class="mono">Memory(conservative=True)</span>, which flags facts for review instead of superseding them.</p>
+</section>
+
+<!-- ============================================================ 06 CODE MAP -->
+<section class="sec" id="code" aria-labelledby="h-code">
+  <div class="head"><h2 class="display" id="h-code">Code <em>map</em>.</h2><p>Where each part lives.</p></div>
+  <ul class="codemap">
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/gem/engine.py">gem/engine.py</a><span>The write path: conflict scan, linking, the cascade and its stopping rules.</span></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/gem/decide.py">gem/decide.py</a><span>The decision layer: batched typed questions and the routing thresholds.</span></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/gem/classify.py">gem/classify.py</a><span>The LLM questions: conflict labels and inferred links, with retries and safe defaults.</span></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/gem/llm.py">gem/llm.py</a><span>Model clients and <span class="mono">make_llm()</span>, the one place to plug in your own.</span></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/gem/memory.py">gem/memory.py</a><span>The Python API: <span class="mono">add</span>, <span class="mono">forget</span>, <span class="mono">search</span>, <span class="mono">profile</span>, <span class="mono">why</span>.</span></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/gem/tools.py">gem/tools.py</a> · <a href="https://github.com/rdarshan10/GEM/blob/main/gem/mcp_server.py">mcp_server.py</a><span>Tool definitions and the MCP server.</span></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/gem/json_store.py">gem/json_store.py</a><span>File storage with cross-process locking; FalkorDB lives in <span class="mono">falkor_store.py</span>.</span></li>
+  </ul>
+</section>
+</main>
+
+<footer>
+  <p class="big">Memory that<br><em>follows</em> through.</p>
+  <ul>
+    <li><a href="index.html">Overview</a></li>
+    <li><a href="https://github.com/rdarshan10/GEM">GitHub</a></li>
+    <li><a href="https://github.com/rdarshan10/GEM/blob/main/RELATED_WORK.md">Related work</a></li>
+  </ul>
+</footer>
+<p class="legal"><span>© 2026 Revanth Darshan · PolyForm Noncommercial 1.0.0</span><span>Jev is a product of TypeSafe AI</span></p>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (t, a, p) => { const n = document.createElementNS(NS, t); for (const k in a) n.setAttribute(k, a[k]); if (p) p.appendChild(n); return n; };
+  const tip = document.getElementById("tip");
+  const show = (e, html) => { tip.innerHTML = html; tip.hidden = false; const r = tip.getBoundingClientRect(); let x = e.clientX + 14, y = e.clientY + 14; if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14; tip.style.left = x + "px"; tip.style.top = y + "px"; };
+  const hide = () => { tip.hidden = true; };
+  const C = { ink: "#ece8df", ink2: "#aaa69c", ink3: "#6f6e68", line: "#22252a", gem: "#5a84ec", muted: "#3d5f9c", llm: "#d95926" };
+
+  // LLM calls, same 12 scenarios: one series; the bar under discussion carries the hue
+  (function calls() {
+    const rows = [["LLM makes every decision", 58, false], ["Skip facts already reached", 37, false], ["Decision layer answers first", 12, true]];
+    const W = 560, L = 0, R = 470, rowH = 62, barH = 18;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${rows.length * rowH}`, role: "img", "aria-label": "LLM calls: 58 when the LLM makes every decision, 37 when facts already reached are skipped, 12 with the decision layer answering first." }, document.getElementById("chart-calls"));
+    const sx = (v) => (v / 60) * (R - L);
+    rows.forEach(([name, v, hi], i) => {
+      const y = i * rowH, g = el("g", {}, svg);
+      el("rect", { x: 0, y, width: W, height: rowH - 8, fill: "transparent" }, g);
+      const t = el("text", { x: 0, y: y + 15, fill: hi ? C.ink : C.ink2, style: "font:400 13.5px Geist, sans-serif" }, g); t.textContent = name;
+      const w = sx(v), by = y + 24, r = 4;
+      el("path", { d: `M0 ${by} H${w - r} Q${w} ${by} ${w} ${by + r} V${by + barH - r} Q${w} ${by + barH} ${w - r} ${by + barH} H0 Z`, fill: hi ? C.gem : C.muted }, g);
+      const vt = el("text", { x: w + 10, y: by + 13.5, fill: C.ink2, style: "font:500 12.5px 'Geist Mono', monospace" }, g); vt.textContent = v + " calls";
+      g.addEventListener("mousemove", (e) => show(e, `<b>${name}</b><br>${v} LLM calls · 37/37 correct`));
+      g.addEventListener("mouseleave", hide);
+    });
+  })();
+
+  // accuracy per run: two series, one dot per run, values labelled where they differ
+  (function runs() {
+    const llm = [100, 100, 95.1, 100, 100], gem = [100, 100, 100, 100, 100];
+    const W = 560, H = 250, L = 46, R = 540, T = 16, B = 206;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Accuracy per run. LLM only: 100, 100, 95.1, 100, 100 percent. With the decision layer: 100 percent in all five runs." }, document.getElementById("chart-runs"));
+    const sy = (v) => B - ((v - 90) / 10) * (B - T);
+    const sx = (i) => L + 40 + i * ((R - L - 80) / 4);
+    [90, 95, 100].forEach((v) => {
+      el("line", { x1: L, x2: R, y1: sy(v), y2: sy(v), stroke: C.line }, svg);
+      const t = el("text", { x: L - 8, y: sy(v) + 4, "text-anchor": "end", fill: C.ink3, style: "font:400 11.5px 'Geist Mono', monospace" }, svg); t.textContent = v + "%";
+    });
+    for (let i = 0; i < 5; i++) {
+      const t = el("text", { x: sx(i), y: H - 18, "text-anchor": "middle", fill: C.ink3, style: "font:400 11.5px 'Geist Mono', monospace" }, svg); t.textContent = "run " + (i + 1);
+      const g = el("g", {}, svg);
+      el("rect", { x: sx(i) - 30, y: T - 6, width: 60, height: B - T + 12, fill: "transparent" }, g);
+      el("circle", { cx: sx(i) - 7, cy: sy(llm[i]), r: 6.5, fill: C.llm, stroke: "#101216", "stroke-width": 2 }, g);
+      el("circle", { cx: sx(i) + 7, cy: sy(gem[i]), r: 6.5, fill: C.gem, stroke: "#101216", "stroke-width": 2 }, g);
+      if (llm[i] !== gem[i]) { const v = el("text", { x: sx(i) - 7, y: sy(llm[i]) + 22, "text-anchor": "middle", fill: C.ink2, style: "font:500 12px 'Geist Mono', monospace" }, g); v.textContent = llm[i] + "%"; }
+      g.addEventListener("mousemove", (e) => show(e, `<b>Run ${i + 1}</b><br>LLM decides everything: ${llm[i]}%<br>With the decision layer: ${gem[i]}%`));
+      g.addEventListener("mouseleave", hide);
+    }
+  })();
+})();
+</script>
+</body>
+</html>
