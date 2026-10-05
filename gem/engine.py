@@ -20,6 +20,7 @@ from dataclasses import dataclass
 
 from .llm import OllamaClient, LLMConfig, make_llm
 from . import classify as C
+from . import decide as D
 from . import embed as E
 from .store import MemoryStore, Node, Edge, EdgeType, Status, Provenance
 
@@ -55,12 +56,21 @@ class GEMConfig:
     # where being wrong is costly and a split vote signals uncertainty -> fail-safe. Avg ~1.3x
     # cost, not Nx. The accuracy gain is conditional (model must be >50% per sample); the
     # uncertainty detection is near-unconditional and is the part that earns the cost.
+    decider: str = os.environ.get("GEM_DECIDER", "llm")
+    # "jev": cheap typed decisions (gem/decide.py) answer the conflict scan, derive_links and the
+    # cascade check in batches; the LLM is called only for rewrites and unsure cases. "llm" = today.
+    jev_stop: float = 0.9             # P(no effect) needed to skip a fact / stop the cascade at it
+    jev_uncertain_low: float = 0.35   # P(unaffected) above this but below jev_stop -> ask the LLM
+    jev_known: float = 0.5            # P(new value follows) at/above this -> LLM rewrite, else STALE
+    jev_edge: float = 0.6             # P(depends) at/above this -> DERIVED_FROM edge without the LLM
+    jev_edge_low: float = 0.2         # P(depends) in (jev_edge_low, jev_edge) -> LLM derive_links
+    jev_batch: int = 8                # items per Jev request (Jev degrades with long context)
 
 
 class GEM:
     def __init__(self, llm: OllamaClient | None = None,
                  embedder=None, config: GEMConfig | None = None, store=None,
-                 cheap_llm=None):
+                 cheap_llm=None, decider=None):
         # store is duck-typed against MemoryStore's interface; pass a FalkorStore for
         # persistence. Defaults to the zero-dependency in-memory store.
         self.store = store if store is not None else MemoryStore()
@@ -68,9 +78,47 @@ class GEM:
         self.cheap_llm = cheap_llm            # optional cheap model for escalation's first pass
         self.embedder = embedder or E.default_embedder()
         self.cfg = config or GEMConfig()
+        if decider is None and self.cfg.decider == "jev":
+            decider = D.JevDecider(batch=self.cfg.jev_batch)
+        self.decider = decider                # None = every decision goes to the LLM
+        self.judge = D.TieredJudge(self.cfg)
         self.trace: list[str] = []    # human-readable log of cascade steps
         self._dec_cache: dict = {}    # (existing, new) -> (label, revised)
-        self.stats = {"capable_calls": 0, "cheap_calls": 0, "cache_hits": 0, "sim_skipped": 0}
+        self.stats = {"capable_calls": 0, "cheap_calls": 0, "cache_hits": 0, "sim_skipped": 0,
+                      "derive_calls": 0, "jev_calls": 0, "jev_decided": 0}
+
+    def _ask_decider(self, method: str, subject: str, items: list[str]) -> list:
+        """Batched decider call; None per item means "no verdict, use the LLM". Any failure falls
+        back to the LLM for the whole batch and is counted in DEGRADED["jev"]."""
+        if self.decider is None or not items:
+            return [None] * len(items)
+        before = getattr(self.decider, "calls", 0)
+        try:
+            out = list(getattr(self.decider, method)(subject, items))
+        except Exception as e:
+            C.DEGRADED["jev"] += 1
+            self._log(f"jev {method} failed ({type(e).__name__}); falling back to the LLM")
+            out = []
+        self.stats["jev_calls"] += getattr(self.decider, "calls", 0) - before
+        return (out + [None] * len(items))[:len(items)]
+
+    def _derive(self, fact: str, candidates: list[Node]) -> list[str]:
+        """derive_links with the decider in front: confident edges are added directly, and only
+        the unsure candidates go to the LLM."""
+        probs = self._ask_decider("depends", fact, [c.content for c in candidates])
+        ids, unsure = [], []
+        for c, p in zip(candidates, probs):
+            route = self.judge.link(p)
+            if route == "edge":
+                ids.append(c.id)
+            elif route == "llm":
+                unsure.append(c)
+            if route != "llm":
+                self.stats["jev_decided"] += 1
+        if unsure:
+            self.stats["derive_calls"] += 1
+            ids += C.derive_links(self.llm, fact, unsure)
+        return ids
 
     def _classify(self, existing: str, new: str):
         """Cost-aware classify: cache + optional escalation. Cheap model first-passes the
@@ -118,16 +166,24 @@ class GEM:
             self._log(f"dedup: '{fact}' ~= {existing.id} (sim {neighbors[0][1]:.2f}); merged")
             return existing
 
-        # 2. PASS A — conflict check against close neighbors BEFORE inserting
-        actions: list[tuple[Node, C.Label, str | None]] = []
+        # 2. PASS A — conflict check against close neighbors. The decider screens them now; the
+        # LLM classify for the rest is deferred to step 5 so it's skipped for any neighbor an
+        # upstream cascade already revised.
+        pending: list[tuple[Node, str]] = []
         if check_conflicts:
+            scan = []
             for n, sim in neighbors:
                 if sim < self.cfg.conflict_sim_threshold:   # clearly unrelated -> skip the LLM
                     self.stats["sim_skipped"] = self.stats.get("sim_skipped", 0) + 1
                     continue
-                label, revised = self._classify(n.content, fact)
-                if label in C.INVALIDATING:
-                    actions.append((n, label, revised))
+                scan.append(n)
+            verdicts = self._ask_decider("conflicts", fact, [n.content for n in scan])
+            for n, v in zip(scan, verdicts):
+                route = self.judge.conflict(v)
+                if route == "skip":                         # confidently no conflict
+                    self.stats["jev_decided"] += 1
+                    continue
+                pending.append((n, route))
 
         # 3. create the node
         node = Node(id=self.store.new_id(), content=fact, embedding=emb,
@@ -136,7 +192,7 @@ class GEM:
 
         # 4. PASS B — derive_links (causal dependency), distinct from the conflict pass
         if parents is None:
-            parent_ids = C.derive_links(self.llm, fact, [n for n, _ in neighbors])
+            parent_ids = self._derive(fact, [n for n, _ in neighbors])
         else:
             parent_ids = parents
         for pid in parent_ids:
@@ -153,13 +209,21 @@ class GEM:
         # already revises the descendants, so a separate descendant-action re-enters the
         # subchain and re-revises it with a conflicting result (the deep-chain interference
         # bug). Fix: share ONE visited set across all actions and process ancestors first,
-        # so a descendant already revised by an upstream cascade is skipped here.
-        if actions:
+        # so a descendant already revised by an upstream cascade is skipped here — before its
+        # classify call, so that call is never paid for.
+        if pending:
             visited: set = set()
-            for (n, label, revised) in self._order_actions_root_first(actions):
+            for (n, route) in self._order_actions_root_first(pending):
                 if n.id in visited:
                     self._log(f"ingest conflict: {n.id} already revised by an upstream "
                               f"cascade this ingest; skip re-revision")
+                    continue
+                if route == "covered":                      # new fact says everything: rewrite to it
+                    self.stats["jev_decided"] += 1
+                    label, revised = C.Label.UPDATES, fact
+                else:
+                    label, revised = self._classify(n.content, fact)
+                if label not in C.INVALIDATING:
                     continue
                 self._log(f"ingest conflict: new '{fact}' {label.value} {n.id} '{n.content}'")
                 self.revise(n, label, revised, trigger=node, visited=visited)
@@ -170,7 +234,7 @@ class GEM:
         """Order conflict-actions so an ancestor is revised before any of its descendants
         in the action set. Counts, for each action node, how many OTHER action nodes are
         its DERIVED_FROM ancestors; roots (0) sort first. Keeps the cascade single-pass."""
-        action_ids = {n.id for (n, _, _) in actions}
+        action_ids = {a[0].id for a in actions}
 
         def ancestor_count(node) -> int:
             seen, stack, cnt = set(), [node.id], 0
@@ -221,9 +285,25 @@ class GEM:
 
         change_desc = self._describe_change(old_content, node, label)
 
-        # walk DERIVED_FROM dependents and recurse
-        for dep in self.store.dependents(node.id):
-            if dep.status != Status.ACTIVE:
+        # walk DERIVED_FROM dependents and recurse. With a decider, all dependents of this node are
+        # judged in one batched call first; the LLM is asked only where the verdict says to.
+        deps = [d for d in self.store.dependents(node.id) if d.status == Status.ACTIVE]
+        verdicts = self._ask_decider("impact", change_desc, [d.content for d in deps])
+        for dep, verdict in zip(deps, verdicts):
+            if dep.status != Status.ACTIVE:         # revised meanwhile by a sibling's subtree
+                continue
+            route = self.judge.impact(verdict)
+            if route == "stop":
+                self.stats["jev_decided"] += 1
+                self._log(f"{'  ' * (depth + 1)}semantic stop (jev): {dep.id} unaffected by change")
+                continue
+            if route == "stale":
+                # affected, new value unknown: recoverable STALE + needs_review. Jev never
+                # supersedes a dependent on its own; certain=False forces the soft path.
+                self.stats["jev_decided"] += 1
+                self._log(f"{'  ' * (depth + 1)}jev: {dep.id} affected, value unknown -> stale")
+                self._propagate(dep, C.Label.UPDATES, None, trigger=node,
+                                depth=depth + 1, visited=visited, certain=False)
                 continue
             # re-check against THIS specific change (divergent-parents rule):
             # is `dep` actually invalidated by what changed in `node`?

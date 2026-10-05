@@ -201,6 +201,7 @@ def run_scenario(s: Scenario, *, verbose: bool = False, make_store=None, cfg=Non
         "node_total": len(per_node),
         "per_node": per_node,
         "trace": list(g.trace),
+        "stats": dict(g.stats),
     }
     if verbose:
         _print_scenario(s, result)

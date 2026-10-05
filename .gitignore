@@ -10,3 +10,5 @@ data_cache/
 *.egg-info/
 build/
 dist/
+# local secrets
+.env

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import requests
 
@@ -117,14 +117,37 @@ def _salvage_json(raw: str) -> dict:
 import time as _time
 
 
+def load_dotenv(path: str = ".env") -> None:
+    """Minimal KEY=VALUE loader for scripts; real environment variables win over the file."""
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, value = line.split("=", 1)
+                if value.strip():
+                    os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+def _env(name: str, default: str = ""):
+    # read at construction, not import, so a .env loaded after import still applies
+    return field(default_factory=lambda: os.environ.get(name, default))
+
+
 @dataclass
 class GroqConfig:
-    model: str = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
-    api_key: str = os.environ.get("GROQ_API_KEY", "")
+    model: str = _env("GROQ_MODEL", "llama-3.1-8b-instant")
+    api_key: str = _env("GROQ_API_KEY")
     base_url: str = "https://api.groq.com/openai/v1"
     temperature: float = 0.0
     timeout: int = 120
-    min_interval: float = 8.0   # seconds between calls — respects 6K tok/min @ ~800 tok/call
+    # seconds between calls. 8s respects the free tier's 6K tok/min @ ~800 tok/call; set
+    # GROQ_MIN_INTERVAL=0 on a paid tier (429s are still honored via Retry-After).
+    min_interval: float = field(
+        default_factory=lambda: float(os.environ.get("GROQ_MIN_INTERVAL", "8")))
+    # reasoning models: gpt-oss takes low|medium|high, qwen3 takes none|default. Empty = omit.
+    reasoning_effort: str = _env("GROQ_REASONING_EFFORT")
 
 
 class GroqClient:
@@ -158,6 +181,13 @@ class GroqClient:
         }
         if json_mode:
             payload["response_format"] = {"type": "json_object"}
+        if self.cfg.reasoning_effort:
+            payload["reasoning_effort"] = self.cfg.reasoning_effort
+        # keep reasoning out of `content` so it parses as JSON (each family has its own switch)
+        if "gpt-oss" in self.cfg.model:
+            payload["include_reasoning"] = False
+        elif "qwen" in self.cfg.model:
+            payload["reasoning_format"] = "hidden"
         headers = {"Authorization": f"Bearer {self.cfg.api_key}"}
         for attempt in range(4):
             self._pace()
@@ -188,7 +218,7 @@ class GroqClient:
 
 
 def make_llm():
-    """Factory: GEM_LLM=groq -> GroqClient (llama-3.1-8b-instant); else OllamaClient."""
+    """Factory: GEM_LLM=groq -> GroqClient (model from GROQ_MODEL); else OllamaClient."""
     if os.environ.get("GEM_LLM", "").lower() == "groq":
         return GroqClient()
     return OllamaClient(LLMConfig())

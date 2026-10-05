@@ -66,6 +66,29 @@ silently trusted. Everything below is intentionally not.
   (−88%)** with accuracy **held at 100%** (16/16). This is the cut escalation-to-cheap couldn't
   give, because it uses only embedding distance (no judgment) — the capable model still
   classifies every plausible candidate, so there are no false-negative misses.
+- **Deferred conflict classify — BUILT (all modes).** When one trigger directly conflicts with
+  several nodes of the same chain, the root's cascade already revises the descendants, so their
+  classify answers were thrown away. Neighbors are now classified in root-first order *after*
+  upstream cascades run, and a neighbor already revised is skipped before its call. Same
+  decisions, fewer calls: **58 → 37** LLM calls on `eval_diverse` (12 scenarios, 37 facts).
+- **Jev decider — BUILT and MEASURED (`gem/decide.py`, `stale_eval/jev_oracle_eval.py`).** Cheap
+  typed decisions (TypeSafe Jev, one batched request per ≤8 items) screen the conflict scan,
+  `derive_links` and every cascade hop; `TieredJudge` routes each probability to an action, and the
+  LLM is asked only for rewrites and unsure cases. Unlike cheap-model escalation, a doubtful
+  "unrelated" is never trusted: skipping or stopping needs P ≥ 0.9 (`jev_stop`), and an affected
+  dependent whose new value is unknown becomes recoverable STALE + needs_review, never SUPERSEDED.
+  Result on `eval_diverse` with real Jev calls and the LLM replaced by a ground-truth oracle (the
+  LLM path scored 37/37 here, so any miss would be Jev's): **37/37, 0 missed invalidations;
+  LLM calls 37 → 12 (−68%)**, 31 Jev calls, 27 decisions made by Jev alone. The cascade is almost
+  entirely Jev (20 hops STALE, 1 sent to the LLM); the remaining LLM calls are ~1 per write, the
+  root conflict, where Jev is sure something changed but not which label applies.
+  **With the real LLM** (Groq `openai/gpt-oss-20b`, `runs/eval_diverse_groq20b_jev.txt`): **37/37,
+  12/12 scenarios, 0 Jev fallbacks, 0 degraded calls; 20 LLM calls + 31 Jev calls**, 19 decisions
+  by Jev alone. More LLM calls than with the oracle because the real LLM rewrites the root in place
+  ("is now: Delaware law"), so Jev more often sees a dependent's new value as derivable and routes
+  it to the LLM for the rewrite (e.g. the 6-hop chain's dates shifted to Nov 17 / Nov 16).
+  No LLM-only run on gpt-oss-20b yet, so the saving against it is not measured.
+  **Still to measure:** the thresholds on held-out tests (`stale_eval/depth_test.py`, `gem/eval.py --repeat 5`) — 37 facts can overfit.
 - **Conclusion:** the *wasteful* part of the cascade cost (scanning every neighbor) is eliminable
   with no accuracy loss; the *irreducible* part (classifying the real candidates + one capable
   call per actual cascade hop) is inherent to the capability. Decision caching (accuracy-free) is

@@ -25,12 +25,14 @@ from .store import Node
 #                   GRAPH CONSTRUCTION at ingest; the scenario then fails looking like a logic
 #                   bug, not a rate-limit artifact.
 # Any nonzero total means the run is invalid and must be discarded — not excused.
-DEGRADED = {"classify": 0, "derive_links": 0}
+# "jev" counts decider failures that fell back to the LLM path: those cost money, not correctness,
+# so they are reported but deliberately left out of degraded_total().
+DEGRADED = {"classify": 0, "derive_links": 0, "jev": 0}
 
 
 def reset_degraded() -> None:
-    DEGRADED["classify"] = 0
-    DEGRADED["derive_links"] = 0
+    for k in DEGRADED:
+        DEGRADED[k] = 0
 
 
 def degraded_total() -> int:

@@ -130,10 +130,18 @@ the linked docs and [runs/](runs/):
   dependents **stale and confidently**. GEM re-examines them via the dependency edge instead.
 - Two distinct passes at write: **conflict detection** (did this change anything?) and
   **provenance** (`derive_links`: what depends on it?) — kept separate on purpose.
+- Optional **Jev decider** (`GEMConfig(decider="jev")` or `GEM_DECIDER=jev`): cheap typed
+  decisions ([TypeSafe Jev](https://typesafe.ai)) answer the conflict scan, `derive_links` and the
+  per-dependent cascade check in batches, with probabilities. The LLM is called only to write a
+  rewrite or when Jev is unsure. Stopping the cascade needs P ≥ 0.9, Jev never supersedes a
+  dependent on its own (it can only mark it STALE + needs_review), and if Jev fails GEM falls back
+  to the LLM. On `eval_diverse` with Groq `gpt-oss-20b` as the LLM: 37/37 with 20 LLM calls and
+  31 Jev calls ([run](runs/eval_diverse_groq20b_jev.txt); see [PRODUCTIONIZATION.md §3](PRODUCTIONIZATION.md)).
 
 ```bash
 pip install -e .                 # core (numpy + an LLM client)
 pip install -e ".[embeddings]"   # recommended: semantic embeddings (sentence-transformers + faiss)
+pip install -e ".[jev]"          # optional: Jev decider (needs TYPESAFE_API_KEY)
 ```
 
 ```python
@@ -160,7 +168,7 @@ m.search("how do tests authenticate?")                  # ACTIVE facts only — 
 >
 > ```bash
 > pip install -e ".[dev]"
-> pytest          # 47 tests exercise the full cascade (multi-hop, semantic stop, cycle guard, …)
+> pytest          # 75 tests exercise the full cascade (multi-hop, semantic stop, cycle guard, …)
 > ```
 
 **See it separate from flat memory** — `python -m gem.quickstart`

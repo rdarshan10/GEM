@@ -153,14 +153,31 @@ DIVERSE = [
 ]
 
 
-def main() -> int:
-    print(f"DIVERSE reality check — {len(DIVERSE)} deep cross-domain scenarios\n")
-    results = [run_scenario(s, verbose=True) for s in DIVERSE]
+def main(argv=None) -> int:
+    import argparse
+    from . import classify as C
+    from .engine import GEMConfig
+    from .llm import load_dotenv
+    ap =argparse.ArgumentParser(description="GEM diverse cross-domain eval")
+    ap.add_argument("--decider", choices=["llm", "jev"], default=None,
+                    help="override GEM_DECIDER (jev needs TYPESAFE_API_KEY)")
+    args = ap.parse_args(argv)
+    load_dotenv()
+    cfg =GEMConfig() if args.decider is None else GEMConfig(decider=args.decider)
+    C.reset_degraded()
+    print(f"DIVERSE reality check — {len(DIVERSE)} deep cross-domain scenarios "
+          f"(decider={cfg.decider})\n")
+    results = [run_scenario(s, verbose=True, cfg=cfg) for s in DIVERSE]
     passed = sum(r["passed"] for r in results)
     nc = sum(r["node_correct"] for r in results)
     nt = sum(r["node_total"] for r in results)
     print("\n" + "=" * 64)
     print(f"scenarios passed: {passed}/{len(results)}   node accuracy {nc}/{nt} ({nc/nt:.0%})")
+    tot = {k: sum(r["stats"].get(k, 0) for r in results)
+           for k in ("capable_calls", "derive_calls", "jev_calls", "jev_decided")}
+    print(f"LLM classify calls {tot['capable_calls']}  LLM derive calls {tot['derive_calls']}  "
+          f"Jev calls {tot['jev_calls']}  decided by Jev alone {tot['jev_decided']}  "
+          f"jev fallbacks {C.DEGRADED['jev']}  degraded LLM calls {C.degraded_total()}")
     print("=" * 64)
     fails = [r["name"] for r in results if not r["passed"]]
     if fails:

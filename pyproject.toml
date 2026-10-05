@@ -31,9 +31,11 @@ dependencies = [
 embeddings = ["sentence-transformers>=2.2", "faiss-cpu>=1.7"]
 # Optional FalkorDB-backed persistent store (default store is in-memory, zero-dep).
 falkor = ["falkordb>=1.0"]
+# Optional Jev (TypeSafe) decider: cheap typed decisions in place of some LLM calls. Needs TYPESAFE_API_KEY.
+jev = ["typesafe-sdk>=0.7.2"]
 # dev/test deps: faiss-cpu is needed by two retrieval tests; sentence-transformers is NOT
 # (the suite mocks the embedder / falls back to the lexical one), so tests stay lightweight.
-dev = ["pytest>=7", "pytest-cov>=4", "faiss-cpu>=1.7"]
+dev = ["pytest>=7", "pytest-cov>=4", "faiss-cpu>=1.7", "typesafe-sdk>=0.7.2"]
 
 [project.urls]
 Homepage = "https://github.com/rdarshan10/gem"
