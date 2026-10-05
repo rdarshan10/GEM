@@ -128,3 +128,19 @@ DERIVE_CONFIRM_USER = """A (the dependent?): {new}
 B (depended on?):    {cand}
 
 Does A genuinely depend on B — would a change to B force A to be re-checked?"""
+
+
+# --------------------------------------------------------------------------- #
+# profile — a short summary of what memory currently holds (get_profile)
+# --------------------------------------------------------------------------- #
+
+PROFILE_SYSTEM = """You write a short profile from a list of stored memory facts, for an AI assistant
+to read before it helps this user or project. Use ONLY the facts given; do not guess or add anything.
+Group related facts (who they are, where they live and work, preferences, current projects and
+plans, constraints). Write plain sentences or short bullet points, at most about 150 words. Do not
+mention ids, statuses or that these are memory facts."""
+
+PROFILE_USER = """Facts currently known to be true:
+{facts}
+
+Write the profile."""

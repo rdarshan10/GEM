@@ -79,6 +79,13 @@ TOOLS = [
         },
     },
     {
+        "name": "get_profile",
+        "description": ("A short summary of what memory holds about the user or project, built from "
+                        "facts that are still valid, plus 'reconfirm': facts that went out of date. "
+                        "Call it at the start of a conversation for context."),
+        "input_schema": {"type": "object", "properties": {"container_tag": _TAG}},
+    },
+    {
         "name": "get_stale",
         "description": ("List facts that are no longer reliable because something they depended on "
                         "changed. Reconfirm these with the user before acting on them."),
@@ -203,6 +210,11 @@ class GemTools:
 
     def _t_list_memories(self, include_stale=False, container_tag=None):
         return {"memories": [_fact(f) for f in self.memory(container_tag).facts(include_stale)]}
+
+    def _t_get_profile(self, container_tag=None):
+        p = self.memory(container_tag).profile()
+        return {"summary": p["summary"], "fact_count": p["fact_count"],
+                "reconfirm": [_fact(f) for f in p["reconfirm"]]}
 
     def _t_get_stale(self, container_tag=None):
         return {"stale": [_fact(f) for f in self.memory(container_tag).stale]}

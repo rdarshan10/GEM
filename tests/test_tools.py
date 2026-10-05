@@ -122,7 +122,8 @@ def test_bad_input_returns_errors_not_exceptions(tmp_path, monkeypatch):
 
 def test_tool_definitions_are_consistent():
     names = [t["name"] for t in TOOLS]
-    assert names == ["add_memory", "search_memory", "list_memories", "get_stale", "why"]
+    assert names == ["add_memory", "search_memory", "list_memories", "get_profile", "get_stale",
+                     "why"]
     assert all(hasattr(GemTools, f"_t_{n}") for n in names)
     assert [f["function"]["name"] for f in openai_tools()] == names
     json.dumps(TOOLS)
@@ -134,3 +135,103 @@ def test_mcp_server_lists_the_tools():
     from gem import mcp_server
     listed = asyncio.run(mcp_server.server.list_tools())
     assert sorted(t.name for t in listed) == sorted(t["name"] for t in TOOLS)
+
+
+# --------------------------------------------------------------------------- #
+# get_profile
+# --------------------------------------------------------------------------- #
+
+def test_profile_uses_valid_facts_lists_stale_and_caches(tmp_path, monkeypatch):
+    prompts_seen = []
+
+    def text_fn(system, user):
+        prompts_seen.append(user)
+        return "Lives in Mumbai."
+    llm = FakeLLM(json_fn=move_responder, text_fn=text_fn)
+    t = _tools(tmp_path, monkeypatch, llm=llm)
+    assert t.call("get_profile") == {"summary": "", "fact_count": 0, "reconfirm": []}
+    loc = t.call("add_memory", {"content": "I live in Bangalore", "derived_from": []})["id"]
+    com = t.call("add_memory", {"content": "My commute is 45 minutes", "derived_from": [loc]})["id"]
+    t.call("add_memory", {"content": "I now live in Mumbai", "derived_from": []})
+
+    p = t.call("get_profile")
+    assert p["summary"] == "Lives in Mumbai." and [f["id"] for f in p["reconfirm"]] == [com]
+    assert "commute" not in prompts_seen[-1]                          # stale facts never summarised
+    t.call("get_profile")
+    assert llm.chat_calls == 1                                        # cached until facts change
+    t.call("add_memory", {"content": "I like tea", "derived_from": []})
+    t.call("get_profile")
+    assert llm.chat_calls == 2
+
+
+# --------------------------------------------------------------------------- #
+# several processes sharing one JSON store
+# --------------------------------------------------------------------------- #
+
+def test_two_instances_on_one_file_see_each_other(tmp_path):
+    a, b = _mem(tmp_path), _mem(tmp_path)
+    x = a.load("I live in Bangalore")
+    assert b.get(x).content == "I live in Bangalore"                  # b refreshes on read
+    y = b.load("I like tea")
+    assert y != x                                                     # b caught up before writing
+    assert {f.id for f in a.facts()} == {x, y}
+
+
+def test_failed_write_is_rolled_back(tmp_path):
+    m = _mem(tmp_path)
+    x = m.load("I live in Bangalore")
+
+    def boom(*a, **k):
+        raise RuntimeError("llm down mid-cascade")
+    m._g.ingest = boom
+    with pytest.raises(RuntimeError):
+        m.add("I now live in Mumbai")
+    assert [f.id for f in m.facts()] == [x]
+    assert [f.id for f in _mem(tmp_path).facts()] == [x]
+
+
+def test_lock_blocks_a_second_writer(tmp_path):
+    from gem.json_store import _FileLock
+    path = str(tmp_path / "x.lock")
+    with _FileLock(path, timeout=1):
+        with pytest.raises(TimeoutError):
+            with _FileLock(path, timeout=0.2):
+                pass
+    with _FileLock(path, timeout=1):                                  # released afterwards
+        pass
+
+
+_WRITER = r'''
+import sys, hashlib, numpy as np
+sys.path.insert(0, sys.argv[3])
+from gem.memory import Memory
+from gem.json_store import JsonStore
+
+class LLM:
+    def chat_json(self, system, user, **kw):
+        return {"derived_from": []} if "derived_from" in system else {"label": "UNRELATED"}
+    def chat(self, *a, **k):
+        return ""
+
+class Emb:
+    def embed(self, text):
+        return np.frombuffer(hashlib.md5(text.encode()).digest(), dtype=np.uint8).astype(np.float32)
+
+m = Memory(llm=LLM(), embedder=Emb(), store=JsonStore(sys.argv[1]))
+for i in range(8):
+    m.add(f"writer {sys.argv[2]} fact {i}")
+'''
+
+
+def test_concurrent_processes_lose_no_writes(tmp_path):
+    import os
+    import subprocess
+    import sys
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    path = str(tmp_path / "shared.json")
+    procs = [subprocess.Popen([sys.executable, "-c", _WRITER, path, str(w), root])
+             for w in range(4)]
+    assert all(p.wait(timeout=120) == 0 for p in procs)
+    facts = Memory(llm=FakeLLM(), embedder=FakeEmbedder(), store=JsonStore(path)).facts()
+    assert len(facts) == 32 and len({f.id for f in facts}) == 32
+    assert {f.content for f in facts} == {f"writer {w} fact {i}" for w in range(4) for i in range(8)}

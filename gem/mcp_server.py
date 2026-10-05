@@ -64,6 +64,18 @@ def list_memories(include_stale: bool = False, container_tag: str | None = None)
     return _run("list_memories", include_stale=include_stale, container_tag=container_tag)
 
 
+@server.tool(description="Summary of what memory holds about the user or project (from still-valid "
+                         "facts), plus facts to reconfirm. Call at the start of a conversation.")
+def get_profile(container_tag: str | None = None) -> str:
+    return _run("get_profile", container_tag=container_tag)
+
+
+@server.resource("gem://profile", description="Profile of the default memory space.",
+                 mime_type="application/json")
+def profile_resource() -> str:
+    return _run("get_profile")
+
+
 @server.tool(description="List facts that went stale because something they depended on changed. "
                          "Reconfirm these before acting on them.")
 def get_stale(container_tag: str | None = None) -> str:

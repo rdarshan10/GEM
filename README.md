@@ -203,11 +203,14 @@ claude mcp add gem -- python -m gem.mcp_server          # Claude Code
 | `add_memory` | `save` a fact (optionally `derived_from` ids) or `forget` one; returns `revised` and `invalidated` facts |
 | `search_memory` | still-valid matches in `results`, out-of-date matches in `stale` |
 | `list_memories` | everything in a space, with status |
+| `get_profile` | short summary of the user/project from still-valid facts, plus facts to `reconfirm` (also the `gem://profile` resource) |
 | `get_stale` | facts to reconfirm because something they depended on changed |
 | `why` | the facts a fact was derived from |
 
 Memory persists per space: JSON files under `~/.gem` by default (`GEM_HOME`), or FalkorDB with
-`GEM_STORE=falkor`. For your own agent loop, `gem.tools` has the same tools as JSON definitions
+`GEM_STORE=falkor`. Several processes can share a JSON space (e.g. two agents): writes take an OS
+file lock and catch up with the file first, reads pick up other processes' writes. Writers are
+serialised for the length of a cascade, so for many concurrent writers prefer FalkorDB. For your own agent loop, `gem.tools` has the same tools as JSON definitions
 (`TOOLS` for Claude, `openai_tools()` for OpenAI/Groq) and a dispatcher:
 `GemTools().call(name, input)`.
 
