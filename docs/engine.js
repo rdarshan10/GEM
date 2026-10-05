@@ -66,6 +66,7 @@
       this.nodes.set(id, n);
       return n;
     }
+    clear() { this.nodes.clear(); this.edges = []; this.fx = []; this.timers.forEach((t) => t.r()); this.timers = []; }
     addEdge(a, b, type = "derived") { this.edges.push({ a, b, type, alpha: 1 }); }
     removeNode(id) {
       this.nodes.delete(id);
@@ -134,7 +135,7 @@
       this.c.addEventListener("pointerdown", (e) => {
         const [x, y] = pos(e);
         const n = this.pick(x, y);
-        if (n) { drag = n; this.c.setPointerCapture(e.pointerId); }
+        if (n) { drag = n; this.hover = n; this.c.setPointerCapture(e.pointerId); }
       });
       this.c.addEventListener("pointermove", (e) => {
         const [x, y] = pos(e);
@@ -158,7 +159,7 @@
       return [(x - this.w / 2 - this.cam.ox) / this.cam.s + this.cam.x, (y - this.h / 2 - this.opts.offsetY) / this.cam.s + this.cam.y];
     }
     pick(x, y) {
-      let best = null, bd = 18;
+      let best = null, bd = this.opts.compact ? 30 : 18;
       this.nodes.forEach((n) => {
         if (n.alpha < 0.4) return;
         const [sx, sy] = this.toScreen(n.x, n.y);
@@ -340,7 +341,8 @@
           ctx.stroke();
         }
         // label
-        if (this.opts.labels && n.showLabel && n.labelA > 0.03) {
+        const spot = !this.opts.compact || n.kind === "trigger" || this.spotlight === n.id || this.hover === n;
+        if (this.opts.labels && n.showLabel && n.labelA > 0.03 && spot) {
           const lx = x + r + 10 * sc, lw = this.opts.labelWidth * sc;
           ctx.font = font;
           const lh = (th.lineHeight || 16) * fz;
@@ -470,6 +472,7 @@
     let jev = 0, llm = 0;
     const count = () => opts.count && opts.count({ jev, llm });
     GemGraph.reset(g, sc, prefix);
+    g.spotlight = null;
     count();
     const trig = g.addNode(P("new"), { label: sc.trigger, x: home[0], y: home[1], r: 8, kind: "trigger" });
     trig.colFrom = trig.colTo = trig.col = g.color("trigger");
@@ -499,6 +502,7 @@
         const n = sc.nodes[i], f = sc.flat[i], gem = sc.gem[i];
         const changed = f.status !== "ACTIVE" || f.content !== n.text;
         const gemChanged = gem.status !== "ACTIVE" || gem.review || gem.content !== n.text;
+        if (changed || gemChanged) g.spotlight = P(n.id);
         if (changed) {
           g.addEdge(P("new"), P(n.id), "trigger");
           await g.pulse(P("new"), P(n.id), { speed: sp }); if (!live()) return;
@@ -518,6 +522,7 @@
     const hop = (from) => { if (!batched.has(from)) { batched.add(from); jev += 1; } };
     for (const s of sc.steps) {
       if (!live()) return;
+      if (s.kind === "revise" || s.kind === "stop") g.spotlight = P(s.id);
       if (s.kind === "revise") {
         const from = s.depth === 0 ? "new" : parentOf(sc, s.id, done);
         if (s.depth === 0) g.addEdge(P("new"), P(s.id), "trigger");

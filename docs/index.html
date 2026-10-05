@@ -1,476 +1,379 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="type-1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0d'/%3E%3Ccircle cx='11' cy='10' r='3.4' fill='%23ece8df'/%3E%3Ccircle cx='21' cy='17' r='3.4' fill='%2386a8ff'/%3E%3Ccircle cx='11' cy='24' r='3.4' fill='%23f4b443'/%3E%3Cpath d='M13.5 11.6 18.6 15.3M18.6 18.8 13.5 22.4' stroke='%23ece8df' stroke-width='1.3'/%3E%3C/svg%3E">
 <title>GEM — Memory that follows through</title>
-<meta name="description" content="GEM is agent memory that keeps derived facts consistent: when a fact changes, it re-checks everything that was built on it, several steps away, and leaves the rest alone.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232457c5'/%3E%3Ccircle cx='10' cy='10' r='3.5' fill='white'/%3E%3Ccircle cx='22' cy='16' r='3.5' fill='white'/%3E%3Ccircle cx='10' cy='22' r='3.5' fill='white' opacity='.55'/%3E%3Cpath d='M13 11.5 19 14.5M13 20.5 19 17.5' stroke='white' stroke-width='1.6'/%3E%3C/svg%3E">
+<meta name="description" content="When a fact changes, GEM finds everything that was built on it, even several links away, and leaves the rest alone. Agent memory with a dependency cascade.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..600,0..100;1,9..144,300..600,0..100&family=Instrument+Serif:ital@0;1&family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..700&family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0b0d; --bg2:#101216; --ink:#ece8df; --ink2:#aaa69c; --ink3:#6c6b66; --line:#22252a;
+    --blue:#86a8ff; --amber:#f4b443; --green:#6bd59a; --red:#ff6b5d;
+    --body: "Geist", system-ui, sans-serif; --mono: "Geist Mono", ui-monospace, monospace;
+    --display: "Fraunces", Georgia, serif; --d-weight: 340; --d-track: -0.02em; --d-lh: .95; --d-var: "SOFT" 60, "opsz" 144; --d-scale: 1;
+  }
+  .type-2 { --display: "Instrument Serif", Georgia, serif; --d-weight: 400; --d-track: -0.01em; --d-lh: .92; --d-var: normal; --d-scale: 1.08; }
+  .type-3 .display em { margin-right: .12em; }
+  .type-3 { --display: "Bricolage Grotesque", system-ui, sans-serif; --d-weight: 560; --d-track: -0.035em; --d-lh: .94; --d-var: "wdth" 80, "opsz" 96; --d-scale: .92; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+  a { color: var(--ink); text-decoration-color: var(--ink3); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--blue); }
+  .mono { font-family: var(--mono); }
+  .display { font-family: var(--display); font-weight: var(--d-weight); letter-spacing: var(--d-track); line-height: var(--d-lh); font-variation-settings: var(--d-var); }
+  .display em { font-style: italic; color: var(--blue); }
+
+  /* ---------------- chrome */
+  .brand { position: fixed; top: 22px; left: 28px; z-index: 10; display: flex; gap: 14px; align-items: baseline; text-decoration: none; }
+  .brand b { font-family: var(--display); font-weight: var(--d-weight); font-variation-settings: var(--d-var); font-size: 26px; line-height: 1; color: var(--ink); }
+  .brand span { font: 400 11px var(--mono); color: var(--ink3); letter-spacing: .12em; text-transform: uppercase; }
+  .topnav { position: fixed; top: 24px; right: 28px; z-index: 10; display: flex; gap: 22px; font: 400 12.5px var(--mono); }
+  .topnav a { color: var(--ink2); text-decoration: none; }
+  .topnav a:hover { color: var(--ink); }
+  .rail { position: fixed; left: 28px; top: 50%; transform: translateY(-50%); z-index: 10; display: flex; flex-direction: column; gap: 10px; transition: opacity .4s; }
+  .rail i { width: 2px; height: 22px; background: #2a2b2f; display: block; transition: background .3s, height .3s; }
+  .rail i.on { background: var(--ink); height: 34px; }
+  .rail.off { opacity: 0; pointer-events: none; }
+
+  /* ---------------- story */
+  .story-wrap { position: relative; }
+  .stage { position: sticky; top: 0; height: 100vh; width: 100%; z-index: 0; overflow: hidden; }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 65% 45%, transparent 40%, rgba(0,0,0,.55) 100%); }
+  .grain { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: .07; mix-blend-mode: overlay; z-index: 20; }
+  .story { position: relative; z-index: 2; margin-top: -100vh; }
+  .step { min-height: 100vh; display: flex; align-items: center; padding: 0 0 0 9vw; pointer-events: none; }
+  .card { max-width: 450px; pointer-events: auto; }
+  .num { font: 500 11px var(--mono); letter-spacing: .14em; color: var(--ink3); margin: 0; }
+  h1.display { font-size: calc(clamp(54px, 7.2vw, 104px) * var(--d-scale)); margin: 10px 0 20px; }
+  h2.display { font-size: calc(clamp(38px, 4.3vw, 60px) * var(--d-scale)); margin: 10px 0 18px; }
+  .card p { color: var(--ink2); margin: 0 0 14px; }
+  .k { display: inline-block; padding: 0 6px; border-radius: 3px; font: 500 12.5px/1.6 var(--mono); }
+  .k-st { color: #1a1305; background: var(--amber); } .k-up { color: #0b1430; background: var(--blue); }
+  .k-ok { color: #062012; background: var(--green); } .k-bad { color: #2a0603; background: var(--red); }
+  .hint { margin-top: 26px; font: 400 12px var(--mono); color: var(--ink3); letter-spacing: .08em; }
+  .hint::after { content: " ↓"; display: inline-block; animation: bob 1.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(4px); } }
+  .meter { margin-top: 18px; display: flex; gap: 26px; }
+  .meter div { display: flex; flex-direction: column; }
+  .meter b { font-family: var(--display); font-weight: var(--d-weight); font-variation-settings: var(--d-var); font-size: 46px; line-height: 1; color: var(--ink); }
+  .meter span { font: 400 11px var(--mono); color: var(--ink3); letter-spacing: .1em; text-transform: uppercase; margin-top: 6px; }
+
+  /* ---------------- sections after the story */
+  .after { position: relative; z-index: 3; background: var(--bg); }
+  .sec { max-width: 1180px; margin: 0 auto; padding: 120px 28px 40px; }
+  .sec-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: end; margin-bottom: 28px; }
+  .sec-head h2 { font-size: calc(clamp(38px, 4.3vw, 60px) * var(--d-scale)); margin: 0; }
+  .sec-head p { color: var(--ink2); margin: 0; max-width: 460px; }
+  @media (max-width: 860px) { .sec-head { grid-template-columns: 1fr; gap: 10px; } }
+
+  /* playground */
+  .play-ui { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  .chip { border: 1px solid var(--line); background: transparent; color: var(--ink2); font: 400 13.5px var(--body); padding: 8px 14px; border-radius: 999px; cursor: pointer; transition: border-color .2s, color .2s, background .2s; }
+  .chip:hover { border-color: var(--ink3); color: var(--ink); }
+  .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .seg { margin-left: auto; display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+  .seg button { border: 0; background: none; color: var(--ink3); font: 500 12px var(--mono); letter-spacing: .08em; padding: 6px 14px; border-radius: 999px; cursor: pointer; }
+  .seg button[aria-checked="true"] { background: #1d2027; color: var(--ink); }
+  .play-stage { position: relative; height: min(620px, 72vh); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: radial-gradient(90% 80% at 50% 40%, #121419, var(--bg)); }
+  .play-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .readout { position: absolute; left: 18px; right: 18px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; font: 400 12.5px var(--mono); color: var(--ink3); pointer-events: none; }
+  .readout b { color: var(--ink); font-weight: 500; }
+  .readout .last { margin-left: auto; color: var(--ink2); max-width: 60%; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drag { position: absolute; top: 14px; right: 18px; font: 400 11.5px var(--mono); color: var(--ink3); pointer-events: none; }
+  @media (max-width: 700px) { .seg { margin-left: 0; } .readout .last { margin-left: 0; max-width: 100%; text-align: left; } .play-ui { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; } .chip { white-space: nowrap; } }
+
+  /* numbers */
+  .numbers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+  .numbers div { padding: 26px 22px 6px 0; border-right: 1px solid var(--line); }
+  .numbers div + div { padding-left: 22px; }
+  .numbers div:last-child { border-right: 0; }
+  .numbers b { display: block; font-family: var(--display); font-weight: var(--d-weight); font-variation-settings: var(--d-var); font-size: 56px; line-height: 1; letter-spacing: var(--d-track); }
+  .numbers b small { font-size: .45em; color: var(--ink3); }
+  .numbers p { color: var(--ink2); font-size: 14.5px; margin: 12px 0 10px; }
+  .numbers a { font: 400 11px var(--mono); color: var(--ink3); word-break: break-all; }
+  @media (max-width: 900px) { .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); } .numbers div:nth-child(2) { border-right: 0; } .numbers div:nth-child(3) { padding-left: 0; } .numbers div:nth-child(n+3) { border-top: 1px solid var(--line); } }
+  @media (max-width: 520px) { .numbers { grid-template-columns: 1fr; } .numbers div, .numbers div + div { border-right: 0; padding-left: 0; } .numbers div + div { border-top: 1px solid var(--line); } }
+
+  /* install */
+  .install { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
+  @media (max-width: 860px) { .install { grid-template-columns: 1fr; } }
+  pre { margin: 0; background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; font: 400 13.5px/1.7 var(--mono); color: var(--ink); overflow-x: auto; }
+  pre .c { color: var(--ink3); }
+  .tools { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+  .tools li { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 15px; color: var(--ink2); }
+  .tools li span:first-child { font: 400 13px var(--mono); color: var(--ink); }
+  footer { max-width: 1180px; margin: 0 auto; padding: 60px 28px 50px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font: 400 12px var(--mono); color: var(--ink3); }
+
+  /* type switcher (preview only) */
+  .typesw { position: fixed; right: 18px; bottom: 18px; z-index: 30; display: flex; gap: 4px; align-items: center; background: #15171c; border: 1px solid var(--line); border-radius: 999px; padding: 4px 4px 4px 12px; font: 400 11px var(--mono); color: var(--ink3); }
+  .typesw button { border: 0; background: none; color: var(--ink2); font: 500 11px var(--mono); padding: 5px 10px; border-radius: 999px; cursor: pointer; }
+  .typesw button.on { background: var(--ink); color: var(--bg); }
+
+  @media (max-width: 760px) {
+    .rail, .topnav a:not(:last-child) { display: none; }
+    .step { align-items: flex-end; padding: 0 16px 9vh; }
+    .card { background: rgba(10,11,13,.86); backdrop-filter: blur(6px); padding: 18px; border-radius: 12px; border: 1px solid #1f2125; max-width: none; }
+    .sec { padding: 90px 16px 30px; }
+    .tools li { grid-template-columns: 1fr; gap: 2px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .hint::after { animation: none; } html { scroll-behavior: auto; } }
+</style>
 </head>
 <body>
+<a class="brand" href="#top"><b>GEM</b><span>governed evolving memory</span></a>
+<nav class="topnav"><a href="#play">playground</a><a href="#numbers">numbers</a><a href="#use">use it</a><a href="https://github.com/rdarshan10/GEM">github ↗</a></nav>
+<nav class="rail" aria-hidden="true"></nav>
+<canvas class="grain" id="grain" aria-hidden="true"></canvas>
 
-<header class="topbar">
-  <div class="wrap topbar-inner">
-    <a class="brand" href="#top" aria-label="GEM home">
-      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="6" cy="6" r="3" fill="currentColor"/><circle cx="18" cy="12" r="3" fill="var(--accent)"/><circle cx="6" cy="18" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8.6 7.3 15.4 10.7M8.6 16.7 15.4 13.3" stroke="currentColor" stroke-width="1.4"/></svg>
-      <span>GEM</span>
-    </a>
-    <nav aria-label="Sections">
-      <a href="#explorer">Explorer</a>
-      <a href="#how">How it works</a>
-      <a href="#results">Results</a>
-      <a href="#use">Use it</a>
-      <a href="https://github.com/rdarshan10/GEM">GitHub</a>
-    </nav>
-    <button class="theme-toggle" type="button" aria-label="Switch colour theme">
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7a5 5 0 0 1 0 10z" fill="currentColor"/></svg>
-    </button>
-  </div>
-</header>
+<div class="story-wrap" id="top">
+  <div class="stage" aria-hidden="true"><canvas id="c"></canvas></div>
+  <main class="story">
+    <section class="step" data-beat="0"><div class="card">
+      <p class="num">RESEARCH BUILD</p>
+      <h1 class="display">Memory that <em>follows</em> through.</h1>
+      <p>When a fact changes, GEM finds everything that was built on it, even four links away, and leaves the rest alone.</p>
+      <p class="hint">scroll</p>
+    </div></section>
+    <section class="step" data-beat="1"><div class="card">
+      <p class="num">01</p>
+      <h2 class="display">Every memory is built on others.</h2>
+      <p>Your commute was worked out from where you live. The alarm from the commute. The coffee maker from the alarm. GEM keeps those links as it stores facts.</p>
+    </div></section>
+    <section class="step" data-beat="2"><div class="card">
+      <p class="num">02</p>
+      <h2 class="display">Then something changes.</h2>
+      <p>“I moved to Mumbai.” Before it's stored, GEM checks it against similar facts. One conflicts directly, and is <span class="k k-up">updated</span>.</p>
+    </div></section>
+    <section class="step" data-beat="3"><div class="card">
+      <p class="num">03</p>
+      <h2 class="display">Ordinary memory stops <em>there</em>.</h2>
+      <p>Same write, flat memory. The fact that conflicted is fixed. The four facts built on it are <span class="k k-bad">still served as true</span>, and nothing about them looks wrong.</p>
+    </div></section>
+    <section class="step" data-beat="4"><div class="card">
+      <p class="num">04</p>
+      <h2 class="display">GEM follows the links.</h2>
+      <p>The change runs down every derived-from link. Each fact is re-checked against <i>this</i> change: <span class="k k-st">stale</span>, rewritten, or <span class="k k-ok">unaffected</span>, like your timezone. Mumbai is still IST.</p>
+    </div></section>
+    <section class="step" data-beat="5"><div class="card">
+      <p class="num">05</p>
+      <h2 class="display">Cheap judgment first.</h2>
+      <p>Each hop is one batched question to Jev, a small model that answers with probabilities. The rings are its answers. The LLM is only called to write a correction or settle a doubt.</p>
+      <div class="meter"><div><b id="m-jev">4</b><span>Jev calls</span></div><div><b id="m-llm">1</b><span>LLM call</span></div></div>
+    </div></section>
+    <section class="step" data-beat="6"><div class="card">
+      <p class="num">06</p>
+      <h2 class="display">A write costs what it <em>touches</em>.</h2>
+      <p>Six memories, one change: the launch slipped. Only that plan lights up, six links deep. Nothing else is read or rewritten.</p>
+    </div></section>
+  </main>
+</div>
 
-<main id="top">
-
-<!-- ============================================================ HERO -->
-<section class="hero wrap">
-  <div class="hero-text">
-    <p class="eyebrow">Governed Evolving Memory · research build</p>
-    <h1>When a fact changes, GEM fixes what was built on it.</h1>
-    <p class="lead">Agent memory stores facts, and facts get derived from other facts. When one changes,
-      ordinary memory updates that one fact. Everything worked out from it stays in memory as true.
-      GEM records what depends on what, follows those links when something changes, and marks each
-      dependent fact as updated, stale, or unaffected.</p>
-    <div class="hero-actions">
-      <a class="btn btn-primary" href="#explorer">Step through a real cascade</a>
-      <a class="btn" href="#use">Add it to your agent</a>
+<div class="after">
+  <section class="sec" id="play">
+    <div class="sec-head">
+      <h2 class="display">Make a <em>change</em>.</h2>
+      <p>Pick something that happens and watch what else it touches. Switch to flat memory to see what that memory leaves behind. Every run is a recorded GEM run.</p>
     </div>
-  </div>
-  <figure class="hero-diff" aria-label="What one write returns">
-    <div class="diff-head"><span class="mono">add_memory("I moved to Mumbai")</span><span class="diff-meta">MCP tool result · real run</span><button type="button" class="replay" id="hero-replay">replay</button></div>
-    <ol class="diff-rows">
-      <li><span class="tag tag-revised">updated</span><span><s>I live in Bangalore</s> → I live in Mumbai</span></li>
-      <li><span class="tag tag-stale">stale</span><span>My commute to the office is 45 minutes</span></li>
-      <li><span class="tag tag-stale">stale</span><span>My alarm is set for 6:30 am to beat the traffic</span></li>
-      <li><span class="tag tag-stale">stale</span><span>The coffee maker is scheduled to start at 6:45 am</span></li>
-      <li><span class="tag tag-stale">stale</span><span>My rent is 30,000 rupees a month</span></li>
-      <li><span class="tag tag-kept">unaffected</span><span>My timezone is IST</span></li>
-    </ol>
-    <figcaption>The coffee maker is four steps from the move and shares no words with it. A similarity search would
-      not find it; GEM reaches it through the dependency links. Cost of this write: 4 Jev calls, 1 LLM call.</figcaption>
-  </figure>
-</section>
-
-<!-- ============================================================ EXPLORER -->
-<section id="explorer" class="section explorer-section">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Memory explorer</p>
-      <h2>Watch a change move through memory</h2>
-      <p class="section-lead">Each example is a real GEM run, recorded from the engine: Jev's probabilities, which
-        decisions needed the LLM, and every fact's final state. Step through it, then switch to flat memory to see
-        what that memory still says after the same update.</p>
+    <div class="play-ui">
+      <div id="chips" style="display:contents"></div>
+      <div class="seg" role="radiogroup" aria-label="Memory"><button type="button" role="radio" aria-checked="true" data-m="gem">GEM</button><button type="button" role="radio" aria-checked="false" data-m="flat">FLAT</button></div>
     </div>
-
-    <div class="scenario-tabs" role="tablist" aria-label="Examples"></div>
-
-    <div class="explorer">
-      <div class="canvas-wrap">
-        <div class="canvas-bar">
-          <div class="seg" role="radiogroup" aria-label="Memory type">
-            <button type="button" role="radio" aria-checked="true" data-view="gem">GEM</button>
-            <button type="button" role="radio" aria-checked="false" data-view="flat">Flat memory</button>
-          </div>
-          <span class="canvas-note mono" id="canvas-note"></span>
-        </div>
-        <div class="canvas" id="canvas"><svg id="graph" role="img" aria-label="Memory graph"></svg></div>
-        <ul class="legend" aria-label="Legend">
-          <li><svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="27" y2="5" stroke="currentColor" stroke-width="1.4"/><path d="M27 1.5 33 5 27 8.5z" fill="currentColor"/></svg>derived from (changes travel along it)</li>
-          <li><svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4"/></svg>associated (never followed)</li>
-          <li><span class="tag tag-revised">updated</span>rewritten to the new value</li>
-          <li><span class="tag tag-stale">stale</span>no longer reliable, flagged for review</li>
-          <li><span class="tag tag-kept">unaffected</span>checked, still true</li>
-          <li><span class="tag tag-wrong">outdated</span>flat memory still serves it as true</li>
-        </ul>
-      </div>
-
-      <aside class="panel" aria-live="polite">
-        <div class="panel-top">
-          <p class="mono step-count" id="step-count"></p>
-          <div class="controls">
-            <button type="button" class="ctl" id="btn-back" aria-label="Previous step">
-              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
-            <button type="button" class="ctl ctl-play" id="btn-play" aria-label="Play">
-              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" class="i-play"><path d="M5 3v10l8-5z" fill="currentColor"/></svg>
-              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" class="i-pause"><path d="M4.5 3h2.5v10H4.5zM9 3h2.5v10H9z" fill="currentColor"/></svg></button>
-            <button type="button" class="ctl" id="btn-next" aria-label="Next step">
-              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="m6 3 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
-            <button type="button" class="ctl ctl-text" id="btn-reset">Restart</button>
-          </div>
-        </div>
-        <div class="progress" aria-hidden="true"><div class="progress-fill" id="progress"></div></div>
-        <div id="step-body" class="step-body"></div>
-        <p class="panel-foot mono" id="panel-foot"></p>
-      </aside>
+    <div class="play-stage">
+      <canvas id="pc" aria-label="Playground memory graph"></canvas>
+      <span class="drag" id="draghint">drag any fact</span>
+      <div class="readout" aria-live="polite"><span><b id="r-jev">0</b> Jev</span><span><b id="r-llm">0</b> LLM</span><span><b id="r-up">0</b> updated</span><span><b id="r-st">0</b> stale</span><span class="last" id="r-last"></span></div>
     </div>
-    <p class="fineprint" id="data-note"></p>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ HOW IT WORKS -->
-<section id="how" class="section">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">How it works</p>
-      <h2>Two passes on every write, and a cascade when something changed</h2>
-      <p class="section-lead">A new fact is first compared with the facts most similar to it (does it change any of
-        them?), then linked to the facts it was derived from. If it changed something, GEM walks the
-        derived-from links and re-checks each dependent against that specific change.</p>
+  <section class="sec" id="numbers">
+    <div class="sec-head">
+      <h2 class="display">Measured, not <em>asserted</em>.</h2>
+      <p>Each number comes from a run file in the repository that you can regenerate.</p>
     </div>
-
-    <figure class="figure">
-      <div class="fig-scroll">
-      <svg viewBox="0 0 1040 330" role="img" aria-label="The write path: a new fact is matched to neighbours, scanned for conflicts, stored and linked, then the cascade re-checks dependents. Jev answers the conflict scan and the cascade checks in batches; the LLM is called only to write corrections and settle unsure cases." class="diagram">
-        <defs>
-          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
-          <marker id="ah-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="fill-accent"/></marker>
-        </defs>
-        <g class="stage">
-          <rect x="10" y="30" width="140" height="78" rx="6"/>
-          <text x="22" y="54" class="t-num">01</text><text x="22" y="76" class="t-title">New fact</text><text x="22" y="95" class="t-sub">add_memory(…)</text>
-        </g>
-        <g class="stage">
-          <rect x="188" y="30" width="140" height="78" rx="6"/>
-          <text x="200" y="54" class="t-num">02</text><text x="200" y="76" class="t-title">Neighbours</text><text x="200" y="95" class="t-sub">embedding top-k</text>
-        </g>
-        <g class="stage stage-key">
-          <rect x="366" y="30" width="140" height="78" rx="6"/>
-          <text x="378" y="54" class="t-num">03</text><text x="378" y="76" class="t-title">Conflict scan</text><text x="378" y="95" class="t-sub">changes a stored fact?</text>
-        </g>
-        <g class="stage">
-          <rect x="544" y="30" width="140" height="78" rx="6"/>
-          <text x="556" y="54" class="t-num">04</text><text x="556" y="76" class="t-title">Store + link</text><text x="556" y="95" class="t-sub">derived-from edges</text>
-        </g>
-        <g class="stage stage-key">
-          <rect x="722" y="30" width="140" height="78" rx="6"/>
-          <text x="734" y="54" class="t-num">05</text><text x="734" y="76" class="t-title">Cascade</text><text x="734" y="95" class="t-sub">hop by hop</text>
-        </g>
-        <g class="stage">
-          <rect x="900" y="30" width="130" height="78" rx="6"/>
-          <text x="912" y="54" class="t-num">06</text><text x="912" y="76" class="t-title">Result</text><text x="912" y="95" class="t-sub">updated · stale · kept</text>
-        </g>
-        <g class="flow" marker-end="url(#ah)">
-          <line x1="150" y1="69" x2="186" y2="69"/><line x1="328" y1="69" x2="364" y2="69"/>
-          <line x1="506" y1="69" x2="542" y2="69"/><line x1="684" y1="69" x2="720" y2="69"/>
-          <line x1="862" y1="69" x2="898" y2="69"/>
-        </g>
-
-        <g class="ask">
-          <line x1="436" y1="110" x2="436" y2="200" marker-start="url(#ah)" marker-end="url(#ah)"/>
-          <line x1="792" y1="110" x2="792" y2="200" marker-start="url(#ah)" marker-end="url(#ah)"/>
-        </g>
-        <text x="444" y="160" class="t-edge">batched question</text>
-        <text x="800" y="160" class="t-edge">one call per hop</text>
-
-        <g class="decider">
-          <rect x="366" y="202" width="454" height="104" rx="6"/>
-          <text x="382" y="228" class="t-title">Jev · typed decisions</text>
-          <text x="382" y="249" class="t-sub">probabilities for every item in one request, no free text</text>
-          <text x="382" y="276" class="t-sub">decides alone: no conflict · replaced · stop · mark stale</text>
-          <text x="382" y="294" class="t-sub">never supersedes a dependent on its own</text>
-        </g>
-        <g class="llm">
-          <rect x="900" y="202" width="130" height="104" rx="6"/>
-          <text x="912" y="228" class="t-title">LLM</text>
-          <text x="912" y="249" class="t-sub">writes corrected</text>
-          <text x="912" y="265" class="t-sub">facts; settles</text>
-          <text x="912" y="281" class="t-sub">unsure cases</text>
-        </g>
-        <line x1="822" y1="254" x2="896" y2="254" class="to-llm" marker-end="url(#ah-acc)"/>
-        <text x="859" y="244" text-anchor="middle" class="t-edge t-acc">only if</text>
-        <text x="859" y="272" text-anchor="middle" class="t-edge t-acc">needed</text>
-      </svg>
-      </div>
-      <figcaption>The write path. Stages 03 and 05 ask Jev in batches; only rewrites and unsure cases reach the
-        LLM. If Jev is unavailable, every decision falls back to the LLM, so a cascade is never skipped.</figcaption>
-    </figure>
-
-    <div class="two-col">
-      <figure class="figure">
-        <div class="fig-scroll">
-        <svg viewBox="0 0 640 360" role="img" aria-label="How one dependent fact is decided: Jev gives the probability it is unaffected and the probability its new value can be worked out. At least 0.9 unaffected stops the cascade; between 0.35 and 0.9 goes to the LLM; otherwise, if the new value follows it goes to the LLM for a rewrite, and if not the fact is marked stale." class="diagram">
-          <defs>
-            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
-          </defs>
-          <g class="stage">
-            <rect x="10" y="140" width="150" height="80" rx="6"/>
-            <text x="22" y="166" class="t-title">Dependent fact</text>
-            <text x="22" y="186" class="t-sub">+ what changed</text>
-            <text x="22" y="204" class="t-sub">upstream</text>
-          </g>
-          <g class="decider">
-            <rect x="196" y="130" width="150" height="100" rx="6"/>
-            <text x="208" y="156" class="t-title">Jev scores it</text>
-            <text x="208" y="178" class="t-sub">P(unaffected)</text>
-            <text x="208" y="196" class="t-sub">P(new value</text>
-            <text x="208" y="212" class="t-sub">follows)</text>
-          </g>
-          <line x1="160" y1="180" x2="194" y2="180" class="flowline" marker-end="url(#ah2)"/>
-          <g class="branches" fill="none">
-            <path d="M346 162 C 380 162, 380 45, 414 45" marker-end="url(#ah2)"/>
-            <path d="M346 172 C 380 172, 380 132, 414 132" marker-end="url(#ah2)"/>
-            <path d="M346 188 C 380 188, 380 228, 414 228" marker-end="url(#ah2)"/>
-            <path d="M346 198 C 380 198, 380 315, 414 315" marker-end="url(#ah2)"/>
-          </g>
-          <g class="outcome o-kept"><rect x="416" y="16" width="214" height="62" rx="6"/>
-            <text x="428" y="37" class="t-edge">P(unaffected) ≥ 0.9</text>
-            <text x="428" y="56" class="t-title">Stop here</text><text x="428" y="71" class="t-sub">fact kept · no LLM</text></g>
-          <g class="outcome o-llm"><rect x="416" y="102" width="214" height="62" rx="6"/>
-            <text x="428" y="123" class="t-edge">0.35 &lt; P(unaffected) &lt; 0.9</text>
-            <text x="428" y="142" class="t-title">Unsure: ask the LLM</text><text x="428" y="157" class="t-sub">1 LLM call</text></g>
-          <g class="outcome o-llm"><rect x="416" y="198" width="214" height="62" rx="6"/>
-            <text x="428" y="219" class="t-edge">affected · value follows</text>
-            <text x="428" y="238" class="t-title">LLM rewrites it</text><text x="428" y="253" class="t-sub">1 LLM call · keep cascading</text></g>
-          <g class="outcome o-stale"><rect x="416" y="284" width="214" height="62" rx="6"/>
-            <text x="428" y="305" class="t-edge">affected · value unknown</text>
-            <text x="428" y="324" class="t-title">Mark stale, flag review</text><text x="428" y="339" class="t-sub">no LLM · keep cascading</text></g>
-        </svg>
-        </div>
-        <figcaption>One decision in the cascade. A wrong "unaffected" would hide a stale fact, so stopping needs
-          90% confidence; anything doubtful costs an LLM call instead.</figcaption>
-      </figure>
-
-      <figure class="figure">
-        <div class="fig-scroll">
-        <svg viewBox="0 0 640 360" role="img" aria-label="Typed edges: derived-from edges are followed by the cascade, associated edges are never followed, and a contradicts edge records which new fact replaced an old one." class="diagram">
-          <defs>
-            <marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="currentColor"/></marker>
-            <marker id="ah3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" class="fill-accent"/></marker>
-          </defs>
-          <g class="stage stage-new"><rect x="20" y="24" width="190" height="52" rx="6"/>
-            <text x="32" y="45" class="t-tag">NEW FACT</text><text x="32" y="64" class="t-sub-ink">I moved to Mumbai</text></g>
-          <g class="stage"><rect x="20" y="150" width="190" height="52" rx="6"/>
-            <text x="32" y="171" class="t-tag">MEMORY</text><text x="32" y="190" class="t-sub-ink">I live in Bangalore</text></g>
-          <g class="stage"><rect x="20" y="284" width="190" height="52" rx="6"/>
-            <text x="32" y="305" class="t-tag">MEMORY</text><text x="32" y="324" class="t-sub-ink">Commute is 45 minutes</text></g>
-          <g class="stage"><rect x="428" y="150" width="196" height="52" rx="6"/>
-            <text x="440" y="171" class="t-tag">MEMORY</text><text x="440" y="190" class="t-sub-ink">Visited Bangalore Palace</text></g>
-
-          <line x1="115" y1="78" x2="115" y2="146" class="edge-acc" marker-end="url(#ah3a)"/>
-          <text x="126" y="108" class="t-edge t-acc">contradicts</text>
-          <text x="126" y="124" class="t-edge">audit: what replaced it</text>
-
-          <line x1="115" y1="204" x2="115" y2="280" class="edge-solid" marker-end="url(#ah3)"/>
-          <text x="126" y="238" class="t-edge">derived from</text>
-          <text x="126" y="254" class="t-edge">the cascade follows this</text>
-
-          <line x1="212" y1="176" x2="426" y2="176" class="edge-dash"/>
-          <text x="232" y="166" class="t-edge">associated</text>
-          <text x="232" y="196" class="t-edge">similar wording only,</text>
-          <text x="232" y="212" class="t-edge">never followed</text>
-        </svg>
-        </div>
-        <figcaption>Edges are typed. Only derived-from edges carry a change; a fact that merely mentions the same
-          place, name or number is linked as associated and left alone.</figcaption>
-      </figure>
+    <div class="numbers">
+      <div><b>37<small>/37</small></b><p>facts right across 12 cross-domain scenarios: medical, legal, finance, six-step chains.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/eval_diverse_groq20b_jev.txt">eval_diverse_groq20b_jev.txt</a></div>
+      <div><b>5<small>/5</small></b><p>repeat runs at 100% on 19 scenarios held out from tuning; none flipped (LLM-only: 99.0%).</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b.txt">determinism_jev_groq120b.txt</a></div>
+      <div><b>117<small> vs 91</small></b><p>facts right out of 117, GEM against flat memory on the same 37 scenarios.</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/propagation_eval_strat_clean.txt">propagation_eval_strat_clean.txt</a></div>
+      <div><b>1.3</b><p>LLM calls per write with Jev deciding first (about 25 LLM and 45 Jev calls for 19 writes).</p><a href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b_calls.txt">determinism_jev_groq120b_calls.txt</a></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============================================================ RESULTS -->
-<section id="results" class="section">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Results</p>
-      <h2>Measured, with the runs in the repo</h2>
-      <p class="section-lead">Every number below comes from a file in <a href="https://github.com/rdarshan10/GEM/tree/main/runs"><span class="mono">runs/</span></a> that you can
-        regenerate. Where something hasn't been measured, the page says so.</p>
+  <section class="sec" id="use">
+    <div class="sec-head">
+      <h2 class="display">Give your agent <em>this</em> memory.</h2>
+      <p>An MCP server for Claude Code, Claude Desktop, Cursor and other clients, or a Python library. Every save reports what it changed further down.</p>
     </div>
+    <div class="install">
+      <pre><span class="c"># MCP server</span>
+pip install -e ".[mcp,embeddings,jev]"
+claude mcp add gem -- python -m gem.mcp_server
 
-    <div class="tiles">
-      <div class="tile">
-        <p class="tile-num">37<span>/37</span></p>
-        <p class="tile-label">facts handled correctly across 12 cross-domain scenarios (medical, legal, finance, 6-step chains) with Jev + gpt-oss-20b</p>
-        <a class="tile-src mono" href="https://github.com/rdarshan10/GEM/blob/main/runs/eval_diverse_groq20b_jev.txt">eval_diverse_groq20b_jev.txt</a>
-      </div>
-      <div class="tile">
-        <p class="tile-num">5<span>/5</span></p>
-        <p class="tile-label">repeat runs at 100% on 19 scenarios not used to set the thresholds; none flipped between runs (LLM-only: 99.0%, two flipped)</p>
-        <a class="tile-src mono" href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b.txt">determinism_jev_groq120b.txt</a>
-      </div>
-      <div class="tile">
-        <p class="tile-num">117<span> vs 91</span></p>
-        <p class="tile-label">facts right out of 117, GEM against flat memory on the same 37 propagation scenarios</p>
-        <a class="tile-src mono" href="https://github.com/rdarshan10/GEM/blob/main/runs/propagation_eval_strat_clean.txt">propagation_eval_strat_clean.txt</a>
-      </div>
-      <div class="tile">
-        <p class="tile-num">≈1.3</p>
-        <p class="tile-label">LLM calls per write with the Jev decider on the held-out set (about 25 LLM and 45 Jev calls for 19 writes)</p>
-        <a class="tile-src mono" href="https://github.com/rdarshan10/GEM/blob/main/runs/determinism_jev_groq120b_calls.txt">determinism_jev_groq120b_calls.txt</a>
-      </div>
-    </div>
-
-    <div class="two-col results-cols">
-      <figure class="figure chart-fig">
-        <figcaption class="chart-title">Where flat memory falls behind: share of facts handled correctly, by scenario type</figcaption>
-        <ul class="chart-legend" aria-hidden="true">
-          <li><span class="sw sw-flat"></span>Flat memory</li>
-          <li><span class="sw sw-gem"></span>GEM</li>
-        </ul>
-        <div id="dumbbell" class="dumbbell"></div>
-        <p class="chart-note">On the other 7 scenario types both score 100%. They include the hard negatives,
-          extensions and no-ops, where nothing should change, so GEM's extra checks don't invalidate facts they shouldn't.</p>
-        <details class="table-view">
-          <summary>Show as a table</summary>
-          <table id="dumbbell-table"><thead><tr><th>Scenario type</th><th>Flat memory</th><th>GEM</th><th>Difference</th></tr></thead><tbody></tbody></table>
-        </details>
-      </figure>
-
-      <figure class="figure chart-fig">
-        <figcaption class="chart-title">LLM calls for the same 12 scenarios and the same decisions</figcaption>
-        <div id="callbars" class="callbars"></div>
-        <p class="chart-note">Measured with the LLM's answers supplied by an oracle (expected answers), so only the
-          number of calls differs between bars; all three scored 37/37. With a real LLM (gpt-oss-20b) the Jev
-          decider used 20 LLM calls and 31 Jev calls, still 37/37. An LLM-only run on that model hasn't been measured.</p>
-      </figure>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================ USE IT -->
-<section id="use" class="section">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">What you get</p>
-      <h2>An MCP server, a Python library, and tool definitions</h2>
-      <p class="section-lead">The tool surface matches common agent-memory servers (save, forget, search, list,
-        memory spaces). The difference is in what comes back: every write reports the facts it changed further
-        down, and search keeps outdated matches in a separate list instead of mixing them in.</p>
-    </div>
-
-    <div class="offer">
-      <div class="offer-card">
-        <h3>MCP server</h3>
-        <p>For Claude Code, Claude Desktop, Cursor and other MCP clients. Runs locally over stdio.</p>
-<pre><code>pip install -e ".[mcp,embeddings,jev]"
-claude mcp add gem -- python -m gem.mcp_server</code></pre>
-      </div>
-      <div class="offer-card">
-        <h3>Python library</h3>
-        <p>Pin dependencies where they matter; let GEM infer the rest.</p>
-<pre><code>from gem import Memory
+<span class="c"># or the library</span>
+from gem import Memory
 m = Memory()
 home = m.add("I live in Bangalore").id
-m.add("My commute is 45 minutes",
-      derived_from=[home])
-r = m.add("I moved to Mumbai")
-r.invalidated   # [commute → STALE]</code></pre>
-      </div>
-      <div class="offer-card">
-        <h3>Tool definitions</h3>
-        <p>For your own agent loop: Claude and OpenAI-format schemas plus a dispatcher.</p>
-<pre><code>from gem.tools import TOOLS, GemTools
-tools = GemTools()
-# pass TOOLS to the model, then:
-tools.call(block.name, block.input)</code></pre>
-      </div>
+m.add("My commute is 45 minutes", derived_from=[home])
+m.add("I moved to Mumbai").invalidated   <span class="c"># [commute]</span></pre>
+      <ul class="tools">
+        <li><span>add_memory</span><span>save or forget a fact; returns what it updated and what went stale</span></li>
+        <li><span>search_memory</span><span>valid matches, with outdated ones in a separate list</span></li>
+        <li><span>get_profile</span><span>a summary built only from facts still true</span></li>
+        <li><span>get_stale</span><span>facts to reconfirm with the user</span></li>
+        <li><span>why</span><span>the facts a fact was derived from</span></li>
+        <li><span>list_memories</span><span>everything in a memory space</span></li>
+      </ul>
     </div>
+  </section>
 
-    <div class="tool-table-wrap">
-      <table class="tool-table">
-        <thead><tr><th>Tool</th><th>What it does</th><th>What's specific to GEM</th></tr></thead>
-        <tbody>
-          <tr><td class="mono">add_memory</td><td>Save a fact (optionally with <span class="mono">derived_from</span> ids), or forget one</td><td>Returns <span class="mono">revised</span> and <span class="mono">invalidated</span> facts, including ones several steps away; forgetting cascades too</td></tr>
-          <tr><td class="mono">search_memory</td><td>Find facts relevant to a query</td><td>Outdated matches come back in a separate <span class="mono">stale</span> list, so the agent asks instead of guessing</td></tr>
-          <tr><td class="mono">get_profile</td><td>Short summary of the user or project</td><td>Built only from facts still valid; stale ones are listed to reconfirm</td></tr>
-          <tr><td class="mono">get_stale</td><td>Facts to reconfirm</td><td>Each one is there because something it depended on changed</td></tr>
-          <tr><td class="mono">why</td><td>The facts a fact was derived from</td><td>The dependency trail behind a stale fact</td></tr>
-          <tr><td class="mono">list_memories</td><td>Everything in a memory space, with status</td><td>Spaces via <span class="mono">container_tag</span>; JSON files or FalkorDB; safe across processes</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
+  <footer><span>GEM · research build by Revanth Darshan · PolyForm Noncommercial</span><span>animations replay recorded runs (Jev + gpt-oss-120b) · <a href="https://github.com/rdarshan10/GEM">github</a></span></footer>
+</div>
 
-<!-- ============================================================ FIT -->
-<section id="fit" class="section">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">Where it fits</p>
-      <h2>Built for memory where facts depend on each other</h2>
-      <p class="section-lead">GEM is a targeted layer, not a general replacement. When facts are independent,
-        flat memory is as accurate and cheaper.</p>
-    </div>
+<div class="typesw" role="group" aria-label="Typeface (preview)">type <button data-t="1" class="on">Fraunces</button><button data-t="2">Instrument</button><button data-t="3">Bricolage</button></div>
 
-    <div class="fit-grid">
-      <div class="usecase">
-        <p class="uc-kicker mono">01 · engineering teams</p>
-        <h3>Requirements and change impact</h3>
-        <p>Traceability tools mark everything linked to a changed requirement as "suspect", and teams wade
-          through false alarms. GEM flags only items whose specific dependency changed, with
-          <span class="mono">why</span> as the review trail.</p>
-      </div>
-      <div class="usecase">
-        <p class="uc-kicker mono">02 · coding agents</p>
-        <h3>Project memory that doesn't rot</h3>
-        <p>Agents act on confident project notes without re-checking them. When a design decision changes, GEM
-          tells the agent which conventions, limits and workarounds were built on it. See the runtime migration example above.</p>
-      </div>
-      <div class="usecase">
-        <p class="uc-kicker mono">03 · personal &amp; multi-agent</p>
-        <h3>Assistants and shared plans</h3>
-        <p>A move, a new manager, a slipped date: the routines and plans built on them get updated or flagged,
-          and several agents can share one memory space.</p>
-      </div>
-    </div>
+<script src="engine.js"></script>
+<script>
+(async function () {
+  // ---------------- typeface preview switcher
+  const html = document.documentElement;
+  const setType = (t) => { html.className = "type-" + t; document.querySelectorAll(".typesw button").forEach((b) => b.classList.toggle("on", b.dataset.t === t)); };
+  document.querySelectorAll(".typesw button").forEach((b) => b.addEventListener("click", () => setType(b.dataset.t)));
+  const qt = new URLSearchParams(location.search).get("type");
+  if (qt) setType(qt);
 
-    <div class="two-col fit-cols">
-      <div class="fit-box">
-        <h3>Use GEM when</h3>
-        <ul>
-          <li>agents act on facts derived from other facts</li>
-          <li>a fact read as true when it's outdated is costly (ops, compliance, tool calls)</li>
-          <li>reads outnumber writes, so the cascade cost is paid once</li>
-        </ul>
-      </div>
-      <div class="fit-box">
-        <h3>Skip it when</h3>
-        <ul>
-          <li>facts are flat and independent (preferences, profile fields)</li>
-          <li>memory is write-heavy and rarely read</li>
-          <li>a wrong-but-cheap answer is acceptable</li>
-        </ul>
-      </div>
-    </div>
+  // ---------------- film grain, generated once
+  const gr = document.getElementById("grain"), gx = gr.getContext("2d");
+  gr.width = gr.height = 256;
+  const img = gx.createImageData(256, 256);
+  for (let i = 0; i < img.data.length; i += 4) { const v = Math.random() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+  gx.putImageData(img, 0, 0);
+  gr.style.backgroundImage = `url(${gr.toDataURL()})`; gr.width = gr.height = 1;
 
-    <div class="tool-table-wrap">
-      <table class="tool-table compare">
-        <thead><tr><th></th><th>Flat / vector memory</th><th>Contradiction-tracking memory</th><th>GEM</th></tr></thead>
-        <tbody>
-          <tr><td>Updates the fact that directly conflicts</td><td>usually</td><td>yes, keeps history</td><td>yes</td></tr>
-          <tr><td>Re-checks facts derived from it</td><td>only if the text is similar</td><td>only if they directly contradict</td><td>yes, through every derived-from step</td></tr>
-          <tr><td>Leaves unaffected dependents alone</td><td>n/a</td><td>n/a</td><td>yes (checks the specific property that changed)</td></tr>
-          <tr><td>Extra cost per write</td><td>none</td><td>a conflict check</td><td>proportional to the affected subgraph, not memory size</td></tr>
-        </tbody>
-      </table>
-      <p class="fineprint">Inferred dependencies are best-effort (about 85–88% recall in our tests); pin
-        <span class="mono">derived_from</span> for facts you can't afford to miss.</p>
-    </div>
-  </div>
-</section>
+  const theme = {
+    states: { active: "#d9d5ca", trigger: "#ffffff", updated: "#86a8ff", stale: "#f4b443", kept: "#6bd59a", wrong: "#ff6b5d", superseded: "#6c6b66", accent: "#86a8ff" },
+    edge: "#8d8f98", edgeAlpha: 0.42, pulse: "#a9c2ff", text: "#ece8df", triggerText: "#ffffff",
+    labelHalo: "rgba(10,11,13,.9)", fontSize: 14, fontFamily: "'Geist', sans-serif", badgeFont: "500 10px 'Geist Mono', monospace",
+    lineHeight: 17, breath: 3.2, glow: 18, dim: 0.16, camSpeed: 2.2,
+    drawNode(ctx, n, x, y, r) {
+      ctx.save();
+      if (n.state !== "active") { ctx.shadowColor = `rgba(${n.col.join(",")},.65)`; ctx.shadowBlur = 16; }
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgb(${n.col.join(",")})`; ctx.fill();
+      ctx.restore();
+      if (n.kind === "trigger") { ctx.beginPath(); ctx.arc(x, y, r + 5, 0, Math.PI * 2); ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 1; ctx.stroke(); }
+    },
+  };
+  const wide = window.innerWidth > 760;
+  // phones: compact mode shows only the new fact, the fact being decided, and any fact you tap
+  const compact = !wide, lay = compact ? { dx: 120, dy: 96 } : {};
+  const g = new GemGraph(document.getElementById("c"), theme, { offsetX: wide ? window.innerWidth * 0.17 : 0, offsetY: wide ? 0 : -window.innerHeight * 0.2, labelWidth: compact ? 150 : 180, compact });
+  const data = await GemGraph.loadData("data/scenarios.json");
+  const S = Object.fromEntries(data.scenarios.map((s) => [s.key, s]));
 
-</main>
+  // ---------------- story
+  const spots = { relocation: [0, 0], runtime: [1250, -60], launch: [-1250, -330], cloud: [1180, 760], reorg: [-1150, 800], email: [40, 900] };
+  const C = {};
+  Object.entries(spots).forEach(([k, [x, y]]) => { C[k] = GemGraph.build(g, S[k], k + ":", x, y, lay); });
+  const all = [].concat(...Object.values(C).map((c) => c.ids));
+  const reloc = C.relocation;
+  const WIDE_OX = wide ? window.innerWidth * 0.24 : 0, ZOOM_OX = wide ? window.innerWidth * 0.21 : 0;
+  let current = -1;
+  const derived = g.edges.filter((e) => e.type === "derived");
+  setInterval(() => {
+    if (current !== 0 || document.hidden) return;
+    const e = derived[Math.floor(Math.random() * derived.length)];
+    g.pulse(e.a, e.b, { dur: 1500, color: "#7f93c9" });
+  }, 650);
 
-<footer class="footer">
-  <div class="wrap footer-inner">
-    <p><strong>GEM</strong> · research build by Revanth Darshan · PolyForm Noncommercial 1.0.0</p>
-    <p class="mono"><a href="https://github.com/rdarshan10/GEM">github.com/rdarshan10/GEM</a> · <a href="https://github.com/rdarshan10/GEM/blob/main/PRODUCTIONIZATION.md">limitations &amp; roadmap</a></p>
-  </div>
-</footer>
+  const rail = document.querySelector(".rail");
+  const steps = [...document.querySelectorAll(".step")];
+  steps.forEach(() => rail.appendChild(document.createElement("i")));
+  let token = { cancelled: true };
+  const fresh = () => { token.cancelled = true; token = { cancelled: false }; g.clearDials(); return token; };
+  const resetAll = () => Object.keys(C).forEach((k) => GemGraph.reset(g, S[k], k + ":"));
+  const zoom = () => { g.setFocus(reloc.ids.concat("relocation:new")); g.frame(reloc.ids, 40, 1.15, 0.18, [reloc.home], ZOOM_OX); };
+  const overview = () => { g.setFocus(all, 1); all.forEach((id) => (g.nodes.get(id).labelAT = 0)); g.frame(all, 50, 0.5, 0.18, [], WIDE_OX); };
 
-<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
-<script src="app.js"></script>
+  const beats = {
+    0() { fresh(); resetAll(); overview(); },
+    1() { fresh(); resetAll(); zoom(); },
+    async 2() { const t = fresh(); resetAll(); zoom(); await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, until: "conflict", dials: false }); },
+    async 3() { const t = fresh(); resetAll(); zoom(); await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, mode: "flat", speed: 1.4 }); },
+    async 4() { const t = fresh(); resetAll(); zoom(); await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, speed: 1.05 }); },
+    async 5() {
+      const t = fresh(); zoom();
+      if (g.nodes.get("relocation:n2").state === "active") await GemGraph.play(g, S.relocation, "relocation:", reloc.home, { token: t, speed: 6, dials: false });
+      if (t.cancelled) return;
+      S.relocation.steps.forEach((s) => { if (s.jev && s.depth > 0) g.dial("relocation:" + s.id, s.kind === "stop" ? s.jev.p_unaffected : s.jev.p_affected, "", s.kind === "stop" ? "kept" : "stale"); });
+      document.getElementById("m-jev").textContent = S.relocation.calls.jev;
+      document.getElementById("m-llm").textContent = S.relocation.calls.llm;
+    },
+    async 6() {
+      const t = fresh(); resetAll(); overview();
+      await g.wait(900); if (t.cancelled) return;
+      g.setFocus(C.launch.ids.concat("launch:new"), 0.3); C.launch.ids.forEach((id) => (g.nodes.get(id).labelAT = 0));
+      await GemGraph.play(g, S.launch, "launch:", C.launch.home, { token: t, speed: 1.3, badges: false, dials: false });
+    },
+  };
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const i = +e.target.dataset.beat;
+      if (i === current) return;
+      current = i;
+      [...rail.children].forEach((r, j) => r.classList.toggle("on", j === i));
+      beats[i]();
+    });
+  }, { threshold: 0.55 });
+  steps.forEach((s) => io.observe(s));
+  new IntersectionObserver((es) => es.forEach((e) => rail.classList.toggle("off", e.isIntersecting)), { threshold: 0.05 }).observe(document.querySelector(".after"));
+  beats[0](); current = 0; g.snap();
+
+  // ---------------- mini playground
+  if (compact) document.getElementById("draghint").textContent = "tap a fact to read it";
+  const SHORT = { relocation: "I moved to Mumbai", runtime: "Lambda → containers", launch: "Launch slipped to Dec 1", cloud: "m5.large → m5.xlarge", reorg: "Bob is my new manager", email: "Gmail → Fastmail" };
+  const pg = new GemGraph(document.getElementById("pc"), theme, { drag: true, labelWidth: compact ? 150 : 175, offsetY: -14, compact });
+  let pKey = "relocation", pMode = "gem", pTok = { cancelled: true }, started = false, pIv = null;
+  const chips = document.getElementById("chips");
+  data.scenarios.forEach((sc) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.textContent = SHORT[sc.key] || sc.title;
+    b.setAttribute("aria-pressed", String(sc.key === pKey));
+    b.addEventListener("click", () => { pKey = sc.key; runPlay(); });
+    chips.appendChild(b);
+  });
+  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => { pMode = b.dataset.m; runPlay(); }));
+  const setR = (id, v) => { document.getElementById(id).textContent = v; };
+
+  async function runPlay() {
+    pTok.cancelled = true; pTok = { cancelled: false }; const my = pTok;
+    [...chips.children].forEach((b, i) => b.setAttribute("aria-pressed", String(data.scenarios[i].key === pKey)));
+    document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.m === pMode)));
+    const sc = S[pKey];
+    pg.clear();
+    const built = GemGraph.build(pg, sc, "p:", 0, 0, lay);
+    pg.frame(built.ids, 50, 1.1, 0.18, [built.home]);
+    if (!started) { pg.snap(); started = true; }
+    setR("r-jev", pMode === "flat" ? "–" : 0); setR("r-llm", pMode === "flat" ? "–" : 0); setR("r-up", 0); setR("r-st", 0); setR("r-last", "");
+    const tick = () => {
+      let up = 0, st = 0, wr = 0;
+      built.ids.forEach((id) => { const n = pg.nodes.get(id); if (!n) return; if (n.state === "updated") up++; if (n.state === "stale" || n.state === "superseded") st++; if (n.state === "wrong") wr++; });
+      setR("r-up", up); setR("r-st", pMode === "flat" ? `${st} · ${wr} still served as true` : st);
+    };
+    clearInterval(pIv); pIv = setInterval(tick, 150);
+    await GemGraph.play(pg, sc, "p:", built.home, {
+      token: my, mode: pMode,
+      log: (k, x) => { if (!my.cancelled && k !== "write") setR("r-last", x.trim()); },
+      count: pMode === "flat" ? null : ({ jev, llm }) => { setR("r-jev", jev); setR("r-llm", llm); },
+    });
+    if (!my.cancelled) { tick(); clearInterval(pIv); }
+  }
+  new IntersectionObserver((es, o) => { if (es.some((e) => e.isIntersecting)) { o.disconnect(); runPlay(); } }, { threshold: 0.4 }).observe(document.querySelector(".play-stage"));
+})();
+</script>
 </body>
 </html>
