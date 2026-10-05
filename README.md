@@ -84,7 +84,7 @@ from a reproducible experiment (artifacts in [runs/](runs/)):
 - 📊 **+27 points more accurate** than flat/vector memory on derived-fact chains (the chart above).
 - 🪨 **Model-robust** — 83% on the deep-dependency test suite on *both* a 120B *and* an 8B model.
 - 🎯 **97% SubEM** fact-resolution on a real benchmark gate (vs a ~60% reference target).
-- 📦 **Usable library** — `from gem import Memory`, pip-installable, **47 offline tests + CI**.
+- 📦 **Usable library + MCP server** — `from gem import Memory` or `python -m gem.mcp_server`, pip-installable, **95 offline tests + CI**.
 - 🔬 **Positioned honestly against the field** — *measured* head-to-head vs **Mem0**; *architectural*
   comparison vs **Zep** and the academic incumbent (**STALE / CUPMem**). A live GEM-vs-CUPMem run on
   the real STALE benchmark is the **next experiment — not done yet.**
@@ -192,7 +192,7 @@ GEM's prompts expect a capable instruction-following model: the published number
 >
 > ```bash
 > pip install -e ".[dev]"
-> pytest          # 75 tests exercise the full cascade (multi-hop, semantic stop, cycle guard, …)
+> pytest          # 95 tests: the cascade (multi-hop, semantic stop, cycle guard, …), the tools, MCP
 > ```
 
 **See it separate from flat memory** — `python -m gem.quickstart`
@@ -213,14 +213,20 @@ plus what flat memory can't do: every save or forget reports the **derived facts
 explain them.
 
 ```bash
-pip install -e ".[mcp,embeddings,jev]"
+pip install -e ".[mcp,embeddings]"        # add ,jev for the optional decision layer
+cp .env.example .env                      # pick your model (see "Choose your model")
 claude mcp add gem -- python -m gem.mcp_server          # Claude Code
 ```
 
+Other MCP clients (Claude Desktop, Cursor, …), with settings passed directly:
+
 ```json
 {"mcpServers": {"gem": {"command": "python", "args": ["-m", "gem.mcp_server"],
-  "env": {"GEM_LLM": "groq", "GROQ_MODEL": "openai/gpt-oss-120b", "GEM_DECIDER": "jev"}}}}
+  "env": {"GEM_LLM": "groq", "GROQ_MODEL": "openai/gpt-oss-120b", "GROQ_API_KEY": "..."}}}}
 ```
+
+Add `"GEM_DECIDER": "jev"` and `"TYPESAFE_API_KEY"` to that `env` to turn on the decision layer.
+Settings can also live in `~/.gem/.env`, which the server reads wherever the client starts it.
 
 | Tool | What it does |
 |---|---|
@@ -230,6 +236,17 @@ claude mcp add gem -- python -m gem.mcp_server          # Claude Code
 | `get_profile` | short summary of the user/project from still-valid facts, plus facts to `reconfirm` (also the `gem://profile` resource) |
 | `get_stale` | facts to reconfirm because something they depended on changed |
 | `why` | the facts a fact was derived from |
+
+**When a fact goes stale, the agent asks the user.** Facts whose new value can't be worked out are
+flagged instead of guessed: they come back in `invalidated`, in search's `stale` list, from
+`get_stale` and in the profile's `reconfirm`. The agent asks, then either:
+
+- saves the answer, e.g. `add_memory("My commute is now 25 minutes", resolves=["n2"])`. The answer
+  replaces the stale fact, inherits its parents and takes over its dependents, so the next change
+  still reaches it. Without `resolves`, GEM matches the answer to similar stale facts itself. Facts
+  built on it that still need an answer come back as `reconfirm`.
+- or confirms the old value: `add_memory(action="confirm", fact_id="n2")` restores it, along with
+  facts that went stale only because it was in doubt.
 
 Memory persists per space: JSON files under `~/.gem` by default (`GEM_HOME`), or FalkorDB with
 `GEM_STORE=falkor`. Several processes can share a JSON space (e.g. two agents): writes take an OS
