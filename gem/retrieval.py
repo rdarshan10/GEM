@@ -1,18 +1,18 @@
-"""Unit 2 — vector + graph retrieval.
+"""Unit 2: vector + graph retrieval.
 
 Three layers, each earning its place (per the build plan):
-  FaissIndex          — replaces the O(N) numpy cosine scan with a real ANN index, so a
+  FaissIndex:          replaces the O(N) numpy cosine scan with a real ANN index, so a
                         scale claim is even arguable. Inner-product over L2-normalized
                         vectors == cosine.
-  semantic_search     — FAISS top-k, filtered to ACTIVE nodes.
-  graph_proximity_search — the NOVEL part: spreading activation over the typed graph.
+  semantic_search:     FAISS top-k, filtered to ACTIVE nodes.
+  graph_proximity_search: the NOVEL part: spreading activation over the typed graph.
                         A query that matches one memory in a dependency cluster also
                         surfaces the REST of that cluster (commute, schedule, ...) by
                         propagating a discounted share of each semantic seed's score along
                         DERIVED_FROM / ASSOCIATED edges. A flat vector store cannot do this;
                         it's retrieval that exploits the typed graph nobody else has.
 
-The graph-proximity claim is measured, not asserted — see gem/retrieval_ablation.py.
+The graph-proximity claim is measured, not asserted; see gem/retrieval_ablation.py.
 """
 
 from __future__ import annotations
@@ -96,7 +96,7 @@ def graph_proximity_search(store: MemoryStore, index: FaissIndex, query_emb: np.
     score(n) = semantic_sim(q, n) + sum over seeds s of alpha^d * sim(q, s),
     where d is the DERIVED_FROM/ASSOCIATED graph distance from s to n (<= hops). A node that
     is graph-adjacent to strong semantic matches gets surfaced even if its own text is a
-    weak match — which is exactly the dependency-neighborhood a flat store misses.
+    weak match: which is exactly the dependency-neighborhood a flat store misses.
     """
     base = {nid: sc for nid, sc in index.search(query_emb, big_k)}
     activation: dict[str, float] = dict(base)

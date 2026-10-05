@@ -1,6 +1,6 @@
 """In-memory graph store for the MVP.
 
-Nodes are memories; edges are typed. The cascade walks DERIVED_FROM edges only —
+Nodes are memories; edges are typed. The cascade walks DERIVED_FROM edges only;
 ASSOCIATED edges are never followed for invalidation (that's the typed-edge distinction
 doing its job). This is deliberately a thin dict/adjacency implementation behind a small
 interface so KuzuDB can replace it later (Unit 1) without the cascade code changing.
@@ -113,7 +113,7 @@ class MemoryStore:
         return out
 
     def dependents(self, node_id: str) -> list[Node]:
-        """Nodes DERIVED_FROM `node_id` — i.e. those whose validity depends on it.
+        """Nodes DERIVED_FROM `node_id`: i.e. those whose validity depends on it.
         This is the one graph hop the cascade walks."""
         out = []
         for e in self._edges:

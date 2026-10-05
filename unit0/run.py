@@ -1,4 +1,4 @@
-"""Unit 0 baseline runner — the go/no-go gate.
+"""Unit 0 baseline runner: the go/no-go gate.
 
 Runs the full chain (chunk stream -> extract -> resolve -> answer) over real
 single-hop FactConsolidation data and reports SubEM, the metric the benchmark uses.
@@ -118,7 +118,7 @@ def main(argv=None) -> int:
                 shown += 1
 
     # --probe: did extraction actually capture facts about these subjects?
-    # The key diagnostic — extraction problem (fact absent) vs answering problem
+    # The key diagnostic: extraction problem (fact absent) vs answering problem
     # (fact present but the model ignored it).
     if args.probe:
         print("\nstate probe (extraction check):")

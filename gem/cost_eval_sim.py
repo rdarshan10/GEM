@@ -1,14 +1,14 @@
-"""Similarity-gated cost reduction — the accuracy-PRESERVING lever (unlike confirm-destructive
+"""Similarity-gated cost reduction: the accuracy-PRESERVING lever (unlike confirm-destructive
 escalation, which traded 19% accuracy).
 
 Each scenario is embedded in the 20-distractor corpus (the realistic large-memory condition) and
 the trigger's ingest conflict-scan considers a large candidate_k. With the filter OFF the scan
 classifies every candidate (expensive); with the filter ON it skips candidates below the cosine
-threshold — and since real conflicts measured >=0.41 while distractors <=0.32, a 0.35 threshold
+threshold: and since real conflicts measured >=0.41 while distractors <=0.32, a 0.35 threshold
 skips every distractor and keeps every real conflict. So the LLM-call count drops with NO accuracy
 loss. We report conflict-scan calls, skipped count, and native (model-free) accuracy for both.
 
-Run:  python -m gem.cost_eval_sim     (capable model only — no cheap model needed)
+Run:  python -m gem.cost_eval_sim     (capable model only; no cheap model needed)
 """
 
 from __future__ import annotations

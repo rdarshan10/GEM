@@ -2,14 +2,14 @@
 
 Three jobs, deliberately separated so each can be iterated and scored on its own:
 
-  1. EXTRACT   — pull atomic facts about the tracked attribute(s) out of a messy
+  1. EXTRACT:   pull atomic facts about the tracked attribute(s) out of a messy
                  4k-token chunk. This is the silent-failure step: if extraction is
                  unreliable here, DERIVED_FROM edges will be unreliable later.
-  2. RESOLVE   — given the running state for an attribute and a newly extracted
+  2. RESOLVE:   given the running state for an attribute and a newly extracted
                  fact, decide whether the new fact UPDATES / CONTRADICTS / EXTENDS /
                  is UNRELATED, and what the current value becomes. (Single-hop only
-                 in Unit 0 — no graph, just keep-latest-correct.)
-  3. ANSWER    — given the resolved current state, answer the benchmark query with
+                 in Unit 0: no graph, just keep-latest-correct.)
+  3. ANSWER:    given the resolved current state, answer the benchmark query with
                  just the entity (SubEM wants the gold substring present).
 
 Conflicts in this data are stated WITHOUT explicit negation ("Maria now works at

@@ -1,4 +1,4 @@
-"""FalkorDB store parity — runs only if a FalkorDB server is reachable on localhost:6379,
+"""FalkorDB store parity: runs only if a FalkorDB server is reachable on localhost:6379,
 otherwise skipped (so the suite stays green without Docker)."""
 
 import numpy as np

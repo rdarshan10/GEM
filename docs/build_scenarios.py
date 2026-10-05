@@ -1,8 +1,8 @@
 """Record real GEM runs for the site's memory explorer -> docs/data/scenarios.json.
 
 Each example is run twice on the same memory: GEM (cascade on, Jev decider) and flat memory (cascade
-off). For GEM it records every step in cascade order — the conflict scan, each dependent's Jev
-verdict and route, what the LLM decided, and each fact's final state — so the page replays what
+off). For GEM it records every step in cascade order; the conflict scan, each dependent's Jev
+verdict and route, what the LLM decided, and each fact's final state; so the page replays what
 actually happened instead of an illustration.
 
     python docs/build_scenarios.py        (needs TYPESAFE_API_KEY and an LLM; reads .env)

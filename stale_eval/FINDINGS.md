@@ -1,4 +1,4 @@
-# STALE method exploration — findings
+# STALE method exploration: findings
 
 Evaluating GEM against the **STALE** benchmark (arxiv 2605.06527, "Can LLM Agents Know When
 Their Memories Are No Longer Valid?") and its solution **CUPMem**, plus prototyping alternative
@@ -7,7 +7,7 @@ judge rubric (Dim1 state-resolution, Dim2 premise-resistance, Dim3 policy-adapta
 
 ## Context
 - The problem GEM targets (propagated / Type-II invalidation: a change cascades to dependent
-  facts) is **externally validated** — STALE benchmarks it; Memora finds 64% of agent errors are
+  facts) is **externally validated**: STALE benchmarks it; Memora finds 64% of agent errors are
   "outdated memory not forgotten." It is **not** uncontested: STALE + CUPMem already address it.
 - **CUPMem ≠ GEM** (read from their code): CUPMem is *ontology-driven* (fixed buckets→tracks) with
   a 4-stage query pipeline (readout→premise_verifier→basis_recovery→action_grounding). GEM is
@@ -15,21 +15,21 @@ judge rubric (Dim1 state-resolution, Dim2 premise-resistance, Dim3 policy-adapta
   differentiation: schema-free, auditable (`why()`), far simpler. CUPMem hits 68% on STALE.
 
 ## Harness
-- `adapter.py` — runs methods on STALE-format data, scores with STALE's judge. Drop-in for their
+- `adapter.py`: runs methods on STALE-format data, scores with STALE's judge. Drop-in for their
   `run_target_model.py` (same I/O); their judge is reused unchanged.
-- `path1.json` — 5 hand-authored personal implicit-conflict scenarios (cascade-favorable).
-- `methods.py` — `TriggerMemory` (inverted invalidator index + dedup + lifecycle cleanup);
+- `path1.json`: 5 hand-authored personal implicit-conflict scenarios (cascade-favorable).
+- `methods.py`: `TriggerMemory` (inverted invalidator index + dedup + lifecycle cleanup);
   bounded lazy retrieval helper.
-- `depth_test.py` — 6-hop chain; change hits root, query asks about the distant leaf.
+- `depth_test.py`: 6-hop chain; change hits root, query asks about the distant leaf.
 
 ## What is SOLID (high confidence)
-1. **The graph is load-bearing — shallow AND deep.** Bounded pure-retrieval `lazy` (no graph)
+1. **The graph is load-bearing: shallow AND deep.** Bounded pure-retrieval `lazy` (no graph)
    dropped to 67–73% because it misses conflicts not embedding-similar to the query
    ("vegan" ≁ "chicken caesar"). The graph connects them regardless of similarity.
 2. **Dead ends (measured, dropped):**
    - `gemv` (CUPMem-style query verification): did **not** help, slightly hurt (over-hedged → Dim3
      "too vague" fails). Simplicity beat it.
-   - `trigger` (#2, pre-enumerated invalidators + **embedding** match): detection is **broken** —
+   - `trigger` (#2, pre-enumerated invalidators + **embedding** match): detection is **broken**:
      "moved to Mumbai" ↔ "relocates to a different city" cosine = **0.21**. Concrete→abstract
      matching needs reasoning, not embedding distance. #2's "cheap no-LLM detection" premise fails.
    - bounded pure-`lazy`: fails without the graph (see #1).
@@ -53,15 +53,15 @@ judge rubric (Dim1 state-resolution, Dim2 premise-resistance, Dim3 policy-adapta
 
 ## Architecture direction (per evidence, not yet fully proven)
 > Write: extract facts + build cheap explicit `DERIVED_FROM` edges + **eager direct-conflict
-> detection** — but **no eager propagation**. Query: retrieve → **walk the graph** (reconstruct
+> detection**, but **no eager propagation**. Query: retrieve → **walk the graph** (reconstruct
 > the chain leaf→root) → one bounded reasoning call → answer.
 
 Rationale, each from a finding: keep the graph (load-bearing for depth + dissimilar conflicts);
 eager *detection* (bounded-lazy failed without it); lazy *propagation* (the cost-wall fix); reason
 don't embedding-match (0.21 cosine); simple query side (`gemv` lost). The **single open question**
-is whether lazy propagation truly recovers eager on deep chains — to settle on a clean run.
+is whether lazy propagation truly recovers eager on deep chains, to settle on a clean run.
 
 ## Next (when cloud is healthy / on Groq)
 1. Clean depth test ×N: glazy(chain-reconstruction) vs eager vs pure-lazy on the 6-hop.
-2. Path-2 subset (~40–50 real STALE scenarios, Groq-8B for rate limits): GEM vs full-context vs —
-   ideally — CUPMem, judged by STALE's judge. Report the gap to 68% honestly.
+2. Path-2 subset (~40–50 real STALE scenarios, Groq-8B for rate limits): GEM vs full-context vs
+   (ideally) CUPMem, judged by STALE's judge. Report the gap to 68% honestly.

@@ -1,13 +1,13 @@
-"""Quickstart — the 90-second "why would a coding agent want this?" demo.
+"""Quickstart: the 90-second "why would a coding agent want this?" demo.
 
 A dev-assistant agent keeps project memory. It learns a few facts about how auth works,
 and crucially some facts DERIVED from that (how tests fake a login, what CI needs). Then the
 codebase migrates JWT -> session cookies. We show two memories side by side:
 
-  flat  — resolves the direct conflict on the auth fact, but the derived test/CI facts stay
+  flat:  resolves the direct conflict on the auth fact, but the derived test/CI facts stay
           ACTIVE and the agent will happily write test setup mocking a verifier that no longer
           exists. This is the silent-staleness bug.
-  GEM   — the same change cascades down the DERIVED_FROM edges: the test and CI facts go STALE,
+  GEM:   the same change cascades down the DERIVED_FROM edges: the test and CI facts go STALE,
           so a later "how do tests authenticate?" retrieval excludes them and the agent knows
           to reconfirm.
 
@@ -21,7 +21,7 @@ from . import Memory
 
 # NOTE on demo design (honest): the dependents must NOT share surface tokens with the change,
 # or a flat memory catches them by direct similarity and the cascade buys nothing (that is a
-# real effect — see PRODUCTIONIZATION/gap_experiment). Here the change reassigns OWNERSHIP; the
+# real effect: see PRODUCTIONIZATION/gap_experiment). Here the change reassigns OWNERSHIP; the
 # dependents are config/process premised on the old owner and don't textually conflict with the
 # new owner, so flat's direct-conflict check passes them as "unrelated" and serves them stale.
 PROJECT_FACTS = [

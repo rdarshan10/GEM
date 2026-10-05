@@ -1,15 +1,15 @@
 """Diagnostics for two questions the propagation eval can't answer on its own.
 
-1. edges(...)        — ZERO-LLM. Build a scenario's setup graph (no trigger) and print its
+1. edges(...):        ZERO-LLM. Build a scenario's setup graph (no trigger) and print its
                        DERIVED_FROM edges. Proves the edges the cascade walks actually exist,
                        so a negative-case TIE is restraint-with-edges, not restraint-by-empty
                        -graph. Setup ingests use check_conflicts=False + parents=[] -> no LLM.
 
-2. derive_recall(...) — THE RELOCATED TEST. The eval pins edges and bypasses derive_links, so
+2. derive_recall(...): THE RELOCATED TEST. The eval pins edges and bypasses derive_links, so
                        derive_links' recall is otherwise unmeasured. Here we ingest each
                        scenario's facts in order with parents=None (derive_links INFERS the
                        edges), then compare the inferred DERIVED_FROM set against the harness's
-                       ground-truth parents. Reports recall/precision — i.e. does provenance
+                       ground-truth parents. Reports recall/precision: i.e. does provenance
                        inference rebuild the intended dependency structure? (Uses the LLM.)
 
 Run:  python -m gem.diag edges            # zero-LLM edge-presence on the tie categories
@@ -101,7 +101,7 @@ def main(argv=None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     cmd = argv[0] if argv else "edges"
     if cmd == "edges":
-        # the seven tied categories — prove their edges exist
+        # the seven tied categories: prove their edges exist
         edges(["timezone-survives", "language-survives", "tax-within-state",
                "charger-survives", "raise-unknown", "multi-parent", "noop"])
     elif cmd == "derive":

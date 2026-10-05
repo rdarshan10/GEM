@@ -2,10 +2,10 @@
 the LEAF (semantically distant). This is where the methods should DIVERGE cleanly, not within noise.
 
 Prediction (the architecture claim):
-  pure_lazy       FAILS — bounded retrieval around the leaf never surfaces the distant root.
-  glazy_pinned    WORKS — walks DERIVED_FROM edges leaf->root, finds the eager-detected stale root.
+  pure_lazy       FAILS: bounded retrieval around the leaf never surfaces the distant root.
+  glazy_pinned    WORKS: walks DERIVED_FROM edges leaf->root, finds the eager-detected stale root.
   glazy_inferred  WORKS *iff* derive_links built the chain (tests the real-dialogue bottleneck).
-  eager_pinned    WORKS — cascade pre-propagated root->leaf at write.
+  eager_pinned    WORKS: cascade pre-propagated root->leaf at write.
 
 Scored with STALE's judge rubric on probes about the LEAF.
 

@@ -1,8 +1,8 @@
 """Scaled test of property-stamped anchoring vs eager vs anchor-trust.
 
 12 deep-dependency scenarios across domains:
-  6 POSITIVE — the root change DOES invalidate the distant leaf (must INVALIDATE).
-  6 NEGATIVE — the root changes but the leaf's depended-on PROPERTY is preserved (must SURVIVE).
+  6 POSITIVE: the root change DOES invalidate the distant leaf (must INVALIDATE).
+  6 NEGATIVE: the root changes but the leaf's depended-on PROPERTY is preserved (must SURVIVE).
 
 The negatives are the discriminators: anchor_trust (root moved -> stale) should OVER-invalidate
 them; anchor_prop (check only if the depended-on property changed) and eager should respect them.

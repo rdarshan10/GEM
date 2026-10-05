@@ -1,8 +1,8 @@
-"""GEM — Governed Evolving Memory: dependency-aware memory invalidation.
+"""GEM: Governed Evolving Memory: dependency-aware memory invalidation.
 
 The one thing GEM does that flat/vector memory (Mem0, ChatGPT memory, plain RAG) does not:
-when a fact changes, the facts DERIVED from it go stale automatically — down a typed
-DERIVED_FROM chain, multi-hop — while unrelated facts survive. A similarity-only memory
+when a fact changes, the facts DERIVED from it go stale automatically; down a typed
+DERIVED_FROM chain, multi-hop: while unrelated facts survive. A similarity-only memory
 never re-examines a dependent that isn't textually similar to the change, so it serves the
 stale fact confidently. GEM re-examines it via the dependency edge.
 
@@ -17,7 +17,7 @@ Public API (see `gem.memory`):
 
 Honest scope: this earns its cost when memory drives ACTIONS off chains of derived facts
 and reads outnumber writes. For flat atomic facts (preferences, profile fields) it is
-overhead — see PRODUCTIONIZATION.md for the measured win/lose regimes.
+overhead: see PRODUCTIONIZATION.md for the measured win/lose regimes.
 """
 
 from .memory import Memory, Fact, AddResult

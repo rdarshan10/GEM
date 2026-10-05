@@ -1,4 +1,4 @@
-"""SubEM scorer — the metric the gate reproduces. Deterministic."""
+"""SubEM scorer: the metric the gate reproduces. Deterministic."""
 
 from unit0 import scorer
 

@@ -19,7 +19,7 @@ classifiers = [
 
 # Core runtime is deliberately light. The cascade logic needs only numpy + an LLM client
 # (requests). Semantic embeddings (sentence-transformers + faiss) are STRONGLY recommended
-# for correctness but optional at install time — without them GEM falls back to a lexical
+# for correctness but optional at install time; without them GEM falls back to a lexical
 # embedder and warns loudly. See the `embeddings` extra.
 dependencies = [
     "numpy>=1.24",
@@ -48,7 +48,7 @@ Homepage = "https://github.com/rdarshan10/gem"
 [tool.setuptools]
 # Ship ONLY the library. `gem` is self-contained (its LLM client lives in gem/llm.py); the
 # `unit0` package is the evaluation/benchmark harness and is intentionally not part of the
-# installed wheel — it stays in the repo for reproducing the results.
+# installed wheel: it stays in the repo for reproducing the results.
 packages = ["gem"]
 
 [tool.pytest.ini_options]

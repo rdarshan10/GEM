@@ -1,4 +1,4 @@
-"""MemoryStore CRUD + typed-edge queries — fully deterministic, no LLM."""
+"""MemoryStore CRUD + typed-edge queries: fully deterministic, no LLM."""
 
 import numpy as np
 import pytest

@@ -5,9 +5,9 @@ Two scenarios, each a chain where the change hits the ROOT and we judge the dist
   NEG (relocation):   root Bangalore->Chennai (SAME timezone) => leaf (IST standup) MUST survive.
 
 Three deciders on the leaf:
-  eager        — GEM eager cascade (reference; hop-by-hop, handles both).
-  anchor_trust — root content moved -> stale. O(1), no confirm. Catches depth, but OVER-invalidates.
-  anchor_prop  — stamp the PROPERTY the leaf depends on (1 call at write); on change, check only if
+  eager:        GEM eager cascade (reference; hop-by-hop, handles both).
+  anchor_trust: root content moved -> stale. O(1), no confirm. Catches depth, but OVER-invalidates.
+  anchor_prop:  stamp the PROPERTY the leaf depends on (1 call at write); on change, check only if
                  THAT property changed. ~O(1) + 1 property-check. Should get depth AND restraint.
 
 Run:  python stale_eval/anchor_test.py

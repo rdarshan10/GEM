@@ -1,9 +1,9 @@
-"""FalkorDB-backed store — the optional persistence backend.
+"""FalkorDB-backed store: the optional persistence backend.
 
 Implements the same interface as the in-memory MemoryStore (duck-typed), so the cascade
 engine is unchanged: `GEM(store=FalkorStore())`. FalkorDB is a Redis-module graph database
 queried with Cypher; it runs as a server (Docker `falkordb/falkordb` or FalkorDB Cloud),
-so this is an OPTIONAL backend — the in-memory store remains the zero-dependency default.
+so this is an OPTIONAL backend; the in-memory store remains the zero-dependency default.
 
 `pip install falkordb`, then e.g. `docker run -p 6379:6379 falkordb/falkordb`.
 
@@ -178,7 +178,7 @@ class FalkorStore:
         return [self._row_to_node(r) for r in res.result_set]
 
     def dependents(self, node_id: str) -> list[Node]:
-        """Nodes DERIVED_FROM node_id — the one graph hop the cascade walks."""
+        """Nodes DERIVED_FROM node_id: the one graph hop the cascade walks."""
         res = self._g.query(
             "MATCH (dep:Memory)-[:DERIVED_FROM]->(n:Memory {id:$id}) "
             "RETURN dep.id, dep.content, dep.embedding, dep.provenance_type, dep.salience, "

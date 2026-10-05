@@ -1,8 +1,8 @@
-"""Mem0 baseline on the propagation eval — argued -> measured (per BASELINE_PROTOCOL.md).
+"""Mem0 baseline on the propagation eval; argued -> measured (per BASELINE_PROTOCOL.md).
 
 Same judge LLM (gpt-oss:120b) for BOTH systems, each system's own retrieval, identical per-fact
 validity scoring. For each scenario: ingest the facts, ingest the trigger, then for every fact
-ask the shared judge — given THIS system's retrieved memories — whether the fact is still VALID
+ask the shared judge, given THIS system's retrieved memories, whether the fact is still VALID
 or has CHANGED. Score against ground truth (expect_invalid). This isolates the architecture:
 GEM's cascade pre-marks dependents stale; Mem0 (ADD-leaning) keeps them as current memories.
 
@@ -22,7 +22,7 @@ from .scenarios import SCENARIOS, Scenario
 
 JUDGE = OllamaClient(LLMConfig(model="gpt-oss:120b-cloud"))   # shared judge for ALL systems
 
-# GEM uses the SAME semantic embedder family as Mem0 (MiniLM/384d) — fair retrieval on both
+# GEM uses the SAME semantic embedder family as Mem0 (MiniLM/384d): fair retrieval on both
 # sides. (The lexical fallback unfairly handicapped GEM's ingest conflict-detection.)
 from .embed import STEmbedder as _ST
 _GEM_EMB = _ST()
@@ -42,7 +42,7 @@ def _judge(retrieved_block: str, fact: str) -> bool:
 
 
 # --------------------------------------------------------------------------- #
-# GEM system (cascade ON) — pre-marks dependents stale
+# GEM system (cascade ON): pre-marks dependents stale
 # --------------------------------------------------------------------------- #
 def _gem_run(s: Scenario) -> list[bool]:
     g = GEM(llm=JUDGE, embedder=_GEM_EMB, config=GEMConfig(cascade_enabled=True))
@@ -68,7 +68,7 @@ def _gem_run(s: Scenario) -> list[bool]:
 
 
 # --------------------------------------------------------------------------- #
-# Mem0 system — configured per its docs (same LLM + a local embedder)
+# Mem0 system: configured per its docs (same LLM + a local embedder)
 # --------------------------------------------------------------------------- #
 def _mem0_factory():
     from mem0 import Memory
@@ -168,7 +168,7 @@ def run_native(scen) -> None:
     print("dependent stale (no mechanism) -> its native score is the survive-fraction floor.")
 
 
-# S2 distractor corpus — fixed, generic, unrelated to any scenario; set without reference to
+# S2 distractor corpus: fixed, generic, unrelated to any scenario; set without reference to
 # where any trigger lands. Loaded via each system's own bulk path (GEM ingest / Mem0 add infer=False).
 DISTRACTORS = [
     "My favorite color is teal", "I have a younger sister named Maya", "I am allergic to peanuts",

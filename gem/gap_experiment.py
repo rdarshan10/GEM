@@ -1,4 +1,4 @@
-"""Is the gap big enough to matter? — the honest pressure-test of GEM's whole premise.
+"""Is the gap big enough to matter?; the honest pressure-test of GEM's whole premise.
 
 The skeptical question (a fair one): a capable LLM doing flat memory updates already catches
 a lot of staleness, so does GEM's explicit DERIVED_FROM cascade add anything REAL, or is it
@@ -6,7 +6,7 @@ complexity for a problem the model handles for free?
 
 PRE-REGISTERED. Two measurements, and what each outcome would mean BEFORE running:
 
-  PART 1 — retrieval blindness (model-free, unriggable). Flat memory (ChatGPT/Mem0
+  PART 1: retrieval blindness (model-free, unriggable). Flat memory (ChatGPT/Mem0
   style) re-examines facts that SIMILARITY-RETRIEVAL surfaces. The mechanism claim is that a
   stale *dependent* is often semantically DISSIMILAR to the trigger that staled it
   ("I wake at 7am to beat traffic" is not similar to "I moved to Mumbai"), so flat retrieval
@@ -16,9 +16,9 @@ PRE-REGISTERED. Two measurements, and what each outcome would mean BEFORE runnin
     - GEM thesis SUPPORTED if dependent recall@k is well below 1.0 at realistic k (flat is
       structurally blind to dependents).
     - GEM thesis WEAKENED if recall@k is ~1.0 (flat retrieval already surfaces dependents, so
-      the cascade buys little) — and we will report that honestly.
+      the cascade buys little): and we will report that honestly.
 
-  PART 2 — realized outcome (capable LLM, end-to-end). Same deep scenarios, run with a capable
+  PART 2: realized outcome (capable LLM, end-to-end). Same deep scenarios, run with a capable
   model in FLAT mode (GEMConfig.cascade_enabled=False: resolve direct conflicts, never
   propagate) vs GEM mode (cascade on). Node accuracy is the staleness-catch rate the capable
   model actually achieves WITHOUT the dependency graph.
@@ -41,7 +41,7 @@ from .engine import GEMConfig
 
 # A realistic background memory: facts a real user/agent would also be carrying, none of which
 # the scenario triggers touch. Ranking dependents against THIS pool (not just the 2-6 scenario
-# facts) is what makes the recall number honest — top-k against a big store, not a tiny one.
+# facts) is what makes the recall number honest; top-k against a big store, not a tiny one.
 DISTRACTORS = [
     "My favorite programming language is Rust",
     "I prefer window seats on flights",

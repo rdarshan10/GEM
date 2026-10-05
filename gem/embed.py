@@ -1,8 +1,8 @@
 """Similarity layer for dedup + neighbor candidate selection.
 
 Per the MVP: plain numpy cosine, no FAISS. Pluggable backend:
-  - LexicalEmbedder  — zero-dependency hashed bag-of-words; runs immediately.
-  - STEmbedder       — sentence-transformers all-MiniLM-L6-v2 (lazy import); the upgrade
+  - LexicalEmbedder:  zero-dependency hashed bag-of-words; runs immediately.
+  - STEmbedder:       sentence-transformers all-MiniLM-L6-v2 (lazy import); the upgrade
                        the plan calls for, swap in when torch is installed.
 
 Both expose embed(text) -> np.ndarray. `search` ranks store nodes by cosine to a query.
@@ -23,7 +23,7 @@ _TOKEN = re.compile(r"[a-z0-9]+")
 
 class LexicalEmbedder:
     """Hashed bag-of-words -> fixed-dim vector. Cheap, dependency-free, good enough to
-    catch near-duplicate restatements. Not semantic — that's what STEmbedder is for."""
+    catch near-duplicate restatements. Not semantic: that's what STEmbedder is for."""
 
     def __init__(self, dim: int = 512):
         self.dim = dim
@@ -52,7 +52,7 @@ _DEFAULT_EMB = None
 
 
 def default_embedder():
-    """Prefer real semantic embeddings (STEmbedder) — they matter for conflict-detection
+    """Prefer real semantic embeddings (STEmbedder): they matter for conflict-detection
     retrieval (lexical can't connect e.g. 'got a raise' to 'salary', so the ingest conflict
     check misses it). Fall back to the zero-dependency LexicalEmbedder only if
     sentence-transformers isn't installed, so the package still runs out of the box.

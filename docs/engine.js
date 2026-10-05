@@ -1,4 +1,4 @@
-/* GemGraph — a small canvas engine for drawing GEM memory as a living graph.
+/* GemGraph: a small canvas engine for drawing GEM memory as a living graph.
    Nodes breathe around a home position, changes travel as pulses along edges, state flips ripple,
    rewritten labels cross-fade, and Jev decisions appear as dials. Themes decide the look; the
    scenario helpers replay recorded GEM runs (docs/data/scenarios.json) on top of it. */

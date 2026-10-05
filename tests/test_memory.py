@@ -1,4 +1,4 @@
-"""Public facade (gem.Memory) — tested deterministically with the mock LLM + embedder.
+"""Public facade (gem.Memory): tested deterministically with the mock LLM + embedder.
 Covers the 6-line user experience: add pins dependencies, a conflicting add cascades and
 reports what went stale, search excludes stale, the flat mode doesn't propagate."""
 
@@ -21,7 +21,7 @@ def _is_change_desc(user: str) -> bool:
 
 def _jwt_responder(system, user):
     """The migration DIRECTLY conflicts only with the auth fact; the derived test/CI facts
-    are not direct contradictions — they go stale only via the cascade (change-desc path)."""
+    are not direct contradictions: they go stale only via the cascade (change-desc path)."""
     existing = _existing(user).lower()
     if not _is_change_desc(user):
         return classify_json("CONTRADICTS") if existing.startswith("auth uses") \

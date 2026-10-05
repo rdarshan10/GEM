@@ -1,16 +1,16 @@
-"""GEM cascade engine — the MVP heart.
+"""GEM cascade engine: the MVP heart.
 
 Wires the in-memory store, the classify/derive_links primitives, and the embedder into
 the operators that carry the novel contribution:
 
-  ingest    — two LLM passes: (1) conflict check vs neighbors, (2) derive_links provenance
-  revise    — apply a conflict resolution to a node, then propagate
-  propagate — walk DERIVED_FROM dependents, re-check each against the SPECIFIC change,
+  ingest:    two LLM passes: (1) conflict check vs neighbors, (2) derive_links provenance
+  revise:    apply a conflict resolution to a node, then propagate
+  propagate: walk DERIVED_FROM dependents, re-check each against the SPECIFIC change,
               recurse; cycle guard + semantic stop + graceful unknown-value handling
-  retrieve  — similarity lookup over ACTIVE nodes (salience/decay are post-MVP stubs)
+  retrieve:  similarity lookup over ACTIVE nodes (salience/decay are post-MVP stubs)
 
 The cascade walks DERIVED_FROM edges ONLY. ASSOCIATED edges are never followed for
-invalidation — that's the whole point of typing the edges.
+invalidation: that's the whole point of typing the edges.
 """
 
 from __future__ import annotations
@@ -151,14 +151,14 @@ class GEM:
         return E.search(self.store, emb, k=self.cfg.candidate_k)
 
     # ------------------------------------------------------------------------- #
-    # INGEST — two distinct passes
+    # INGEST: two distinct passes
     # ------------------------------------------------------------------------- #
     def ingest(self, fact: str, *, provenance=Provenance.FACT,
                parents: list[str] | None = None, check_conflicts: bool = True,
                resolves: list[str] | None = None) -> Node:
         """Insert a fact. `parents` lets scenarios pin DERIVED_FROM links explicitly;
         if None, the derive_links LLM pass infers them. `check_conflicts=False` skips the
-        conflict-detection pass — used when loading known, conflict-free setup memories so
+        conflict-detection pass: used when loading known, conflict-free setup memories so
         only the trigger drives the cascade (keeps scenario setup fast and deterministic).
         `resolves` names stale facts this one answers (the user gave their current value); if
         omitted, similar stale facts are checked automatically. See resolve()."""
@@ -176,7 +176,7 @@ class GEM:
             self._log(f"dedup: '{fact}' ~= {existing.id} (sim {neighbors[0][1]:.2f}); merged")
             return existing
 
-        # 2. PASS A — conflict check against close neighbors. The decider screens them now; the
+        # 2. PASS A: conflict check against close neighbors. The decider screens them now; the
         # LLM classify for the rest is deferred to step 5 so it's skipped for any neighbor an
         # upstream cascade already revised.
         pending: list[tuple[Node, str]] = []
@@ -202,7 +202,7 @@ class GEM:
                     provenance_type=provenance)
         self.store.add_node(node)
 
-        # 4. PASS B — derive_links (causal dependency), distinct from the conflict pass
+        # 4. PASS B: derive_links (causal dependency), distinct from the conflict pass
         if parents is None:
             parent_ids = self._derive(fact, [n for n, _ in neighbors])
         else:
@@ -228,7 +228,7 @@ class GEM:
         # already revises the descendants, so a separate descendant-action re-enters the
         # subchain and re-revises it with a conflicting result (the deep-chain interference
         # bug). Fix: share ONE visited set across all actions and process ancestors first,
-        # so a descendant already revised by an upstream cascade is skipped here — before its
+        # so a descendant already revised by an upstream cascade is skipped here; before its
         # classify call, so that call is never paid for.
         if pending:
             visited: set = set()
@@ -341,7 +341,7 @@ class GEM:
         return sorted(actions, key=lambda a: ancestor_count(a[0]))
 
     # ------------------------------------------------------------------------- #
-    # REVISE + PROPAGATE — the cascade
+    # REVISE + PROPAGATE: the cascade
     # ------------------------------------------------------------------------- #
     def revise(self, node: Node, label: C.Label, revised_content: str | None, trigger: Node,
                visited: set | None = None):
@@ -409,10 +409,10 @@ class GEM:
             # re-check against THIS specific change (divergent-parents rule):
             # is `dep` actually invalidated by what changed in `node`?
             # The dependent has an explicit DERIVED_FROM edge to `node`, so tell the
-            # classifier that dependency exists — otherwise it judges surface semantics
+            # classifier that dependency exists: otherwise it judges surface semantics
             # and prunes genuine dependents whose rationale isn't in their own text.
             # World knowledge can still yield UNRELATED (e.g. timezone unchanged by a
-            # same-zone move) — that's the correct semantic stop.
+            # same-zone move): that's the correct semantic stop.
             # Two-step property decomposition: small models prune far more reliably when the
             # boundary judgment is constrained to "which property, did it change?" rather than
             # an open-ended "is this affected?".
@@ -456,7 +456,7 @@ class GEM:
                *, certain: bool = True):
         # fail-safe: a destructive supersede becomes recoverable STALE + needs_review when
         # EITHER conservative mode is on OR the decision was uncertain (split vote). An
-        # uncertain decision also never applies a content rewrite — it flags for review
+        # uncertain decision also never applies a content rewrite; it flags for review
         # rather than committing a possibly-wrong value.
         soft = self.cfg.conservative_invalidation or not certain
         destructive = Status.STALE if soft else Status.SUPERSEDED
@@ -483,7 +483,7 @@ class GEM:
     @staticmethod
     def _describe_change(old_content: str, node: Node, label: C.Label) -> str:
         """Natural-language description of what changed, fed into classify for each
-        dependent — so the check is always relative to the SPECIFIC upstream change.
+        dependent: so the check is always relative to the SPECIFIC upstream change.
         Crucially, a PARTIALLY_UPDATES rewrite must still signal that the underlying VALUE
         is now uncertain, or the chain breaks when the rewritten text reads as benign."""
         if node.status == Status.SUPERSEDED:
@@ -497,7 +497,7 @@ class GEM:
         return f"The fact '{old_content}' has changed and is now: '{node.content}'."
 
     # ------------------------------------------------------------------------- #
-    # RETRIEVE — similarity over ACTIVE nodes (salience/decay are post-MVP)
+    # RETRIEVE: similarity over ACTIVE nodes (salience/decay are post-MVP)
     # ------------------------------------------------------------------------- #
     def retrieve(self, query: str, k: int = 5) -> list[Node]:
         emb = self.embedder.embed(query)

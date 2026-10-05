@@ -9,10 +9,10 @@ cluster's DEPENDENT neighborhood each method surfaces in top-k:
 Metric: recall of the dependent members @k.
 
 HONEST FRAMING (the caveat the design must carry): "relevant" here = "facts that depend on the
-queried fact" — the context-expansion use case (when you ask about X, surface what's downstream
+queried fact": the context-expansion use case (when you ask about X, surface what's downstream
 of X). That is exactly what a flat vector store cannot do and what the typed graph enables. It
 is NOT a claim about precise single-fact lookup, where semantic search is already fine. So this
-shows a capability flat stores lack, measured — not a universal "better retrieval" claim.
+shows a capability flat stores lack, measured; not a universal "better retrieval" claim.
 
 Run:  python -m gem.retrieval_ablation
 """
@@ -72,7 +72,7 @@ def main() -> int:
     K = 4   # tight budget vs a memory of ~20 nodes, so retrieval is actually selective
 
     # ONE shared memory: every cluster's nodes are distractors for every other query. This is
-    # the realistic setting — the dependents must compete against the whole store for a top-k
+    # the realistic setting: the dependents must compete against the whole store for a top-k
     # slot, and being semantically dissimilar to the query they lose that competition unless
     # the graph surfaces them.
     g = GEM(embedder=emb)

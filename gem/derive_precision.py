@@ -1,4 +1,4 @@
-"""Lever #1 — derive_links PRECISION via a confirmation pass.
+"""Lever #1: derive_links PRECISION via a confirmation pass.
 
 derive_links infers edges at ~88% recall / ~84% precision (runs/diag_derive_diverse.txt): ~1 in 6
 inferred edges is spurious -> over-cascade (staling facts that were fine). The confirmation pass

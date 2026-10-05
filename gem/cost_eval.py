@@ -3,7 +3,7 @@
 The cascade's expense is capable-model (gpt-oss:120b) calls: the ingest conflict-scan classifies
 the trigger against ~k neighbors (most return UNRELATED) plus one call per cascade hop. Escalation
 runs a CHEAP model (llama-3.1-8b on Groq) for that first pass and only confirms the DESTRUCTIVE
-decisions on the capable model — so the expensive calls drop to the destructive minority. Caching
+decisions on the capable model: so the expensive calls drop to the destructive minority. Caching
 memoizes repeated (existing, new) decisions.
 
 We report capable-model calls (the cost metric) AND native accuracy (model-free node-status read)

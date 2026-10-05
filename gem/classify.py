@@ -1,4 +1,4 @@
-"""The classify primitive and the derive_links pass — the two LLM calls the cascade rests on.
+"""The classify primitive and the derive_links pass; the two LLM calls the cascade rests on.
 
 classify(existing, new) -> (Label, revised_content|None)
 derive_links(new, candidates) -> [candidate_id, ...]
@@ -24,7 +24,7 @@ from .store import Node
 #   derive_links -> a degraded [] means a DERIVED_FROM edge silently never forms, corrupting
 #                   GRAPH CONSTRUCTION at ingest; the scenario then fails looking like a logic
 #                   bug, not a rate-limit artifact.
-# Any nonzero total means the run is invalid and must be discarded — not excused.
+# Any nonzero total means the run is invalid and must be discarded; not excused.
 # "jev" counts decider failures that fell back to the LLM path: those cost money, not correctness,
 # so they are reported but deliberately left out of degraded_total().
 DEGRADED = {"classify": 0, "derive_links": 0, "jev": 0}
@@ -43,7 +43,7 @@ def _robust_json(llm: OllamaClient, system: str, user: str,
                  *, retries: int = 2, backoff: float = 1.5) -> dict | None:
     """Wrap chat_json with retry + graceful degradation. Local/cloud models throw
     malformed JSON and transient HTTP errors in normal use; the cascade must survive a
-    single bad call rather than crash a long run. Returns None when all attempts fail —
+    single bad call rather than crash a long run. Returns None when all attempts fail;
     callers degrade to a safe default (UNRELATED / no links) so propagation stops cleanly
     instead of exploding."""
     last = None
@@ -109,12 +109,12 @@ def classify_consistent(llm: OllamaClient, existing_content: str, new_fact: str,
     """Self-consistency voting for small/noisy models. Majority-votes the label over
     `samples` samples (a prior `seed` decision counts as the first vote, so escalation
     callers don't waste their first pass). Returns (label, revised, certain); `certain` is
-    False when the model can't agree with itself (top label below `certainty`) — the caller
+    False when the model can't agree with itself (top label below `certainty`): the caller
     routes uncertain decisions to the fail-safe (STALE + needs_review).
 
     Two jobs, with different strength: it STABILISES noisy calls (only when the model is
-    right >50% per sample — an unconfirmed precondition on any given model), and it DETECTS
-    uncertainty via disagreement (nearly unconditional — only needs the model to be
+    right >50% per sample: an unconfirmed precondition on any given model), and it DETECTS
+    uncertainty via disagreement (nearly unconditional: only needs the model to be
     inconsistent when unsure). The detector is the part that stands on its own."""
     from collections import Counter
     sys_p = prompts.CLASSIFY_SYSTEM

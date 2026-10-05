@@ -1,9 +1,9 @@
-"""SubEM scorer — the metric MemoryAgentBench uses for Conflict_Resolution.
+"""SubEM scorer: the metric MemoryAgentBench uses for Conflict_Resolution.
 
 SubEM ("substring exact match"): the prediction is correct if the normalized gold
 answer appears as a substring of the normalized prediction. This is more forgiving
 than strict EM (the model may wrap the entity in a sentence) but still requires the
-exact gold entity to be present — which is the point of a conflict benchmark: did
+exact gold entity to be present; which is the point of a conflict benchmark: did
 you land on the *current correct value*, not an outdated one.
 
 Normalization mirrors the SQuAD-style cleanup: lowercase, strip punctuation, drop
@@ -45,7 +45,7 @@ def score(predictions: list[str], golds) -> dict:
     """Aggregate SubEM over aligned prediction/gold lists. Returns accuracy + counts.
 
     Each gold may be a single string or a list of acceptable strings (any match
-    counts) — FactConsolidation answers are lists like ["Belgium"].
+    counts): FactConsolidation answers are lists like ["Belgium"].
     """
     assert len(predictions) == len(golds), "predictions/golds length mismatch"
     hits = []

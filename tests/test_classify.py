@@ -1,4 +1,4 @@
-"""classify primitive, derive_links, voting, and the degraded-call integrity counter —
+"""classify primitive, derive_links, voting, and the degraded-call integrity counter;
 driven by the mock LLM."""
 
 import pytest

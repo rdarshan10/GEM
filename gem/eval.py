@@ -1,8 +1,8 @@
-"""Unit 5.5 — the propagation eval (the headline's proof).
+"""Unit 5.5: the propagation eval (the headline's proof).
 
 No public benchmark tests dependency-aware invalidation, so this is a purpose-built,
 TRANSPARENTLY GENERATED eval. The whole defense of a self-built eval is that a skeptical
-reader can see it wasn't hand-tuned to flatter the system — so scenarios come from
+reader can see it wasn't hand-tuned to flatter the system; so scenarios come from
 documented TEMPLATES across multiple domains, ground truth is derived from each template's
 structure (not eyeballed per-instance), and the same set runs against both GEM and a flat
 baseline.
@@ -16,7 +16,7 @@ Generation method (fully here, by design):
   trigger), divergent parents (survive when the changed parent doesn't matter), unknown-value
   updates, and EXTENDS non-propagation.
 
-Baseline: GEM with cascade_enabled=False — it resolves the DIRECT conflict (keep-latest) but
+Baseline: GEM with cascade_enabled=False: it resolves the DIRECT conflict (keep-latest) but
 never walks DERIVED_FROM. That isolates exactly what the cascade adds: a flat memory leaves
 every downstream dependent stale-but-unmarked.
 
@@ -39,7 +39,7 @@ from . import classify as C
 
 
 # --------------------------------------------------------------------------- #
-# Template generators — each returns concrete Scenarios with structural ground truth
+# Template generators: each returns concrete Scenarios with structural ground truth
 # --------------------------------------------------------------------------- #
 
 CITIES_SAME_ZONE = [   # (from_city, to_city) pairs in the SAME timezone/country
@@ -275,13 +275,13 @@ def t_subscription() -> list[Scenario]:
 
 
 # --------------------------------------------------------------------------- #
-# EXTREMES — real memory is messy: deep chains, wide fan-out, subtle near-misses,
+# EXTREMES: real memory is messy: deep chains, wide fan-out, subtle near-misses,
 # multi-parent facts. These stress the cascade where it's most likely to break; some
 # are genuinely hard and a perfect score is NOT expected (that's the point).
 # --------------------------------------------------------------------------- #
 
 def t_deep_chain() -> list[Scenario]:
-    """6-hop chain — far past the typical demo depth. Every link must invalidate."""
+    """6-hop chain: far past the typical demo depth. Every link must invalidate."""
     out = []
     for frm, to in RELOCATE[:6]:
         out.append(Scenario(
@@ -304,7 +304,7 @@ def t_deep_chain() -> list[Scenario]:
 
 
 def t_wide_fanout() -> list[Scenario]:
-    """One city with 5 direct dependents — some invalidate, some SURVIVE. Tests
+    """One city with 5 direct dependents; some invalidate, some SURVIVE. Tests
     selective fan-out (the whole point of typed edges + semantic stop)."""
     out = []
     for frm, to in CITIES_SAME_ZONE[:5]:
@@ -364,7 +364,7 @@ def t_tax_boundary() -> list[Scenario]:
 
 def t_multi_parent() -> list[Scenario]:
     """A fact derived from THREE parents. Change one parent that matters (recipe depends
-    on the oven) vs one that doesn't (the wall color) — separate scenarios, opposite truth."""
+    on the oven) vs one that doesn't (the wall color): separate scenarios, opposite truth."""
     out = []
     out.append(Scenario(
         name="multi-parent-matters",
@@ -398,7 +398,7 @@ def t_multi_parent() -> list[Scenario]:
 
 
 # --------------------------------------------------------------------------- #
-# CHAOS / adversarial reality — input that does NOT conform to the system's clean
+# CHAOS / adversarial reality: input that does NOT conform to the system's clean
 # assumptions: no-op observations, messy colloquial phrasing, irrelevant noise mixed in,
 # oblique triggers that imply a change without stating it, off-domain chains, and triggers
 # that change two roots at once. The system is EXPECTED to lose points here; reporting that
@@ -407,7 +407,7 @@ def t_multi_parent() -> list[Scenario]:
 
 def t_noop_observations() -> list[Scenario]:
     """The most common real case: an observation that changes nothing. Everything must
-    SURVIVE. Tests the false-positive rate — a cascade that over-fires fails here."""
+    SURVIVE. Tests the false-positive rate: a cascade that over-fires fails here."""
     out = []
     setups = [
         (["I live in Denver", "My commute is 25 minutes", "I wake at 7am"],
@@ -433,7 +433,7 @@ def t_noop_observations() -> list[Scenario]:
 
 
 def t_messy_phrasing() -> list[Scenario]:
-    """Same logical relocation cascade, but stated the way people actually talk —
+    """Same logical relocation cascade, but stated the way people actually talk;
     colloquial, run-on, emotional. Ground truth identical to the clean version."""
     rows = [
         ("Berlin", "ok so we FINALLY got the keys, officially Munich people now, "
@@ -529,7 +529,7 @@ def t_offbeat_domains() -> list[Scenario]:
 
 
 def t_multiple_changes() -> list[Scenario]:
-    """One trigger that changes TWO independent roots at once — both their chains must move,
+    """One trigger that changes TWO independent roots at once; both their chains must move,
     unrelated facts must not."""
     return [
         Scenario(
@@ -570,7 +570,7 @@ def generate() -> list[Scenario]:
 
 
 def generate_stratified(per_template: int) -> list[Scenario]:
-    """Take the first `per_template` scenarios from EACH template — a representative slice
+    """Take the first `per_template` scenarios from EACH template; a representative slice
     spanning all 19 templates/categories that completes inside the cloud rate-limit window,
     so a determinism run isn't silently degraded by quota throttling on a multi-hour job."""
     out = []

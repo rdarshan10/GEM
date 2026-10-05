@@ -1,4 +1,4 @@
-"""Reality check — deep, radically-diverse scenarios across domains the relocation-heavy eval
+"""Reality check: deep, radically-diverse scenarios across domains the relocation-heavy eval
 never touched, with complex structures (multi-parent DAGs, deep chains, subtle partials, and
 cross-domain hard negatives). Many require real DOMAIN KNOWLEDGE and subtle reasoning.
 
@@ -6,13 +6,13 @@ WHY THIS EXISTS: a narrow, location-only eval reported 100% and could not have s
 real ENGINE bug. This eval did. The 6-hop "project launch slip" chain originally failed
 (5/6): when one trigger directly conflicts with SEVERAL nodes in the same DERIVED_FROM chain,
 the ingest fired an independent cascade per conflict, and a descendant-conflict re-revised a
-subchain the root's cascade had already corrected — leaving an intermediate node (the press
+subchain the root's cascade had already corrected; leaving an intermediate node (the press
 embargo) wrongly ACTIVE. That is a mechanism defect, not a model/domain gap, and only a deep
 chain where every node is relative to the same root exposes it. The fix (engine.py ingest
 step 5: share one visited frontier across conflict-actions, process ancestors first) is
 guarded by tests/test_engine.py::test_multi_direct_conflict_on_chain_revises_each_node_once.
 
-Result after the fix (gpt-oss:120b-cloud): 12/12 scenarios, 37/37 nodes (100%) — medical,
+Result after the fix (gpt-oss:120b-cloud): 12/12 scenarios, 37/37 nodes (100%): medical,
 legal, finance, multi-parent DAG, belief revision, deep chains, and cross-domain hard
 negatives. The takeaway is NOT "it's always perfect"; it's that diverse/deep structure is
 what finds the real failures, and this one is now closed.
@@ -25,7 +25,7 @@ from __future__ import annotations
 from .scenarios import Scenario, run_scenario
 
 DIVERSE = [
-    Scenario(  # MEDICAL — needs to know DOACs don't need INR monitoring
+    Scenario(  # MEDICAL: needs to know DOACs don't need INR monitoring
         name="medical: warfarin -> DOAC",
         category="medical",
         facts=["The patient is anticoagulated with warfarin",
@@ -36,7 +36,7 @@ DIVERSE = [
         expect_invalid=[True, True, True],
         note="apixaban is a DOAC — INR target and INR draws become irrelevant",
     ),
-    Scenario(  # LEGAL — chain
+    Scenario(  # LEGAL: chain
         name="legal: governing law change",
         category="legal",
         facts=["The contract is governed by New York law",
@@ -46,7 +46,7 @@ DIVERSE = [
         trigger="The contract was amended to be governed by Delaware law",
         expect_invalid=[True, True, True],
     ),
-    Scenario(  # LEGAL — cross-domain hard negative
+    Scenario(  # LEGAL: cross-domain hard negative
         name="legal: sales office is unrelated",
         category="legal / hard-negative",
         facts=["The contract is governed by New York law",
@@ -55,7 +55,7 @@ DIVERSE = [
         trigger="We opened a satellite sales office in Texas",
         expect_invalid=[False, False],
     ),
-    Scenario(  # INFRA — chain
+    Scenario(  # INFRA: chain
         name="infra: datastore migration",
         category="software",
         facts=["Our primary datastore is PostgreSQL",
@@ -65,7 +65,7 @@ DIVERSE = [
         trigger="We migrated the primary datastore to DynamoDB",
         expect_invalid=[True, True, True],
     ),
-    Scenario(  # FINANCE — chain
+    Scenario(  # FINANCE: chain
         name="finance: sold the position",
         category="finance",
         facts=["I hold 100 shares of AAPL",
@@ -75,7 +75,7 @@ DIVERSE = [
         trigger="I sold all of my AAPL shares",
         expect_invalid=[True, True, True],
     ),
-    Scenario(  # ORG — star fan-out
+    Scenario(  # ORG: star fan-out
         name="org: manager reorg",
         category="org",
         facts=["Alice is my manager",
@@ -86,7 +86,7 @@ DIVERSE = [
         trigger="After the reorg, Bob is now my manager",
         expect_invalid=[True, True, True, True],
     ),
-    Scenario(  # DIET — subtle, needs to see fish is now allowed
+    Scenario(  # DIET: subtle, needs to see fish is now allowed
         name="diet: vegetarian -> pescatarian",
         category="lifestyle",
         facts=["I am vegetarian",
@@ -96,7 +96,7 @@ DIVERSE = [
         expect_invalid=[True, True],
         note="the 'no fish' instruction is now wrong",
     ),
-    Scenario(  # CLOUD — multi-parent DAG (cost depends on region+type, NOT the AMI)
+    Scenario(  # CLOUD: multi-parent DAG (cost depends on region+type, NOT the AMI)
         name="cloud: instance-type change (DAG)",
         category="cloud / divergent-parents",
         facts=["My EC2 instances run in us-east-1",
@@ -108,7 +108,7 @@ DIVERSE = [
         expect_invalid=[False, True, False, True],
         note="cost depends on region+type; type changed -> cost stale; region/AMI survive",
     ),
-    Scenario(  # PROJECT — deep 6-hop chain
+    Scenario(  # PROJECT: deep 6-hop chain
         name="project: launch slip (6-hop)",
         category="project / deep-chain",
         facts=["The product launch date is October 1",
@@ -121,7 +121,7 @@ DIVERSE = [
         trigger="The launch date slipped to December 1",
         expect_invalid=[True, True, True, True, True, True],
     ),
-    Scenario(  # BELIEF revision — chain
+    Scenario(  # BELIEF revision: chain
         name="belief: benchmark overturns choice",
         category="reasoning",
         facts=["We believe approach A is the fastest option",
@@ -131,7 +131,7 @@ DIVERSE = [
         trigger="New benchmarks show approach B is three times faster than approach A",
         expect_invalid=[True, True, True],
     ),
-    Scenario(  # SECURITY — cross-domain hard negative
+    Scenario(  # SECURITY: cross-domain hard negative
         name="security: unrelated email switch",
         category="security / hard-negative",
         facts=["My password manager is 1Password",
@@ -140,7 +140,7 @@ DIVERSE = [
         trigger="I switched my personal email provider to Fastmail",
         expect_invalid=[False, False],
     ),
-    Scenario(  # API — conditional/opportunity
+    Scenario(  # API: conditional/opportunity
         name="api: tier upgrade frees a throttle",
         category="software",
         facts=["Our API plan is the free tier, limited to 100 requests per minute",

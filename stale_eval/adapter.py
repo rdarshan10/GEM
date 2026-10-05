@@ -4,15 +4,15 @@ This is the Path-1 validation: our scenarios in STALE's schema, scored by STALE'
 (verbatim rubric from icedreamc/STALE judge_prompts.py). It compares, on the SAME items and
 SAME judge, two answerers:
 
-  full      — STALE's baseline: dump the whole haystack into the model, then answer.
-  gem       — ingest the haystack into GEM Memory (the cascade fires on the implicit conflict
+  full:      STALE's baseline: dump the whole haystack into the model, then answer.
+  gem:       ingest the haystack into GEM Memory (the cascade fires on the implicit conflict
               turn), then answer each probe from memory (stale facts flagged/withheld).
 
 Three probing dimensions (STALE): dim1 state-resolution, dim2 premise-resistance, dim3 implicit
 policy adaptation. Judge returns boolean pass per dim.
 
 HONEST scope: Path 1 uses our scenarios (not STALE's official 400), and ingests user turns as
-facts via GEM's ZERO-CONFIG path (derive_links infers edges) — so it tests the real end-to-end
+facts via GEM's ZERO-CONFIG path (derive_links infers edges): so it tests the real end-to-end
 pipeline, including the extraction/edge-inference bottleneck, not an idealised pinned-edge cascade.
 
 Run:  python stale_eval/adapter.py --data stale_eval/path1.json --methods gem full
@@ -153,8 +153,8 @@ def gemv_answer(mem, query, llm):
 
 
 # --- lazy (#3): NO eager cascade. Store facts in order; invalidate only the query's candidates
-# at query time, against the later timeline. Cost ~O(queries) not O(haystack) — fixes the scale
-# wall — and the check is query-specific, so often more accurate.
+# at query time, against the later timeline. Cost ~O(queries) not O(haystack): fixes the scale
+# wall: and the check is query-specific, so often more accurate.
 LAZY_INVALIDATE_SYSTEM = (
     "You are a memory validator. Given CANDIDATE facts relevant to a query and a bounded set of the "
     "user's RELATED observations, decide which candidates are STILL VALID and which were INVALIDATED "
@@ -185,7 +185,7 @@ def _retrieve(facts, emb, query, k=5):
 
 def lazy_answer(facts, emb, query, llm):
     # bounded readout: candidate facts + only their most-relevant related observations (scales to
-    # huge haystacks — ~O(1) in timeline length), instead of sending the whole timeline.
+    # huge haystacks: ~O(1) in timeline length), instead of sending the whole timeline.
     from methods import lazy_candidates_and_context
     cands, ctx = lazy_candidates_and_context(facts, emb, query)
     verdict = llm.chat_json(
@@ -215,7 +215,7 @@ def precond_answer(facts, preconds, emb, query, llm):
 
 
 # --- trigger (#2): pre-enumerate invalidators at write ("what future event makes this false?").
-# Detection is then a CHEAP embedding match of later observations against the trigger index — NO
+# Detection is then a CHEAP embedding match of later observations against the trigger index; NO
 # per-query LLM reasoning for detection (only the final grounded answer). Front-loads world
 # knowledge to write-time; tests whether match-not-reason is enough.
 TRIGGER_GEN_SYSTEM = (
@@ -258,7 +258,7 @@ def trigger_answer(facts, trig, emb, query, llm, thr=0.45):
 
 # --- glazy (graph-guided lazy): EAGER direct-conflict detection (marks directly-contradicted
 # facts stale at write) + LAZY propagation (walk DERIVED_FROM edges at query to reach a stale
-# ancestor, then ONE bounded reasoning call to confirm — preserving semantic-stop). Recovers the
+# ancestor, then ONE bounded reasoning call to confirm; preserving semantic-stop). Recovers the
 # eager cascade's accuracy (same detection + edges) at lazy's cost (propagate only what's queried).
 PROPAGATE_CHECK_SYSTEM = (
     "You are given a QUERIED memory and the DEPENDENCY CHAIN it rests on, from the queried fact up "

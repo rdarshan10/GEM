@@ -3,8 +3,8 @@
 The plan is emphatic that these are not the same operation, and conflating them is the
 original GEM paper's gap:
 
-  classify      — does the new fact CONFLICT with an existing one? (validity interaction)
-  derive_links  — does the new fact causally DEPEND on existing ones? (provenance)
+  classify:      does the new fact CONFLICT with an existing one? (validity interaction)
+  derive_links:  does the new fact causally DEPEND on existing ones? (provenance)
 
 A memory can depend on another without conflicting, and conflict without depending.
 Keep them apart.
@@ -13,7 +13,7 @@ Keep them apart.
 from __future__ import annotations
 
 # --------------------------------------------------------------------------- #
-# classify — the conflict primitive everything calls
+# classify: the conflict primitive everything calls
 # --------------------------------------------------------------------------- #
 
 CLASSIFY_SYSTEM = """You compare an EXISTING memory against a NEW statement and decide how
@@ -79,7 +79,7 @@ Classify the new statement's DIRECT effect on the existing memory."""
 
 
 # --------------------------------------------------------------------------- #
-# derive_links — the causal-dependency (provenance) pass
+# derive_links: the causal-dependency (provenance) pass
 # --------------------------------------------------------------------------- #
 
 DERIVE_SYSTEM = """A NEW memory has just been created. For EACH candidate existing memory,
@@ -131,7 +131,7 @@ Does A genuinely depend on B — would a change to B force A to be re-checked?""
 
 
 # --------------------------------------------------------------------------- #
-# profile — a short summary of what memory currently holds (get_profile)
+# profile: a short summary of what memory currently holds (get_profile)
 # --------------------------------------------------------------------------- #
 
 PROFILE_SYSTEM = """You write a short profile from a list of stored memory facts, for an AI assistant

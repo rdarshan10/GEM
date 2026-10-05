@@ -1,4 +1,4 @@
-"""GEM as agent tools — the same shape as Supermemory's (add_memory with save/forget, search_memory,
+"""GEM as agent tools: the same shape as Supermemory's (add_memory with save/forget, search_memory,
 list_memories, scoped by container_tag), plus the part only GEM has: every write reports which
 derived facts it invalidated, and get_stale / why expose them.
 
@@ -8,8 +8,8 @@ Use it three ways:
                            then result = tools.call(block.name, block.input)
   - OpenAI-style loop:     openai_tools() gives the same definitions in function-calling format
 
-Storage (env GEM_STORE): "json" (default) — one file per container under GEM_HOME (~/.gem);
-"falkor" — FalkorDB graph gem_<tag> at GEM_FALKOR_HOST:GEM_FALKOR_PORT; "memory" — not persisted.
+Storage (env GEM_STORE): "json" (default) keeps one file per container under GEM_HOME (~/.gem);
+"falkor" uses the FalkorDB graph gem_<tag> at GEM_FALKOR_HOST:GEM_FALKOR_PORT; "memory" is not persisted.
 """
 
 from __future__ import annotations

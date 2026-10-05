@@ -1,4 +1,4 @@
-"""GEM MCP server — dependency-aware memory as tools for Claude Code, Claude Desktop, Cursor, etc.
+"""GEM MCP server: dependency-aware memory as tools for Claude Code, Claude Desktop, Cursor, etc.
 
 Same tool surface as Supermemory's MCP (add_memory save/forget, search_memory, list_memories,
 container_tag spaces), plus get_stale and why. Runs locally over stdio; memory persists per the

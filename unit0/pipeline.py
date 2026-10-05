@@ -5,7 +5,7 @@
 
 This is deliberately the *thinnest* thing that exercises the hard part: pulling the
 right fact out of messy chunk text and keeping the current value as later chunks
-silently override earlier ones. No graph, no embeddings, no propagation — Unit 0 is
+silently override earlier ones. No graph, no embeddings, no propagation; Unit 0 is
 single-hop only, on purpose.
 
 State is a flat dict keyed by (entity, attribute) -> current value. That is the
@@ -27,7 +27,7 @@ from . import scorer
 
 
 def _log(msg: str) -> None:
-    """Flushed progress line — so a slow CPU run never looks frozen."""
+    """Flushed progress line: so a slow CPU run never looks frozen."""
     print(msg, flush=True)
     sys.stdout.flush()
 

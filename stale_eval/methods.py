@@ -1,4 +1,4 @@
-"""Optimised, robust, scalable versions of the two promising STALE methods — and the trigger
+"""Optimised, robust, scalable versions of the two promising STALE methods; and the trigger
 index LIFECYCLE (dedup + cleanup) that answers the question "won't the trigger index just grow?".
 
 trigger (#2) -> TriggerMemory: an INVERTED invalidator index
@@ -9,12 +9,12 @@ trigger (#2) -> TriggerMemory: an INVERTED invalidator index
     set, and any trigger whose set becomes empty is dropped. So the index stays ~proportional to
     ACTIVE facts (not facts x triggers), and a dead fact's triggers can never phantom-fire.
   - DETECTION: a new observation is embedding-matched against the index; a fired trigger
-    invalidates its WHOLE fact set at once — no per-pair LLM reasoning at detection time.
+    invalidates its WHOLE fact set at once; no per-pair LLM reasoning at detection time.
 
 lazy (#3) -> bounded query-time check: retrieve the candidate plus only its top-k most-relevant
     LATER observations (not the whole timeline) -> ~O(1) per query regardless of haystack size.
 
-Run the lifecycle demo (no cloud — embeddings are local, triggers injected):
+Run the lifecycle demo (no cloud; embeddings are local, triggers injected):
     python stale_eval/methods.py
 """
 
@@ -113,7 +113,7 @@ class TriggerMemory:
 
 def lazy_candidates_and_context(facts_in_order, embedder, query, k_cand=3, k_ctx=4):
     """Bounded lazy readout: the query's candidate facts + only the most-relevant OTHER facts
-    (the likely conflicting observations) — NOT the whole timeline. ~O(1) in haystack size."""
+    (the likely conflicting observations): NOT the whole timeline. ~O(1) in haystack size."""
     qv = embedder.embed(query)
     fvecs = [(f, embedder.embed(f)) for f in facts_in_order]
     ranked = sorted(fvecs, key=lambda fv: cosine(qv, fv[1]), reverse=True)

@@ -1,23 +1,23 @@
-"""Cheap typed decisions (Jev) in front of the LLM — the LLM is called only where it's needed.
+"""Cheap typed decisions (Jev) in front of the LLM; the LLM is called only where it's needed.
 
 The engine makes three kinds of judgment: the ingest conflict scan, derive_links, and the per-dependent
 check in the cascade. A Decider answers them in batches with probabilities instead of free text, and
 TieredJudge turns those probabilities into an action:
 
-  conflict scan  — confidently no conflict          -> skip (no LLM)
+  conflict scan:  confidently no conflict          -> skip (no LLM)
                    new fact fully covers the memory  -> rewrite it to the new fact (no LLM)
                    anything else                     -> today's LLM classify
-  derive_links   — confidently depends               -> DERIVED_FROM edge (no LLM)
+  derive_links:   confidently depends               -> DERIVED_FROM edge (no LLM)
                    in between                        -> LLM derive_links on those candidates only
                    confidently independent           -> no edge
-  cascade        — confidently unaffected            -> semantic stop (no LLM)
+  cascade:        confidently unaffected            -> semantic stop (no LLM)
                    affected, new value unknown       -> STALE + needs_review (no LLM)
                    affected, new value follows       -> LLM classify (it writes the rewrite)
                    unsure                            -> LLM classify
 
 Safety: stopping needs high confidence (jev_stop), so a mistake leaves a fact flagged for review rather
 than missed; Jev never supersedes a dependent on its own; and if Jev fails the engine falls back to the
-LLM path and counts it in DEGRADED["jev"] — the cascade never silently stops.
+LLM path and counts it in DEGRADED["jev"]; the cascade never silently stops.
 """
 
 from __future__ import annotations
@@ -125,7 +125,7 @@ def _chunks(items: Sequence[str], n: int):
 class JevDecider:
     """Batched typed questions to Jev via typesafe-sdk (`pip install gem-memory[jev]`).
 
-    One request per chunk of at most `batch` items — Jev gets worse with long context. Raises on
+    One request per chunk of at most `batch` items; Jev gets worse with long context. Raises on
     transport/API errors; the engine catches them and falls back to the LLM path."""
 
     def __init__(self, client=None, *, model: str | None = None, batch: int = 8):

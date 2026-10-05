@@ -8,7 +8,7 @@ numpy>=1.24
 # Conflict detection relies on semantic similarity. The lexical fallback matches only on shared
 # surface tokens, so a superseding fact with non-overlapping vocabulary may go undetected and a
 # stale fact be retained, with no error. Strongly recommended; GEM warns when it is absent.
-sentence-transformers>=2.2     # STEmbedder (all-MiniLM-L6-v2, 384-dim) — the default when present
+sentence-transformers>=2.2     # STEmbedder (all-MiniLM-L6-v2, 384-dim): the default when present
 faiss-cpu>=1.7                 # ANN index replacing the O(N) numpy scan + graph-proximity
 
 # --- optional backends ---

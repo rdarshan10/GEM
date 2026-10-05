@@ -1,4 +1,4 @@
-"""Public library API — the 6-line experience.
+"""Public library API: the 6-line experience.
 
 GEM's engine is powerful but low-level (two-pass ingest, typed edges, cascade internals).
 This module is the thin, stable facade a user actually imports. The whole pitch fits in one
@@ -17,7 +17,7 @@ screen:
     m.search("how do tests handle auth?")   # returns only ACTIVE facts (stale ones excluded)
 
 The one thing this buys over a flat vector memory: when `auth` changes, the facts DERIVED
-from it go stale automatically — even though "Tests mock the JWT verifier" is not textually
+from it go stale automatically: even though "Tests mock the JWT verifier" is not textually
 similar to "we migrated to session cookies", so a similarity-only memory would never re-examine
 it. That is the entire product, exposed in two methods (`add`, `search`).
 """
@@ -48,11 +48,11 @@ class Fact:
 @dataclass
 class AddResult:
     """What an `add()` did:
-      id          — the new fact's id.
-      invalidated — existing facts now STALE/SUPERSEDED (or flagged needs_review) because
+      id:          the new fact's id.
+      invalidated: existing facts now STALE/SUPERSEDED (or flagged needs_review) because
                     they depended, transitively, on something this change altered. Do not
                     trust these for their value until reconfirmed.
-      revised     — existing facts corrected IN PLACE (still ACTIVE, new content) because
+      revised:     existing facts corrected IN PLACE (still ACTIVE, new content) because
                     the change directly updated them.
     `invalidated` is the one the cascade earns: dependents that flat memory would miss."""
     id: str
@@ -89,11 +89,11 @@ class Memory:
           consequences down DERIVED_FROM edges, returning what went stale. `derived_from`
           pins dependencies explicitly; if omitted, they are inferred.
       search(query, k=5, include_stale=False) -> list[Fact]
-          Retrieve relevant facts. Stale/superseded facts are excluded by default — that
+          Retrieve relevant facts. Stale/superseded facts are excluded by default; that
           exclusion is the staleness fix made visible at read time.
 
     `cascade=False` reduces this to a flat memory (resolve direct conflicts, never
-    propagate) — useful as the honest A/B baseline. `conservative=True` downgrades
+    propagate): useful as the honest A/B baseline. `conservative=True` downgrades
     destructive invalidations to recoverable STALE+needs_review (recommended when a weaker
     model drives the cascade)."""
 
@@ -108,9 +108,9 @@ class Memory:
             resolves: list[str] | str | None = None) -> AddResult:
         """Store a fact; if it conflicts with memory, resolve it and cascade the consequences.
 
-        `derived_from` — ids this fact depends on. PIN these for correctness-critical facts:
+        `derived_from`: ids this fact depends on. PIN these for correctness-critical facts:
         explicit edges are exact. If omitted, GEM INFERS the dependencies (an extra LLM pass).
-        Inference is convenient but best-effort — measured ~85–88% recall / ~75–84% precision
+        Inference is convenient but best-effort: measured ~85–88% recall / ~75–84% precision
         across domains (small N; see runs/diag_derive_*.txt), so a minority of cascades may be
         missed or spurious. Rule of thumb: pin what you can't afford to get wrong, infer the rest.
         """
@@ -179,7 +179,7 @@ class Memory:
 
     def load(self, content: str, derived_from: list[str] | None = None) -> str:
         """Bulk-load a fact you already trust (skips the conflict scan). For seeding a known,
-        non-conflicting initial memory fast — not for new observations."""
+        non-conflicting initial memory fast: not for new observations."""
         with self._write():
             return self._g.ingest(content, parents=(derived_from or []), check_conflicts=False).id
 
@@ -214,13 +214,13 @@ class Memory:
                 if include_stale or n.status == Status.ACTIVE]
 
     def why(self, fact_id: str) -> list[str]:
-        """The DERIVED_FROM parents of a fact — 'this is stale because it depended on …'."""
+        """The DERIVED_FROM parents of a fact; 'this is stale because it depended on …'."""
         self._read()
         return [p.content for p in self._g.store.derived_from_targets(fact_id)]
 
     def profile(self, max_facts: int = 300) -> dict:
         """A short summary of what memory currently holds (Supermemory's get_profile), built by the
-        LLM from ACTIVE facts only — stale facts are listed separately as things to reconfirm,
+        LLM from ACTIVE facts only: stale facts are listed separately as things to reconfirm,
         never folded into the summary. Cached until the set of active facts changes."""
         self._read()
         nodes = self._g.store.all_nodes()

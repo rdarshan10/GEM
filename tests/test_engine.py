@@ -1,4 +1,4 @@
-"""Cascade logic — the heart — tested deterministically with a mock LLM and embedder.
+"""Cascade logic, the heart, tested deterministically with a mock LLM and embedder.
 Covers: multi-hop propagation, semantic stop, cycle guard, every _apply label, conservative
 fail-safe, decision caching, and the similarity-gate cost lever."""
 
@@ -119,7 +119,7 @@ def test_multi_direct_conflict_on_chain_revises_each_node_once():
     """Regression: when ONE trigger directly conflicts with SEVERAL nodes in the same
     DERIVED_FROM chain, the root's cascade already revises the descendants. Each conflict
     must NOT fire an independent cascade (that re-revises the subchain with a conflicting
-    result — the deep-chain interference bug). Here the trigger directly conflicts with BOTH
+    result: the deep-chain interference bug). Here the trigger directly conflicts with BOTH
     launch (root) and campaign (middle); embargo (leaf) only conflicts transitively."""
     # distinct, non-colliding keys so the FakeEmbedder gives controlled (non-dedup) similarities
     vecs = {"launch": [1, 0, 0, 0], "campaign": [0, 1, 0, 0],

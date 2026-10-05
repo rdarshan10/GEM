@@ -1,8 +1,8 @@
-"""Cascade scenario suite — the MVP slice of the propagation eval (full set is Unit 5.5).
+"""Cascade scenario suite: the MVP slice of the propagation eval (full set is Unit 5.5).
 
 Each scenario pins a small DERIVED_FROM graph, fires one trigger observation, and
 declares ground truth: which memories SHOULD be invalidated and which SHOULD survive.
-The scorer measures propagation correctness against that — rewarding correct pruning of
+The scorer measures propagation correctness against that; rewarding correct pruning of
 hard negatives, not just aggressive invalidation.
 
 Setup memories are loaded with check_conflicts=False (no LLM, deterministic structure);
@@ -181,7 +181,7 @@ def run_scenario(s: Scenario, *, verbose: bool = False, make_store=None, cfg=Non
     for i, node in enumerate(nodes):
         cur = g.store.get(node.id)
         # "affected" = anything changed: status, confidence, OR content (an in-place
-        # UPDATE corrects the node and keeps it ACTIVE — that still counts as affected).
+        # UPDATE corrects the node and keeps it ACTIVE; that still counts as affected).
         affected = (cur.status != Status.ACTIVE or cur.confidence < 1.0
                     or cur.content != originals[i])
         per_node.append({

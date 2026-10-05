@@ -1,4 +1,4 @@
-"""The Mumbai 4-hop cascade trace — the demo the whole MVP exists to show.
+"""The Mumbai 4-hop cascade trace: the demo the whole MVP exists to show.
 
 One upstream fact changes, four hops invalidate down a DERIVED_FROM chain, and one
 branch is correctly pruned:

@@ -1,7 +1,7 @@
 """Closed-book ablation: does the model already KNOW the answers, or is it reading our
 resolved state?
 
-The multi-hop FactConsolidation golds are MQuAKE counterfactual edits — deliberately false
+The multi-hop FactConsolidation golds are MQuAKE counterfactual edits; deliberately false
 in the real world (e.g. "Blair Walsh plays rugby"). If the model answers from PRETRAINING it
 will return the real-world values and MISS the edited golds. So we ask the same questions with
 NO facts supplied and SubEM-score: a LOW closed-book score proves the open-book 77% comes from
