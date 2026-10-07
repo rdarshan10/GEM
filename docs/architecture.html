@@ -69,7 +69,8 @@
   .codemap a { font: 400 13px var(--mono); color: var(--ink); }
   .tip { position: fixed; z-index: 60; pointer-events: none; background: var(--ink); color: var(--bg); font: 400 12.5px/1.45 var(--body); padding: 7px 9px; border-radius: 6px; max-width: 280px; }
   @media (max-width: 900px) { .two { grid-template-columns: minmax(0, 1fr); } .stats { grid-template-columns: minmax(0, 1fr); } .stats div, .stats div + div { border-right: 0; padding-left: 0; } .stats div + div { border-top: 1px solid var(--line); } .codemap li { grid-template-columns: 1fr; gap: 2px; } }
-  @media (max-width: 760px) { .arch-hero { padding-top: 110px; } .dia { min-width: 640px; } .fig { padding: 14px; } }
+  @media (max-width: 760px) { .arch-hero { padding-top: 110px; } .cfg { font-size: 14px; } .cfg td:first-child { white-space: normal; } .cfg td { overflow-wrap: anywhere; } .dia { min-width: 640px; } .fig { padding: 14px; }
+    .fig-scroll { padding-right: 32px; -webkit-mask-image: linear-gradient(to right, #000 86%, transparent); mask-image: linear-gradient(to right, #000 86%, transparent); } }
 </style>
 </head>
 <body>
@@ -78,7 +79,7 @@
     <a class="keep" href="index.html">Overview</a><a href="#write">Write path</a><a href="#graph">Graph</a><a href="#decisions">Decisions</a><a href="#cost">Cost</a><a href="#models">Models</a>
     <a class="gh keep" href="https://github.com/rdarshan10/GEM">GitHub ↗</a>
   </nav>
-  <div class="brand"><a class="home" href="index.html" aria-label="GEM home"><b>GEM</b><span>architecture</span></a><a class="by" href="https://www.revanthdarshan.me/" target="_blank" rel="noopener">by Revanth Darshan D R ↗</a></div>
+  <div class="brand"><a class="home" href="index.html" aria-label="GEM home"><b>GEM</b><span>architecture</span></a><a class="by" href="https://www.revanthdarshan.me/" target="_blank" rel="noopener">by <span class="nm">Revanth Darshan D R ↗</span></a></div>
 </header>
 
 <main>

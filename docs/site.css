@@ -35,11 +35,11 @@ p { margin: 0; }
 .brand { display: flex; flex-direction: column; align-items: flex-end; text-align: right; padding-top: 2px; }
 .brand .home { display: flex; flex-direction: column; align-items: flex-end; text-decoration: none; }
 .brand b { font: 340 42px/.9 var(--display); font-variation-settings: "SOFT" 60, "opsz" 144; letter-spacing: -.02em; transform-origin: 100% 0; transition: transform .35s ease; text-shadow: 0 2px 18px rgba(10,11,13,.8); }
-.brand span { margin-top: 6px; font: 400 10.5px var(--mono); color: var(--ink3); letter-spacing: .12em; text-transform: uppercase; transition: opacity .3s; }
+.brand .home span { margin-top: 6px; font: 400 10.5px var(--mono); color: var(--ink3); letter-spacing: .12em; text-transform: uppercase; transition: opacity .3s; }
 .top.solid .brand b { transform: scale(.78); }
 .brand .by { margin-top: 5px; font: 400 11px var(--mono); color: var(--ink2); text-decoration: none; transition: opacity .3s, color .2s; }
 .brand .by:hover { color: var(--ink); }
-.top.solid .brand span, .top.solid .brand .by { opacity: 0; pointer-events: none; }
+.top.solid .brand .home span, .top.solid .brand .by { opacity: 0; pointer-events: none; }
 .rail { position: fixed; left: var(--gutter); top: 50%; transform: translateY(-50%); z-index: 30; display: flex; flex-direction: column; gap: 9px; transition: opacity .4s; }
 .rail a { display: block; position: relative; width: 2px; height: 20px; background: #2a2b2f; transition: background .3s, height .3s; }
 .rail a::before { content: ""; position: absolute; inset: -4px -10px; }
@@ -192,7 +192,7 @@ footer ul a:hover { color: var(--ink); }
 /* below 1180 the graph and the text can't sit side by side: graph on top, text card underneath */
 @media (max-width: 1180px) {
   .rail { display: none; }
-  .brand span { display: none; }
+  .brand .home span { display: none; }
   .step { align-items: flex-end; padding: 0 var(--gutter) 6vh; }
   .card { background: rgba(10,11,13,.88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 22px; border-radius: 14px; border: 1px solid #1f2125; max-width: 640px; }
   .js .step:not(.on) .card { opacity: .5; }
@@ -202,13 +202,17 @@ footer ul a:hover { color: var(--ink); }
   .card .status { display: none; }
   .actions { margin-top: 18px; }
   .callpanel { display: none; }
+  /* the steps scroll under the floating chrome, so once past the hero it gets a backdrop */
+  .top::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 84px; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, rgba(10,11,13,.94) 0 66%, rgba(10,11,13,0)); opacity: 0; transition: opacity .3s; }
+  .top.solid::before { opacity: 1; }
 }
 @media (max-width: 880px) { .pill a:not(.keep) { display: none; } .brand b { font-size: 34px; } }
 @media (max-width: 980px) {
   .head, .install, .limits { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .install { gap: 30px; }
   .play { grid-template-columns: minmax(0, 1fr); gap: 14px; }
-  .picks { display: flex; gap: 8px; overflow-x: auto; border: 0; padding-bottom: 4px; scrollbar-width: none; }
+  .picks { display: flex; gap: 8px; overflow-x: auto; border: 0; padding-bottom: 4px; scrollbar-width: none; padding-right: 40px;
+    -webkit-mask-image: linear-gradient(to right, #000 82%, transparent); mask-image: linear-gradient(to right, #000 82%, transparent); }
   .picks li { border: 0; flex: 0 0 auto; }
   .picks button { border: 1px solid var(--line2); border-radius: 999px; padding: 8px 15px; }
   .picks .cat, .picks button[aria-pressed="true"] .desc { display: none; }
@@ -222,12 +226,24 @@ footer ul a:hover { color: var(--ink); }
 }
 @media (max-width: 760px) {
   :root { --gutter: 16px; }
-  .step { padding: 0 16px 6vh; }
-  .card { padding: 20px; max-width: none; }
-  .card h1 { font-size: 40px; }
-  .lead { font-size: 16px; }
+  .brand .by { font-size: 10px; }
+  .brand .by .nm { white-space: nowrap; }
+  /* phones: the graph gets whatever the card leaves above it, so the cards stay tight */
+  .step { padding: 0 12px calc(12px + env(safe-area-inset-bottom)); }
+  .card { padding: 16px 18px; max-width: none; border-radius: 12px; }
+  .card h1 { font-size: 34px; margin: 4px 0 12px; }
+  .card h2 { font-size: 29px; margin: 8px 0 10px; }
+  .card p { font-size: 15px; line-height: 1.5; margin-bottom: 10px; }
+  .card p:last-child { margin-bottom: 0; }
+  .lead { font-size: 15.5px; }
+  .actions { margin-top: 14px; gap: 8px; }
   .btn { height: 40px; padding: 0 16px; font-size: 14px; }
-  .card h2 { font-size: 36px; }
+  .io { margin: 4px 0 10px; font-size: 11.5px; }
+  .io div { padding: 7px 10px; grid-template-columns: 56px 1fr; gap: 8px; }
+  .meter { margin: 10px 0 0; gap: 22px; }
+  .meter b { font-size: 34px; }
+  .meter span { font-size: 10px; letter-spacing: .06em; }
+  pre { font-size: 12px; padding: 14px; }
   .sec { padding-top: 96px; }
   .play-q { display: none; }
   .play-bar { justify-content: space-between; }
@@ -235,6 +251,11 @@ footer ul a:hover { color: var(--ink); }
   footer { grid-template-columns: 1fr; }
   footer ul { text-align: left; }
 }
+/* short phones: drop the follow-on paragraph so the graph keeps some room */
+@media (max-width: 760px) and (max-height: 720px) { .card .extra { display: none; } .card .io:last-child { margin-bottom: 0; } }
+/* narrow phones: tighter pill so the wordmark keeps its corner; the byline breaks after "by" */
+@media (max-width: 420px) { .top { gap: 10px; } .pill a { padding: 7px 10px; font-size: 12px; } }
+@media (max-width: 340px) { .brand .by .nm { white-space: normal; } }
 @media (max-width: 520px) {
   .numbers { grid-template-columns: 1fr; }
   .numbers > div, .numbers > div + div { border-right: 0; padding-left: 0; }

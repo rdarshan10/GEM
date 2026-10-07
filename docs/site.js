@@ -434,7 +434,8 @@
   const stackOy = () => {
     const card = document.querySelector(".step.on .card"), H = window.innerHeight;
     if (!card) return g.opts.offsetY;
-    const cardTop = H * 0.94 - card.offsetHeight;                 // .step: aligned to the bottom, 6vh padding
+    const pad = parseFloat(getComputedStyle(card.closest(".step")).paddingBottom) || 0;
+    const cardTop = H - pad - card.offsetHeight;                  // .step aligns the card to its bottom
     return (g.opts.insetTop + cardTop - 16) / 2 - H / 2;
   };
   const focusOn = (key, hero = false) => {
