@@ -29,8 +29,9 @@
       this.edges = [];
       this.fx = [];
       this.notes = [];
-      this.cam = { x: 0, y: 0, s: 0.6, ox: this.opts.offsetX, oy: this.opts.offsetY };
-      this.camT = { x: 0, y: 0, s: 0.6, ox: this.opts.offsetX, oy: this.opts.offsetY };
+      // k stretches x only: a compact graph short of height spreads into the spare width, so labels wrap to fewer lines
+      this.cam = { x: 0, y: 0, s: 0.6, k: 1, ox: this.opts.offsetX, oy: this.opts.offsetY };
+      this.camT = { x: 0, y: 0, s: 0.6, k: 1, ox: this.opts.offsetX, oy: this.opts.offsetY };
       this.time = 0;
       this.last = 0;
       this.timers = [];
@@ -129,15 +130,18 @@
       this._framed = [ids, pad, maxS, minS, extra, ox, oy];
       const pts = ids.map((id) => this.nodes.get(id)).filter(Boolean).map((n) => [n.hx, n.hy]).concat(extra);
       if (!pts.length) return;
-      const lw = this.opts.labels ? this.opts.labelWidth : 0;
+      // compact labels start a node's width to the right and carry state tags: give them that room
+      const lw = this.opts.labels ? this.opts.labelWidth + (this.opts.compact ? 26 : 0) : 0;
       let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
       pts.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x + lw); y0 = Math.min(y0, y - 24); y1 = Math.max(y1, y + (lw ? 64 : 24)); });
       // fit inside the canvas around the offset centre, keeping clear of opts.insetTop (a fixed top bar)
       const cx = this.w / 2 + ox, cy = this.h / 2 + oy, top = Math.max(pad, this.opts.insetTop || 0);
       const availW = 2 * Math.max(10, Math.min(cx - pad, this.w - pad - cx));
       const availH = 2 * Math.max(10, Math.min(cy - top, this.h - pad - cy));
-      const s = clamp(Math.min(availW / Math.max(1, x1 - x0), availH / Math.max(1, y1 - y0)), minS, maxS);
-      this.camT = { x: (x0 + x1) / 2, y: (y0 + y1) / 2, s, ox, oy };
+      const fitW = availW / Math.max(1, x1 - x0);
+      const s = clamp(Math.min(fitW, availH / Math.max(1, y1 - y0)), minS, maxS);
+      const k = this.opts.compact && lw ? clamp(fitW / s, 1, 1.8) : 1;
+      this.camT = { x: (x0 + x1) / 2, y: (y0 + y1) / 2, s, k, ox, oy };
     }
     snap() { this.cam = { ...this.camT }; }
 
@@ -168,10 +172,10 @@
       this.c.addEventListener("pointerleave", () => { this.hover = null; });
     }
     toScreen(x, y) {
-      return [(x - this.cam.x) * this.cam.s + this.w / 2 + this.cam.ox, (y - this.cam.y) * this.cam.s + this.h / 2 + this.cam.oy];
+      return [(x - this.cam.x) * this.cam.s * this.cam.k + this.w / 2 + this.cam.ox, (y - this.cam.y) * this.cam.s + this.h / 2 + this.cam.oy];
     }
     toWorld(x, y) {
-      return [(x - this.w / 2 - this.cam.ox) / this.cam.s + this.cam.x, (y - this.h / 2 - this.cam.oy) / this.cam.s + this.cam.y];
+      return [(x - this.w / 2 - this.cam.ox) / (this.cam.s * this.cam.k) + this.cam.x, (y - this.h / 2 - this.cam.oy) / this.cam.s + this.cam.y];
     }
     pick(x, y) {
       let best = null, bd = this.opts.compact ? 30 : 18;
@@ -200,6 +204,7 @@
       this.cam.x = lerp(this.cam.x, this.camT.x, k);
       this.cam.y = lerp(this.cam.y, this.camT.y, k);
       this.cam.s = lerp(this.cam.s, this.camT.s, k);
+      this.cam.k = lerp(this.cam.k, this.camT.k, k);
       this.cam.ox = lerp(this.cam.ox, this.camT.ox, k);
       this.cam.oy = lerp(this.cam.oy, this.camT.oy, k);
       const amp = reduceMotion ? 0 : this.theme.breath ?? 3;
@@ -376,7 +381,10 @@
 
       // nodes
       // label type scales with zoom (within limits) so text and spacing stay in proportion
-      const fz = clamp(this.cam.s, 0.9, 1.15);
+      // compact: labels scale with the graph and wrap inside their slot, so every fact stays labelled
+      // without running into its neighbours. Wide: a steady size, wrapped at labelWidth.
+      const fz = this.opts.compact ? clamp(this.cam.s, 0.74, 1) : clamp(this.cam.s, 0.9, 1.15);
+      const wrapW = this.opts.compact ? Math.round(this.opts.labelWidth * this.cam.s * this.cam.k / fz / 4) * 4 : this.opts.labelWidth;
       const font = th.fontSize ? `${th.fontWeight || 400} ${(th.fontSize * fz).toFixed(1)}px ${th.fontFamily}` : th.font || "13px sans-serif";
       // line breaks come from the unzoomed size, so a label never reflows (jumps between 2 and 3 lines) mid-zoom
       const wrapFont = th.fontSize ? `${th.fontWeight || 400} ${th.fontSize}px ${th.fontFamily}` : font;
@@ -419,14 +427,12 @@
           ctx.stroke();
         }
         labels.push(() => {
-        // compact: label only the fact being decided (the new fact until a decision starts) or a tapped one
-        const spot = !this.opts.compact || this.hover === n || this.spotlight === n.id || (n.kind === "trigger" && !this.spotlight);
-        if (this.opts.labels && n.showLabel && n.labelA > 0.03 && spot) {
+        if (this.opts.labels && n.showLabel && n.labelA > 0.03) {
           const lx = x + r + 10 * sc;
           ctx.font = font;
           const lh = (th.lineHeight || 16) * fz;
           const drawLabel = (text, a) => {
-            const lines = this._wrap(text, this.opts.labelWidth, wrapFont);
+            const lines = this._wrap(text, wrapW, wrapFont);
             ctx.font = font;                                    // _wrap measured with wrapFont
             const top = y - ((lines.length - 1) * lh) / 2 + 4;
             ctx.globalAlpha = n.alpha * n.labelA * a;
@@ -443,6 +449,7 @@
           if (n.labelOld && n.labelT < 1) drawLabel(n.labelOld, 1 - easeIO(n.labelT));
           if (n.badge) {
             ctx.font = th.badgeFont || "600 10px monospace";
+            if (this.opts.compact) ctx.font = ctx.font.replace(/([\d.]+)px/, (m, v) => (v * fz).toFixed(1) + "px");
             ctx.globalAlpha = n.alpha * n.labelA * easeOut(n.badgeT);
             ctx.fillStyle = css(n.col);
             const by = y + ((nl - 1) * lh) / 2 + 4 + lh + 1;

@@ -347,7 +347,7 @@
       if (n.kind === "trigger") { ctx.beginPath(); ctx.arc(x, y, r + 5, 0, Math.PI * 2); ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 1; ctx.stroke(); }
     },
   };
-  const lay = compact ? { dx: 120, dy: 96 } : {};
+  const lay = compact ? { dx: 132, dy: 104 } : {};       // compact: a 104px label slot plus the node
 
   let data;
   try { data = await GemGraph.loadData("data/scenarios.json"); }
@@ -373,7 +373,7 @@
   // ------------------------------------------------------------------ story
   const g = new GemGraph($("#stage"), theme, {
     offsetX: OX, offsetY: wide ? 0 : -window.innerHeight * 0.2,
-    labelWidth: compact ? 150 : 180, compact,
+    labelWidth: compact ? 104 : 180, compact,
     insetTop: 84,                     // the top bar (64px) plus breathing room
   });
   fieldHooks.stageBox = () => {           // screen box around the visible facts and their labels
@@ -446,7 +446,7 @@
     MAP.forEach(([k]) => { C[k].card.activeT = 0; });
     g.showNotes(false);
     g.setFocus(c.ids.concat(key + ":new"), 0);
-    g.frame(c.ids, 40, 1.15, 0.18, [c.home], ZOOM_OX, wide ? (hero ? HERO_OY : 0) : stackOy());
+    g.frame(c.ids, compact ? 14 : 40, 1.15, 0.18, [c.home], ZOOM_OX, wide ? (hero ? HERO_OY : 0) : stackOy());
   };
 
   // ---------------- hero tool-call panel: the call types itself, results fill in as the cascade runs
@@ -598,7 +598,7 @@
     ["cloud", "Infrastructure", "m5.large → m5.xlarge", "The budget is built on two facts, and only one of them changed."],
     ["email", "Change impact", "Gmail → Fastmail", "The dependency tree beside the change is left alone."],
   ];
-  const pg = new GemGraph($("#play-canvas"), theme, { drag: true, labelWidth: compact ? 150 : 175, offsetY: 6, compact });
+  const pg = new GemGraph($("#play-canvas"), theme, { drag: true, labelWidth: compact ? 104 : 175, offsetY: 6, compact });
   let pKey = "runtime", pMode = "gem", pTok = { cancelled: true }, pIv = null, started = false;
   const picks = $("#picks");
   PICKS.forEach(([key, cat, title, desc]) => {
@@ -620,8 +620,8 @@
     const sc = S[pKey];
     $("#play-q").textContent = (pMode === "flat" ? "flat memory · " : "") + `add_memory("${sc.trigger}")`;
     pg.clear();
-    const built = GemGraph.build(pg, sc, "p:", 0, 0, lay);
-    pg.frame(built.ids, 60, 1.1, 0.18, [built.home]);
+    const built = GemGraph.build(pg, sc, "p:", 0, 0, compact ? { dx: 132, dy: 128 } : lay);   // the stage is tall: rows get more room
+    pg.frame(built.ids, compact ? 28 : 60, 1.1, 0.18, [built.home]);
     if (!started) { pg.snap(); started = true; }
     const flat = pMode === "flat";
     setR("r-llm", flat ? "–" : 0); setR("r-up", 0); setR("r-st", 0);
