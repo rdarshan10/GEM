@@ -228,9 +228,13 @@ footer ul a:hover { color: var(--ink); }
   :root { --gutter: 16px; }
   .brand .by { font-size: 10px; }
   .brand .by .nm { white-space: nowrap; }
-  /* phones: the graph gets whatever the card leaves above it, so the cards stay tight */
-  .step { padding: 0 12px calc(12px + env(safe-area-inset-bottom)); }
-  .card { padding: 16px 18px; max-width: none; border-radius: 12px; }
+  /* phones: the graph owns the top of the screen; the step text scrolls up beneath it and never covers it */
+  .stage { height: 60vh; height: 60svh; z-index: 3; background: var(--bg); }
+  .stage::after { -webkit-mask-image: none; mask-image: none; background: linear-gradient(to bottom, rgba(10,11,13,0) 86%, var(--bg)); }
+  .steps { margin-top: 0; }
+  .step, .step.short { min-height: 40vh; min-height: 40svh; align-items: flex-start; padding: 14px 16px 36px; }
+  .card { padding: 0; max-width: none; background: none; border: 0; border-radius: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .js .step:not(.on) .card { opacity: .4; }
   .card h1 { font-size: 34px; margin: 4px 0 12px; }
   .card h2 { font-size: 29px; margin: 8px 0 10px; }
   .card p { font-size: 15px; line-height: 1.5; margin-bottom: 10px; }
@@ -252,10 +256,9 @@ footer ul a:hover { color: var(--ink); }
   footer { grid-template-columns: 1fr; }
   footer ul { text-align: left; }
 }
-/* phones: drop the follow-on paragraph so the graph keeps some room */
-@media (max-width: 760px) { .card .extra { display: none; } .card .io:last-child { margin-bottom: 0; } }
-/* narrow phones: tighter pill so the wordmark keeps its corner; the byline breaks after "by" */
+/* narrow phones: tighter pill so the wordmark keeps its corner */
 @media (max-width: 420px) { .top { gap: 10px; } .pill a { padding: 7px 10px; font-size: 12px; } }
+@media (max-width: 380px) { .brand .by .pre { display: none; } }   /* the name alone keeps to one line, clear of the graph */
 @media (max-width: 340px) { .brand .by .nm { white-space: normal; } }
 @media (max-width: 520px) {
   .numbers { grid-template-columns: 1fr; }

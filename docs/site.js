@@ -8,13 +8,15 @@
   // and the text card below it (the two would collide otherwise). Matches the CSS breakpoint.
   const BP = 1180;
   const wide = window.innerWidth > BP, compact = !wide;
+  // phones: the graph keeps the top of the screen to itself and the step text scrolls up beneath it
+  const PHONE = 760, phone = window.innerWidth <= PHONE;
   const W0 = window.innerWidth;
   const textRight = W0 * 0.09 + Math.min(460, W0 * 0.34);       // .step padding + .card width
   const OX = wide ? (textRight + 56 - 28) / 2 : 0;                // centre the graph in what's left
-  let lastWide = wide;
+  const mode = () => (window.innerWidth > BP ? "wide" : window.innerWidth <= PHONE ? "phone" : "compact");
+  let lastMode = mode();
   window.addEventListener("resize", () => {                       // the story is laid out for one mode
-    const w = window.innerWidth > BP;
-    if (w !== lastWide) { lastWide = w; location.reload(); }
+    if (mode() !== lastMode) { lastMode = mode(); location.reload(); }
   });
   document.documentElement.classList.add("js");
 
@@ -374,7 +376,7 @@
   const g = new GemGraph($("#stage"), theme, {
     offsetX: OX, offsetY: wide ? 0 : -window.innerHeight * 0.2,
     labelWidth: compact ? 104 : 180, compact,
-    insetTop: 84,                     // the top bar (64px) plus breathing room
+    insetTop: phone ? 66 : 84,        // the top bar plus breathing room
   });
   fieldHooks.stageBox = () => {           // screen box around the visible facts and their labels
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -432,6 +434,7 @@
   const HERO_OY = wide ? -window.innerHeight * 0.06 : undefined;
   // stacked layout: centre the graph between the top bar and the active step's text card
   const stackOy = () => {
+    if (phone) return (g.opts.insetTop - 20) / 2;                 // the stage is the graph's own: fill it below the bar
     const card = document.querySelector(".step.on .card"), H = window.innerHeight;
     if (!card) return g.opts.offsetY;
     const pad = parseFloat(getComputedStyle(card.closest(".step")).paddingBottom) || 0;
@@ -518,16 +521,9 @@
     async rewrite() { const t = fresh(); resetAll(); focusOn("reorg"); await g.wait(600); await play("reorg", t); },
     async stale() {
       const t = fresh(); resetAll(); focusOn("relocation");
-      const commute = "relocation:" + rel.nodes[1].id;
-      // phones: the whole memory is too small to read above this card, so zoom to the commute's chain
-      // (where you live, the commute, what was built on it) and dim the rest
-      const chain = new Set(rel.nodes[1].parents.concat(rel.nodes[1].id));
-      rel.nodes.forEach((n) => { if (n.parents.some((p) => chain.has(p) && p !== rel.nodes[1].parents[0])) chain.add(n.id); });
-      const ids = [...chain].map((id) => "relocation:" + id);
-      if (compact) { g.setFocus(ids, 0.12); g.frame(ids, 26, 1.15, 0.18, [], ZOOM_OX, stackOy()); }
       await play("relocation", t, { speed: 8, badges: true });
       if (t.cancelled) return;
-      if (compact) g.setFocus(ids, 0.12);   // the new fact arrived during the replay
+      const commute = "relocation:" + rel.nodes[1].id;
       g.spotlight = commute;
       g.setState(commute, "stale", { badge: "stale · ask the user" });
     },
@@ -591,7 +587,18 @@
     const room = window.innerHeight - 64;
     if (e.intersectionRatio >= 0.995 || e.intersectionRect.height >= room * 0.9) activate(e.target.closest(".step"));
   }), { rootMargin: "-64px 0px 0px 0px", threshold: [0, 0.25, 0.5, 0.75, 0.9, 0.95, 0.99, 0.995, 1] });
-  steps.forEach((s) => storyIO.observe(s.querySelector(".card")));
+  // phones: a step leads once its text has come up into the band under the graph
+  if (phone) {
+    let raf = 0;
+    const pick = () => {
+      raf = 0;
+      const line = window.innerHeight * 0.78;
+      let on = steps[0];
+      steps.forEach((s) => { if (s.getBoundingClientRect().top < line) on = s; });
+      activate(on);
+    };
+    window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(pick); }, { passive: true });
+  } else steps.forEach((s) => storyIO.observe(s.querySelector(".card")));
   new IntersectionObserver((es) => es.forEach((e) => rail.classList.toggle("off", e.isIntersecting)), { threshold: 0.02 })
     .observe($(".after"));
   current = "hero"; steps[0].classList.add("on"); beats.hero(); g.snap();

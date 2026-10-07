@@ -133,7 +133,8 @@
       // compact labels start a node's width to the right and carry state tags: give them that room
       const lw = this.opts.labels ? this.opts.labelWidth + (this.opts.compact ? 26 : 0) : 0;
       let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-      pts.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x + lw); y0 = Math.min(y0, y - 24); y1 = Math.max(y1, y + (lw ? 64 : 24)); });
+      const lx = this.opts.compact ? 16 : 0;                    // compact: keep nodes and their rings off the edge
+      pts.forEach(([x, y]) => { x0 = Math.min(x0, x - lx); x1 = Math.max(x1, x + lw); y0 = Math.min(y0, y - 24); y1 = Math.max(y1, y + (lw ? 64 : 24)); });
       // fit inside the canvas around the offset centre, keeping clear of opts.insetTop (a fixed top bar)
       const cx = this.w / 2 + ox, cy = this.h / 2 + oy, top = Math.max(pad, this.opts.insetTop || 0);
       const availW = 2 * Math.max(10, Math.min(cx - pad, this.w - pad - cx));
