@@ -518,9 +518,16 @@
     async rewrite() { const t = fresh(); resetAll(); focusOn("reorg"); await g.wait(600); await play("reorg", t); },
     async stale() {
       const t = fresh(); resetAll(); focusOn("relocation");
+      const commute = "relocation:" + rel.nodes[1].id;
+      // phones: the whole memory is too small to read above this card, so zoom to the commute's chain
+      // (where you live, the commute, what was built on it) and dim the rest
+      const chain = new Set(rel.nodes[1].parents.concat(rel.nodes[1].id));
+      rel.nodes.forEach((n) => { if (n.parents.some((p) => chain.has(p) && p !== rel.nodes[1].parents[0])) chain.add(n.id); });
+      const ids = [...chain].map((id) => "relocation:" + id);
+      if (compact) { g.setFocus(ids, 0.12); g.frame(ids, 26, 1.15, 0.18, [], ZOOM_OX, stackOy()); }
       await play("relocation", t, { speed: 8, badges: true });
       if (t.cancelled) return;
-      const commute = "relocation:" + rel.nodes[1].id;
+      if (compact) g.setFocus(ids, 0.12);   // the new fact arrived during the replay
       g.spotlight = commute;
       g.setState(commute, "stale", { badge: "stale · ask the user" });
     },
